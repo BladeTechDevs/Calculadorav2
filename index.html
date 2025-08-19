@@ -4,28 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Solar Fotovoltaica</title>
-    <link rel="stylesheet" href="styles2.css">
+    <title>Hexa Solar Power Solutions - Calculadora Solar Fotovoltaica</title>
+    <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
- 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
     <div class="container">
+        <!-- Enhanced header with company branding -->
         <header class="header">
             <div class="header-content">
-                <i class="fas fa-solar-panel"></i>
-                <h1>Calculadora Solar Fotovoltaica</h1>
-                <p>Sistema de cálculo para instalaciones solares</p>
+                <div class="company-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-solar-panel"></i>
+                        <div class="logo-accent"></div>
+                    </div>
+                    <div class="company-info">
+                        <h1>Hexa Solar Power Solutions</h1>
+                        <p class="company-tagline">Energía Solar Inteligente para un Futuro Sostenible</p>
+                    </div>
+                </div>
+                <div class="header-subtitle">
+                    <h2>Calculadora Solar Fotovoltaica</h2>
+                    <!-- <p>Sistema avanzado de cálculo para instalaciones solares comerciales y residenciales</p> -->
+                </div>
             </div>
         </header>
       
         <div class="main-content">
             <div class="form-section">
                 <div class="card">
-                    <h2><i class="fas fa-user"></i> Información del Proyecto</h2>
+                    <h2><i class="fas fa-user-tie"></i> Información del Proyecto</h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombreCliente">Nombre del Cliente:</label>
@@ -37,10 +48,11 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="card">
-                    <h2><i class="fas fa-chart-line"></i> Datos de Consumo</h2>
+                    <h2><i class="fas fa-chart-line"></i> Datos de Consumo Energético</h2>
                     <div class="form-group">
-                        <label for="tipoPeriodo">Tipo de Período:</label>
+                        <label for="tipoPeriodo">Tipo de Período de Facturación:</label>
                         <select id="tipoPeriodo" onchange="updateConsumoFields()">
                             <option value="mensual">Mensual (12 valores)</option>
                             <option value="bimestral">Bimestral (6 valores)</option>
@@ -48,7 +60,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Consumo Actual (kWh):</label>
+                        <label>Consumo Histórico (kWh):</label>
                         <div id="consumoInputs" class="consumo-grid">
                             Se generará dinámicamente
                         </div>
@@ -56,7 +68,7 @@
                 </div>
 
                 <div class="card">
-                    <h2><i class="fas fa-map-marker-alt"></i> Ubicación</h2>
+                    <h2><i class="fas fa-map-marker-alt"></i> Ubicación Geográfica</h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="latitud">Latitud:</label>
@@ -70,7 +82,7 @@
                 </div>
 
                 <div class="card">
-                    <h2><i class="fas fa-solar-panel"></i> Especificaciones del Panel</h2>
+                    <h2><i class="fas fa-solar-panel"></i> Especificaciones del Panel Solar</h2>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="potenciaPanel">Potencia Nominal (W):</label>
@@ -98,8 +110,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="eficiencia">Eficiencia del Sistema:</label>
-                            <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76"
-                                value="0.76">
+                            <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76" value="0.76">
                         </div>
                         <div class="form-group">
                             <label for="porcentajeAhorro">% de Ahorro Requerido:</label>
@@ -111,7 +122,7 @@
                         <label class="checkbox-label">
                             <input type="checkbox" id="limitacionEspacio">
                             <span class="checkmark"></span>
-                            Limitación de Espacio
+                            Limitación de Espacio Disponible
                         </label>
                     </div>
 
@@ -128,16 +139,25 @@
 
                 <button class="calculate-btn" onclick="calcularSistema()">
                     <i class="fas fa-calculator"></i>
-                    Calcular Sistema Solar
+                    <span>Calcular Sistema Solar</span>
                 </button>
             </div>
 
             <div class="results-section" id="resultsSection" style="display: none;">
                 <div class="card results-card">
-                    <h2><i class="fas fa-chart-bar"></i> Resultados del Cálculo</h2>
+                    <!-- Enhanced results header with company branding -->
+                    <div class="results-header">
+                        <div class="results-title">
+                            <i class="fas fa-chart-bar"></i>
+                            <h2>Resultados del Análisis Solar</h2>
+                        </div>
+                        <div class="hexa-badge">
+                            <i class="fas fa-solar-panel"></i>
+                            <span>Hexa Solar</span>
+                        </div>
+                    </div>
 
                     <div class="results-grid">
-                        Resultados principales
                         <div class="result-item">
                             <div class="result-icon"><i class="fas fa-bolt"></i></div>
                             <div class="result-content">
@@ -234,14 +254,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="result-item">
-                            <div class="result-icon"><i class="fas fa-tools"></i></div>
-                            <div class="result-content">
-                                <h3>Peso Estructura</h3>
-                                <p id="pesoEstructura">-</p>
-                            </div>
-                        </div> -->
-
                         <div class="result-item">
                             <div class="result-icon"><i class="fas fa-weight"></i></div>
                             <div class="result-content">
@@ -283,21 +295,11 @@
                         </div>
                     </div>
 
-                    <!-- <div class="card">
-                        <h2><i class="fas fa-sun"></i> Irradiación Solar Anual</h2>
-                        <div id="irradiacionChart" class="custom-chart"></div>
-                    </div>
-
-                    <div class="card">
-                        <h2><i class="fas fa-chart-line"></i> Balance Energético Mensual</h2>
-                        <div id="produccionChart" class="custom-chart"></div>
-                    </div> -->
-
-                    Nueva tabla para el detalle mensual
-                    <div class="card">
-                        <h2><i class="fas fa-table"></i> Detalle Mensual</h2>
+                    <!-- Enhanced table with better styling -->
+                    <div class="card table-card">
+                        <h2><i class="fas fa-table"></i> Análisis Mensual Detallado</h2>
                         <div class="table-container">
-                            <table>
+                            <table class="results-table">
                                 <thead>
                                     <tr>
                                         <th>Mes</th>
@@ -308,31 +310,54 @@
                                     </tr>
                                 </thead>
                                 <tbody id="detalleTableBody">
-                                    Las filas se insertarán dinámicamente aquí
+                                    <!-- Las filas se insertarán dinámicamente aquí -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                  
-                    <button class="calculate-btn" onclick="exportResultsToPdf()">
-                        <i class="fas fa-file-pdf"></i>
-                        Exportar Resultados a PDF
-                    </button>
-
+                    <!-- Enhanced export button -->
+                    <div class="export-section">
+                        <button class="export-btn" onclick="exportResultsToPdf()">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Exportar Reporte Profesional</span>
+                        </button>
+                        <p class="export-note">Genera un reporte PDF completo con todos los cálculos y análisis</p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Enhanced loading screen -->
         <div class="loading" id="loading" style="display: none;">
             <div class="loading-content">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Consultando datos de irradiación solar...</p>
+                <div class="loading-spinner">
+                    <i class="fas fa-solar-panel fa-spin"></i>
+                </div>
+                <h3>Procesando Datos Solares</h3>
+                <p>Consultando datos de irradiación solar de NASA...</p>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
             </div>
         </div>
+
+        <!-- Added footer with company info -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-solar-panel"></i>
+                    <span>Hexa Solar Power Solutions</span>
+                </div>
+                <div class="footer-info">
+                    <p>© 2024 Hexa Solar Power Solutions. Todos los derechos reservados.</p>
+                    <p>Energía Solar Profesional | Soluciones Sostenibles | Tecnología Avanzada</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <script src="script2.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
