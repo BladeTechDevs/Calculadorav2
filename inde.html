@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Solar Fotovoltaica</title>
+    <link rel="stylesheet" href="styles2.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+ 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <i class="fas fa-solar-panel"></i>
+                <h1>Calculadora Solar Fotovoltaica</h1>
+                <p>Sistema de cálculo para instalaciones solares</p>
+            </div>
+        </header>
+        <a href="index.html"> Regresar a  la version 1</a>
+        <div class="main-content">
+            <div class="form-section">
+                <div class="card">
+                    <h2><i class="fas fa-user"></i> Información del Proyecto</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreCliente">Nombre del Cliente:</label>
+                            <input type="text" id="nombreCliente" placeholder="Ingrese nombre del cliente">
+                        </div>
+                        <div class="form-group">
+                            <label for="nombreEjecutivo">Ejecutivo de Ventas:</label>
+                            <input type="text" id="nombreEjecutivo" placeholder="Ingrese su nombre">
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2><i class="fas fa-chart-line"></i> Datos de Consumo</h2>
+                    <div class="form-group">
+                        <label for="tipoPeriodo">Tipo de Período:</label>
+                        <select id="tipoPeriodo" onchange="updateConsumoFields()">
+                            <option value="mensual">Mensual (12 valores)</option>
+                            <option value="bimestral">Bimestral (6 valores)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Consumo Actual (kWh):</label>
+                        <div id="consumoInputs" class="consumo-grid">
+                            Se generará dinámicamente
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-map-marker-alt"></i> Ubicación</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="latitud">Latitud:</label>
+                            <input type="number" id="latitud" step="0.000001" placeholder="20.676667" value="20.676667">
+                        </div>
+                        <div class="form-group">
+                            <label for="longitud">Longitud:</label>
+                            <input type="number" id="longitud" step="0.000001" placeholder="-99.1332" value="-99.1332">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-solar-panel"></i> Especificaciones del Panel</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="potenciaPanel">Potencia Nominal (W):</label>
+                            <input type="number" id="potenciaPanel" placeholder="565" value="565">
+                        </div>
+                        <div class="form-group">
+                            <label for="anchoPanel">Ancho (cm):</label>
+                            <input type="number" id="anchoPanel" placeholder="113.4" value="113.4">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="altoPanel">Alto (cm):</label>
+                            <input type="number" id="altoPanel" placeholder="227.8" value="227.8">
+                        </div>
+                        <div class="form-group">
+                            <label for="pesoPanel">Peso (kg):</label>
+                            <input type="number" id="pesoPanel" placeholder="28" value="28">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-cogs"></i> Configuración del Sistema</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eficiencia">Eficiencia del Sistema:</label>
+                            <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76"
+                                value="0.76">
+                        </div>
+                        <div class="form-group">
+                            <label for="porcentajeAhorro">% de Ahorro Requerido:</label>
+                            <input type="number" id="porcentajeAhorro" placeholder="100" value="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="limitacionEspacio">
+                            <span class="checkmark"></span>
+                            Limitación de Espacio
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="areaGroup">
+                        <label for="areaDisponible">Área Disponible (m²):</label>
+                        <input type="number" id="areaDisponible" placeholder="40" value="40">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pesoEstructura">Peso de Estructura por Módulo (kg):</label>
+                        <input type="number" id="pesoEstructura" placeholder="20" value="20">
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calcularSistema()">
+                    <i class="fas fa-calculator"></i>
+                    Calcular Sistema Solar
+                </button>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="card results-card">
+                    <h2><i class="fas fa-chart-bar"></i> Resultados del Cálculo</h2>
+
+                    <div class="results-grid">
+                        Resultados principales
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="result-content">
+                                <h3>Consumo Anual</h3>
+                                <p id="consumoAnual">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="result-content">
+                                <h3>Consumo Diario</h3>
+                                <p id="consumoDiario">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="result-content">
+                                <h3>Consumo Mensual</h3>
+                                <p id="consumoMensual">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div class="result-content">
+                                <h3>Promedio Mensual</h3>
+                                <p id="promedioConsumo">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-sun"></i></div>
+                            <div class="result-content">
+                                <h3>Horas Solares Pico</h3>
+                                <p id="hsp">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-lightning-bolt"></i></div>
+                            <div class="result-content">
+                                <h3>Potencia Fotovoltaica</h3>
+                                <p id="potenciaFotovoltaica">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-solar-panel"></i></div>
+                            <div class="result-content">
+                                <h3>Número de Módulos</h3>
+                                <p id="numeroModulos">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-plug"></i></div>
+                            <div class="result-content">
+                                <h3>Potencia Instalada</h3>
+                                <p id="potenciaInstalada">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+                            <div class="result-content">
+                                <h3>Área Requerida</h3>
+                                <p id="areaRequerida">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-industry"></i></div>
+                            <div class="result-content">
+                                <h3>Generación Anual</h3>
+                                <p id="generacionAnual">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-weight-hanging"></i></div>
+                            <div class="result-content">
+                                <h3>Peso Total Paneles</h3>
+                                <p id="pesoTotalPaneles">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-balance-scale"></i></div>
+                            <div class="result-content">
+                                <h3>Peso por m²</h3>
+                                <p id="pesoPorM2">-</p>
+                            </div>
+                        </div>
+
+                        <!-- <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-tools"></i></div>
+                            <div class="result-content">
+                                <h3>Peso Estructura</h3>
+                                <p id="pesoEstructura">-</p>
+                            </div>
+                        </div> -->
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-weight"></i></div>
+                            <div class="result-content">
+                                <h3>Peso Total Sistema</h3>
+                                <p id="pesoTotalSistema">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-microchip"></i></div>
+                            <div class="result-content">
+                                <h3>Inversores Recomendados</h3>
+                                <p id="numeroInversores">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-leaf"></i></div>
+                            <div class="result-content">
+                                <h3>Ahorro CO₂</h3>
+                                <p id="ahorroCO2">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-tree"></i></div>
+                            <div class="result-content">
+                                <h3>Árboles Equivalentes</h3>
+                                <p id="arbolesPlantados">-</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="result-content">
+                                <h3>Producción Promedio</h3>
+                                <p id="promedioProduccion">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- <div class="card">
+                        <h2><i class="fas fa-sun"></i> Irradiación Solar Anual</h2>
+                        <div id="irradiacionChart" class="custom-chart"></div>
+                    </div>
+
+                    <div class="card">
+                        <h2><i class="fas fa-chart-line"></i> Balance Energético Mensual</h2>
+                        <div id="produccionChart" class="custom-chart"></div>
+                    </div> -->
+
+                    Nueva tabla para el detalle mensual
+                    <div class="card">
+                        <h2><i class="fas fa-table"></i> Detalle Mensual</h2>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Irradiación (kWh/m²/día)</th>
+                                        <th>Producción (kWh)</th>
+                                        <th>Consumo (kWh)</th>
+                                        <th>Balance (kWh)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detalleTableBody">
+                                    Las filas se insertarán dinámicamente aquí
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    Nuevo botón para exportar a PDF
+                    <button class="calculate-btn" onclick="exportResultsToPdf()">
+                        <i class="fas fa-file-pdf"></i>
+                        Exportar Resultados a PDF
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="loading-content">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Consultando datos de irradiación solar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script2.js"></script>
+</body>
+
+</html>
