@@ -246,12 +246,12 @@
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .form-group label {
@@ -691,22 +691,52 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="coloniaCliente">Colonia</label>
-                        <input type="text" id="coloniaCliente" placeholder="Colonia">
+                        <label for="estadoCliente">Estado</label>
+                        <select id="estadoCliente" name="estadoCliente">
+                            <option value="">Selecciona un estado</option>
+                            <option value="Aguascalientes">Aguascalientes</option>
+                            <option value="Baja California">Baja California</option>
+                            <option value="Baja California Sur">Baja California Sur</option>
+                            <option value="Campeche">Campeche</option>
+                            <option value="Chiapas">Chiapas</option>
+                            <option value="Chihuahua">Chihuahua</option>
+                            <option value="Ciudad de México">Ciudad de México</option>
+                            <option value="Coahuila">Coahuila</option>
+                            <option value="Colima">Colima</option>
+                            <option value="Durango">Durango</option>
+                            <option value="Estado de México">Estado de México</option>
+                            <option value="Guanajuato">Guanajuato</option>
+                            <option value="Guerrero">Guerrero</option>
+                            <option value="Hidalgo">Hidalgo</option>
+                            <option value="Jalisco">Jalisco</option>
+                            <option value="Michoacán">Michoacán</option>
+                            <option value="Morelos">Morelos</option>
+                            <option value="Nayarit">Nayarit</option>
+                            <option value="Nuevo León">Nuevo León</option>
+                            <option value="Oaxaca">Oaxaca</option>
+                            <option value="Puebla">Puebla</option>
+                            <option value="Querétaro">Querétaro</option>
+                            <option value="Quintana Roo">Quintana Roo</option>
+                            <option value="San Luis Potosí">San Luis Potosí</option>
+                            <option value="Sinaloa">Sinaloa</option>
+                            <option value="Sonora">Sonora</option>
+                            <option value="Tabasco">Tabasco</option>
+                            <option value="Tamaulipas">Tamaulipas</option>
+                            <option value="Tlaxcala">Tlaxcala</option>
+                            <option value="Veracruz">Veracruz</option>
+                            <option value="Yucatán">Yucatán</option>
+                            <option value="Zacatecas">Zacatecas</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="estadoCliente">Estado</label>
-                        <input type="text" id="estadoCliente" placeholder="Estado">
+                        <label for="correoCliente">Correo</label>
+                        <input type="email" id="correoCliente" placeholder="correo@cliente.com">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cpCliente">Código Postal</label>
-                        <input type="text" id="cpCliente" placeholder="CP">
-                    </div>
-                    <div class="form-group">
-                        <label for="municipioCliente">Municipio</label>
-                        <input type="text" id="municipioCliente" placeholder="Municipio">
+                        <label for="telefonoCliente">Teléfono</label>
+                        <input type="tel" id="telefonoCliente" placeholder="Teléfono">
                     </div>
                 </div>
             </div>
@@ -720,11 +750,15 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombreEjecutivo">Nombre del Ejecutivo</label>
-                        <input type="text" id="nombreEjecutivo" placeholder="Su nombre">
+                        <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo">
                     </div>
                     <div class="form-group">
-                        <label for="correoEjecutivo">Correo Electrónico</label>
+                        <label for="correoEjecutivo">Correo</label>
                         <input type="email" id="correoEjecutivo" placeholder="correo@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="codigoEjecutivo">Código del Ejecutivo</label>
+                        <input type="text" id="codigoEjecutivo" placeholder="Código">
                     </div>
                 </div>
             </div>
@@ -751,27 +785,47 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="calleProyecto">Calle del Proyecto</label>
-                        <input type="text" id="calleProyecto" placeholder="Calle y número">
-                    </div>
-                    <div class="form-group">
-                        <label for="coloniaProyecto">Colonia</label>
-                        <input type="text" id="coloniaProyecto" placeholder="Colonia">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
                         <label for="estadoProyecto">Estado</label>
-                        <input type="text" id="estadoProyecto" placeholder="Estado">
+                        <select id="estadoProyecto" name="estadoProyecto">
+                            <option value="">Selecciona un estado</option>
+                            <option value="Aguascalientes">Aguascalientes</option>
+                            <option value="Baja California">Baja California</option>
+                            <option value="Baja California Sur">Baja California Sur</option>
+                            <option value="Campeche">Campeche</option>
+                            <option value="Chiapas">Chiapas</option>
+                            <option value="Chihuahua">Chihuahua</option>
+                            <option value="Ciudad de México">Ciudad de México</option>
+                            <option value="Coahuila">Coahuila</option>
+                            <option value="Colima">Colima</option>
+                            <option value="Durango">Durango</option>
+                            <option value="Estado de México">Estado de México</option>
+                            <option value="Guanajuato">Guanajuato</option>
+                            <option value="Guerrero">Guerrero</option>
+                            <option value="Hidalgo">Hidalgo</option>
+                            <option value="Jalisco">Jalisco</option>
+                            <option value="Michoacán">Michoacán</option>
+                            <option value="Morelos">Morelos</option>
+                            <option value="Nayarit">Nayarit</option>
+                            <option value="Nuevo León">Nuevo León</option>
+                            <option value="Oaxaca">Oaxaca</option>
+                            <option value="Puebla">Puebla</option>
+                            <option value="Querétaro">Querétaro</option>
+                            <option value="Quintana Roo">Quintana Roo</option>
+                            <option value="San Luis Potosí">San Luis Potosí</option>
+                            <option value="Sinaloa">Sinaloa</option>
+                            <option value="Sonora">Sonora</option>
+                            <option value="Tabasco">Tabasco</option>
+                            <option value="Tamaulipas">Tamaulipas</option>
+                            <option value="Tlaxcala">Tlaxcala</option>
+                            <option value="Veracruz">Veracruz</option>
+                            <option value="Yucatán">Yucatán</option>
+                            <option value="Zacatecas">Zacatecas</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="cpProyecto">Código Postal</label>
-                        <input type="text" id="cpProyecto" placeholder="CP">
+                        <label for="ciudadProyecto">Ciudad</label>
+                        <input type="text" id="ciudadProyecto" placeholder="Ciudad">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="municipioProyecto">Municipio</label>
-                    <input type="text" id="municipioProyecto" placeholder="Municipio">
                 </div>
             </div>
 
@@ -864,28 +918,9 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="eficiencia">Eficiencia del Sistema</label>
-                        <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76" value="0.76">
+                        <label for="areaRequerida">Área aproximada requerida (m²)</label>
+                        <input type="number" id="areaRequerida" placeholder="Ejemplo: 40">
                     </div>
-                    <div class="form-group">
-                        <label for="porcentajeAhorro">% de Ahorro Requerido</label>
-                        <input type="number" id="porcentajeAhorro" placeholder="100" value="100">
-                    </div>
-                </div>
-                
-                <div class="checkbox-container">
-                    <input type="checkbox" id="limitacionEspacio">
-                    <label for="limitacionEspacio">Limitación de Espacio Disponible</label>
-                </div>
-
-                <div class="form-group" id="areaGroup" style="display: none;">
-                    <label for="areaDisponible">Área Disponible (m²)</label>
-                    <input type="number" id="areaDisponible" placeholder="40" value="40">
-                </div>
-
-                <div class="form-group">
-                    <label for="pesoEstructura">Peso de Estructura por Módulo (kg)</label>
-                    <input type="number" id="pesoEstructura" placeholder="20" value="20">
                 </div>
             </div>
 
@@ -900,7 +935,7 @@
         <div class="results-panel">
             <!-- Estado inicial -->
             <div class="results-placeholder" id="resultsPlaceholder">
-                <i class="fas fa-solar-panel"></i>
+                <img src="logo.png" alt="Logo Hexa Solar" style="height: 60px; width: auto; margin-bottom: 10px; opacity: 0.5;" />
                 <h3>Análisis Solar Inteligente</h3>
                 <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados detallados</p>
             </div>
@@ -1274,7 +1309,7 @@
             header.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <i class="fas fa-solar-panel" style="font-size: 2.5rem; color: #10b981;"></i>
+                        <img src="logo.png" alt="Logo Hexa Solar" style="height: 2.5rem; width: auto; display: block;" />
                         <div>
                             <h1 style="margin: 0; font-size: 2rem; font-weight: 800;">Hexa Solar Power Solutions</h1>
                             <p style="margin: 5px 0 0 0; opacity: 0.9;">Energía Solar Inteligente</p>
