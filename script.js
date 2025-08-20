@@ -20,25 +20,44 @@ const eficincia = 0.76;
 
 // Funciones globales (fuera del DOMContentLoaded para que sean accesibles desde HTML)
 function updateConsumoFields() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const container = document.getElementById("consumoInputs")
-  const numCampos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const container = document.getElementById("consumoInputs");
+  const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  container.innerHTML = ""
+  container.innerHTML = "";
 
-  for (let i = 0; i < numCampos; i++) {
-    const input = document.createElement("input")
-    input.type = "number"
-    input.className = "consumo-input"
-    input.placeholder = tipoPeriodo === "mensual" ? meses[i] : `Bimestre ${i + 1}`
-    input.id = `consumo${i}`
-
-    // Valores por defecto para el ejemplo
-    if (tipoPeriodo === "bimestral") {
-      input.value = valoresDefault[i] || ""
+  if (tipoPeriodo === "mensual") {
+    // Dos filas de 6 inputs usando grid
+    const gridDiv = document.createElement("div");
+    gridDiv.style.display = "grid";
+    gridDiv.style.gridTemplateColumns = "repeat(6, 1fr)";
+    gridDiv.style.gridTemplateRows = "repeat(2, auto)";
+    gridDiv.style.gap = "0.75rem";
+    for (let i = 0; i < 12; i++) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "consumo-input";
+      input.placeholder = meses[i];
+      input.id = `consumo${i}`;
+      gridDiv.appendChild(input);
     }
-
-    container.appendChild(input)
+    container.appendChild(gridDiv);
+  } else {
+    // Una fila de 6 inputs para bimestral
+    const gridDiv = document.createElement("div");
+    gridDiv.style.display = "grid";
+    gridDiv.style.gridTemplateColumns = "repeat(6, 1fr)";
+    gridDiv.style.gap = "0.75rem";
+    for (let i = 0; i < 6; i++) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "consumo-input";
+      input.placeholder = `Bimestre ${i + 1}`;
+      input.id = `consumo${i}`;
+      input.value = valoresDefault[i] || "";
+      gridDiv.appendChild(input);
+    }
+    container.appendChild(gridDiv);
   }
 }
 
