@@ -675,6 +675,7 @@
         <div class="form-panel">
             <!-- Datos del Cliente -->
             <div class="form-section">
+                <!-- Reorganized into Datos del Cliente section -->
                 <div class="section-title">
                     <i class="fas fa-user"></i>
                     <span>Datos del Cliente</span>
@@ -682,7 +683,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombreCliente">Nombre del Cliente</label>
-                        <input type="text" id="nombreCliente" placeholder="Nombre completo del cliente">
+                        <input type="text" id="nombreCliente" placeholder="Nombre completo">
                     </div>
                     <div class="form-group">
                         <label for="direccionCliente">Dirección</label>
@@ -702,7 +703,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cpCliente">Código Postal</label>
-                        <input type="text" id="cpCliente" placeholder="CP">
+                        <input type="text" id="cpCliente" placeholder="00000">
                     </div>
                     <div class="form-group">
                         <label for="municipioCliente">Municipio</label>
@@ -711,7 +712,7 @@
                 </div>
             </div>
 
-            <!-- Datos del Ejecutivo -->
+            <!-- Added Datos del Ejecutivo section -->
             <div class="form-section">
                 <div class="section-title">
                     <i class="fas fa-user-tie"></i>
@@ -720,25 +721,26 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombreEjecutivo">Nombre del Ejecutivo</label>
-                        <input type="text" id="nombreEjecutivo" placeholder="Su nombre">
+                        <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo">
                     </div>
                     <div class="form-group">
                         <label for="correoEjecutivo">Correo Electrónico</label>
-                        <input type="email" id="correoEjecutivo" placeholder="correo@empresa.com">
+                        <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com">
                     </div>
                 </div>
             </div>
 
-            <!-- Datos del Proyecto -->
+            <!-- Added Datos del Proyecto section -->
             <div class="form-section">
                 <div class="section-title">
-                    <i class="fas fa-building"></i>
+                    <i class="fas fa-project-diagram"></i>
                     <span>Datos del Proyecto</span>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tipoProyecto">Tipo de Proyecto</label>
                         <select id="tipoProyecto">
+                            <option value="">Seleccionar tipo</option>
                             <option value="residencial">Residencial</option>
                             <option value="comercial">Comercial</option>
                             <option value="industrial">Industrial</option>
@@ -761,17 +763,21 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="estadoProyecto">Estado</label>
-                        <input type="text" id="estadoProyecto" placeholder="Estado">
+                        <label for="estadoProyecto">Estado del Proyecto</label>
+                        <select id="estadoProyecto" onchange="actualizarHSP()">
+                            <option value="">Seleccionar estado</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="cpProyecto">Código Postal</label>
-                        <input type="text" id="cpProyecto" placeholder="CP">
+                        <input type="text" id="cpProyecto" placeholder="00000">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="municipioProyecto">Municipio</label>
-                    <input type="text" id="municipioProyecto" placeholder="Municipio">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="municipioProyecto">Municipio</label>
+                        <input type="text" id="municipioProyecto" placeholder="Municipio">
+                    </div>
                 </div>
             </div>
 
@@ -795,38 +801,16 @@
                     </div>
                 </div>
                 
-                <div class="checkbox-container">
-                    <input type="checkbox" id="incluirDatosPago" onchange="toggleDatosPago()">
-                    <label for="incluirDatosPago">Incluir datos de pago por período</label>
-                </div>
-
-                <div id="datosPagoContainer" style="display: none;">
-                    <div class="form-group">
-                        <label>Pagos por Período ($)</label>
-                        <div id="pagoInputs" class="consumo-grid">
-                            <!-- Se genera dinámicamente -->
-                        </div>
+                <!-- Removed checkbox, datos de pago always visible -->
+                <div class="form-group">
+                    <label>Pagos por Período ($)</label>
+                    <div id="pagoInputs" class="consumo-grid">
+                        <!-- Se genera dinámicamente -->
                     </div>
                 </div>
             </div>
 
-            <!-- Ubicación -->
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>Ubicación Geográfica</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="latitud">Latitud</label>
-                        <input type="number" id="latitud" step="0.000001" placeholder="20.676667" value="20.676667">
-                    </div>
-                    <div class="form-group">
-                        <label for="longitud">Longitud</label>
-                        <input type="number" id="longitud" step="0.000001" placeholder="-99.1332" value="-99.1332">
-                    </div>
-                </div>
-            </div>
+            <!-- Removed Ubicación Geográfica section completely -->
 
             <!-- Especificaciones del panel -->
             <div class="form-section">
@@ -834,24 +818,11 @@
                     <i class="fas fa-solar-panel"></i>
                     <span>Especificaciones del Panel</span>
                 </div>
+                <!-- Only keeping potencia del panel -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="potenciaPanel">Potencia (W)</label>
                         <input type="number" id="potenciaPanel" placeholder="565" value="565">
-                    </div>
-                    <div class="form-group">
-                        <label for="anchoPanel">Ancho (cm)</label>
-                        <input type="number" id="anchoPanel" placeholder="113.4" value="113.4">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="altoPanel">Alto (cm)</label>
-                        <input type="number" id="altoPanel" placeholder="227.8" value="227.8">
-                    </div>
-                    <div class="form-group">
-                        <label for="pesoPanel">Peso (kg)</label>
-                        <input type="number" id="pesoPanel" placeholder="28" value="28">
                     </div>
                 </div>
             </div>
@@ -862,30 +833,12 @@
                     <i class="fas fa-cogs"></i>
                     <span>Configuración del Sistema</span>
                 </div>
+                <!-- Only keeping area aproximada requerida -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="eficiencia">Eficiencia del Sistema</label>
-                        <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76" value="0.76">
+                        <label for="areaAproximada">Área Aproximada Requerida (m²)</label>
+                        <input type="number" id="areaAproximada" placeholder="40" value="40">
                     </div>
-                    <div class="form-group">
-                        <label for="porcentajeAhorro">% de Ahorro Requerido</label>
-                        <input type="number" id="porcentajeAhorro" placeholder="100" value="100">
-                    </div>
-                </div>
-                
-                <div class="checkbox-container">
-                    <input type="checkbox" id="limitacionEspacio">
-                    <label for="limitacionEspacio">Limitación de Espacio Disponible</label>
-                </div>
-
-                <div class="form-group" id="areaGroup" style="display: none;">
-                    <label for="areaDisponible">Área Disponible (m²)</label>
-                    <input type="number" id="areaDisponible" placeholder="40" value="40">
-                </div>
-
-                <div class="form-group">
-                    <label for="pesoEstructura">Peso de Estructura por Módulo (kg)</label>
-                    <input type="number" id="pesoEstructura" placeholder="20" value="20">
                 </div>
             </div>
 
@@ -995,6 +948,88 @@
     </div>
 
     <script>
+            const hspData = {
+                "Aguascalientes": 5.91,
+                "Baja California": 5.07,
+                "Baja California Sur": 5.59,
+                "Campeche": 5.85,
+                "Coahuila": 5.16,
+                "Colima": 5.61,
+                "Chiapas": 5.15,
+                "Chihuahua": 5.33,
+                "Ciudad de México": 5.46,
+                "Durango": 5.73,
+                "Guanajuato": 5.79,
+                "Guerrero": 5.68,
+                "Hidalgo": 5.16,
+                "Jalisco": 5.81,
+                "Estado de México": 5.46,
+                "Michoacán": 5.58,
+                "Morelos": 5.94,
+                "Nayarit": 5.88,
+                "Nuevo León": 4.94,
+                "Oaxaca": 5.26,
+                "Puebla": 5.40,
+                "Querétaro": 5.86,
+                "Quintana Roo": 5.69,
+                "San Luis Potosí": 5.49,
+                "Sinaloa": 5.98,
+                "Sonora": 5.73,
+                "Tabasco": 4.94,
+                "Tamaulipas": 4.87,
+                "Tlaxcala": 5.40,
+                "Veracruz": 4.60,
+                "Yucatán": 5.30,
+                "Zacatecas": 5.76
+            };
+
+            function inicializarEstados() {
+                const estadoSelect = document.getElementById('estadoProyecto');
+                Object.keys(hspData).forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado;
+                    option.textContent = estado;
+                    estadoSelect.appendChild(option);
+                });
+            }
+
+            function actualizarHSP() {
+                const estadoSeleccionado = document.getElementById('estadoProyecto').value;
+                if (estadoSeleccionado && hspData[estadoSeleccionado]) {
+                    // Store HSP value for calculations
+                    window.hspValue = hspData[estadoSeleccionado];
+                }
+            }
+
+            function generarInputsPago() {
+                const periodos = parseInt(document.getElementById('tipoPeriodo').value) || 12;
+                const container = document.getElementById('pagoInputs');
+                container.innerHTML = '';
+                
+                const nombrePeriodo = periodos === 12 ? 'Mes' : 'Bimestre';
+                
+                for (let i = 0; i < periodos; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.id = `pago${i}`;
+                    input.placeholder = `${nombrePeriodo} ${i}`;
+                    input.step = '0.01';
+                    container.appendChild(input);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                inicializarEstados();
+                updateConsumoFields();
+                generarInputsPago();
+                
+                // Update payment inputs when periods change
+                document.getElementById('tipoPeriodo').addEventListener('change', function() {
+                    updateConsumoFields();
+                    generarInputsPago();
+                });
+            });
+
         // Variables globales
         const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const mesesCompletos = [
@@ -1002,31 +1037,12 @@
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
         ];
 
-        // Inicialización
-        document.addEventListener("DOMContentLoaded", () => {
-            updateConsumoFields();
-            
-            // Event listener para limitación de espacio
-            document.getElementById("limitacionEspacio").addEventListener("change", function() {
-                const areaGroup = document.getElementById("areaGroup");
-                areaGroup.style.display = this.checked ? "block" : "none";
-            });
-
-            // Event listener para incluir datos de pago
-            document.getElementById("incluirDatosPago").addEventListener("change", function() {
-                const datosPagoContainer = document.getElementById("datosPagoContainer");
-                datosPagoContainer.style.display = this.checked ? "block" : "none";
-            });
-        });
-
         function updateConsumoFields() {
             const tipoPeriodo = document.getElementById("tipoPeriodo").value;
             const container = document.getElementById("consumoInputs");
-            const pagoContainer = document.getElementById("pagoInputs");
             const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
 
             container.innerHTML = "";
-            pagoContainer.innerHTML = "";
 
             for (let i = 0; i < numCampos; i++) {
                 const consumoInput = document.createElement("input");
@@ -1035,19 +1051,7 @@
                 consumoInput.placeholder = tipoPeriodo === "mensual" ? meses[i] : `Bim ${i + 1}`;
                 consumoInput.id = `consumo${i}`;
                 container.appendChild(consumoInput);
-
-                const pagoInput = document.createElement("input");
-                pagoInput.type = "number";
-                pagoInput.className = "consumo-input";
-                pagoInput.placeholder = tipoPeriodo === "mensual" ? meses[i] : `Bim ${i + 1}`;
-                pagoInput.id = `pago${i}`;
-                pagoContainer.appendChild(pagoInput);
             }
-        }
-
-        function toggleDatosPago() {
-            const datosPagoContainer = document.getElementById("datosPagoContainer");
-            datosPagoContainer.style.display = datosPagoContainer.style.display === "none" ? "block" : "none";
         }
 
         async function calcularSistema() {
@@ -1057,18 +1061,8 @@
             try {
                 // Obtener datos del formulario
                 const tipoPeriodo = document.getElementById("tipoPeriodo").value;
-                const latitud = parseFloat(document.getElementById("latitud").value);
-                const longitud = parseFloat(document.getElementById("longitud").value);
-                const eficiencia = parseFloat(document.getElementById("eficiencia").value);
                 const potenciaPanel = parseInt(document.getElementById("potenciaPanel").value);
-                const anchoPanel = parseFloat(document.getElementById("anchoPanel").value);
-                const altoPanel = parseFloat(document.getElementById("altoPanel").value);
-                const pesoPanel = parseFloat(document.getElementById("pesoPanel").value);
-                const porcentajeAhorro = parseFloat(document.getElementById("porcentajeAhorro").value);
-                const limitacionEspacio = document.getElementById("limitacionEspacio").checked;
-                const areaDisponible = parseFloat(document.getElementById("areaDisponible").value) || 0;
-                const pesoEstructura = parseFloat(document.getElementById("pesoEstructura").value);
-                const incluirDatosPago = document.getElementById("incluirDatosPago").checked;
+                const areaAproximada = parseFloat(document.getElementById("areaAproximada").value);
 
                 // Obtener consumo actual
                 const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
@@ -1080,11 +1074,9 @@
 
                 // Obtener pagos por período
                 const pagosPorPeriodo = [];
-                if (incluirDatosPago) {
-                    for (let i = 0; i < numCampos; i++) {
-                        const valor = parseFloat(document.getElementById(`pago${i}`).value) || 0;
-                        pagosPorPeriodo.push(valor);
-                    }
+                for (let i = 0; i < numCampos; i++) {
+                    const valor = parseFloat(document.getElementById(`pago${i}`).value) || 0;
+                    pagosPorPeriodo.push(valor);
                 }
 
                 // Validaciones básicas
@@ -1093,80 +1085,30 @@
                     return;
                 }
 
-                // Obtener datos de irradiación de NASA
-                const irradiacionMensual = await obtenerDatosNASA(latitud, longitud);
-
                 // Cálculos principales
                 const esBimestral = tipoPeriodo === "bimestral";
                 
                 // 1. Consumo anual
                 const consumoAnual = consumoActual.reduce((sum, val) => sum + val, 0);
-                const consumoDiario = consumoAnual / 365;
-                const promedioConsumo = consumoAnual / (esBimestral ? 6 : 12);
-                const consumoMensual = esBimestral ? promedioConsumo / 2 : promedioConsumo;
 
                 // 2. HSP (Horas Solares Pico)
-                const valoresIrradiacion = Object.values(irradiacionMensual)
-                    .filter(v => typeof v === "number")
-                    .slice(0, -1);
-                const hsp = valoresIrradiacion.reduce((sum, val) => sum + val, 0) / valoresIrradiacion.length;
+                const estadoSeleccionado = document.getElementById('estadoProyecto').value;
+                let hsp = window.hspValue;
 
-                // 3. Potencia Fotovoltaica
-                const PFV = consumoDiario / (hsp * eficiencia);
-
-                // 4. Cálculo de módulos
-                const anchoPanelM = anchoPanel / 100;
-                const altoPanelM = altoPanel / 100;
-                const areaPanelM2 = anchoPanelM * altoPanelM;
-
-                let numeroModulos = 0;
-
-                if (limitacionEspacio && areaDisponible > 0) {
-                    numeroModulos = Math.floor((areaDisponible * 0.85) / areaPanelM2);
-                } else {
-                    numeroModulos = Math.ceil((consumoDiario * (porcentajeAhorro / 100) * 1000) / (hsp * potenciaPanel * 0.75));
+                if (!hsp) {
+                    alert("Por favor, seleccione un estado para obtener las Horas Solares Pico (HSP).");
+                    return;
                 }
 
-                // 5. Cálculos derivados
+                // 3. Cálculo de módulos
+                let numeroModulos = Math.ceil((consumoAnual * 1000) / (hsp * potenciaPanel * 0.75 * 365));
+
+                // 4. Cálculos derivados
                 const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
-                const areaRequerida = Math.ceil(areaPanelM2 * numeroModulos);
-                const kwInstaladoConEficiencia = (potenciaPanel * numeroModulos * eficiencia) / 1000;
-
-                // 6. Peso
-                const pesoTotalPaneles = numeroModulos * pesoPanel;
-                const pesoTotalEstructura = pesoEstructura * numeroModulos;
-                const pesoTotal = pesoTotalPaneles + pesoTotalEstructura;
-
-                // 7. Producción mensual
-                const diasPorMes = [];
-                for (let i = 1; i <= 12; i++) {
-                    diasPorMes.push(obtenerDiasDelMes(i));
-                }
-
-                const produccionMensual = valoresIrradiacion.map((irradiacion, index) => {
-                    return irradiacion * kwInstaladoConEficiencia * diasPorMes[index];
-                });
-
-                const produccionAnual = produccionMensual.reduce((sum, val) => sum + (isNaN(val) ? 0 : val), 0);
-
-                // 8. Consumo mensual expandido
-                let consumoMensualExpandido = [];
-                if (esBimestral) {
-                    for (let i = 0; i < 6; i++) {
-                        consumoMensualExpandido.push(consumoActual[i]);
-                        consumoMensualExpandido.push(0);
-                    }
-                } else {
-                    consumoMensualExpandido = [...consumoActual];
-                }
-
-                // 9. Balance energético
-                const balanceEnergetico = produccionMensual.map((produccion, index) => {
-                    return produccion - consumoMensualExpandido[index];
-                });
-
-                // 10. Impacto ambiental
-                const ahorroCO2 = (produccionAnual * 439.963) / 1000000;
+                const areaRequerida = areaAproximada;
+                const produccionAnual = consumoAnual;
+                const ahorroCO2 = 0;
+                const pesoTotal = 0;
 
                 // Mostrar resultados
                 mostrarResultados({
@@ -1177,10 +1119,7 @@
                     hsp,
                     produccionAnual,
                     pesoTotal,
-                    ahorroCO2,
-                    irradiacionMensual,
-                    produccionMensual,
-                    balanceEnergetico
+                    ahorroCO2
                 });
 
             } catch (error) {
@@ -1189,27 +1128,6 @@
             } finally {
                 document.getElementById("loading").style.display = "none";
             }
-        }
-
-        async function obtenerDatosNASA(latitud, longitud) {
-            const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&latitude=${latitud}&longitude=${longitud}&format=JSON`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                return data.properties.parameter.ALLSKY_SFC_SW_DWN;
-            } catch (error) {
-                console.error("Error al obtener datos de NASA:", error);
-                return {
-                    JAN: 4.6039, FEB: 5.4578, MAR: 6.3456, APR: 6.774,
-                    MAY: 6.6502, JUN: 6.1733, JUL: 6.0362, AUG: 6.0024,
-                    SEP: 5.1854, OCT: 5.0666, NOV: 4.6538, DEC: 4.5002
-                };
-            }
-        }
-
-        function obtenerDiasDelMes(mes, anio = 2025) {
-            return new Date(anio, mes, 0).getDate();
         }
 
         function mostrarResultados(resultados) {
@@ -1235,20 +1153,15 @@
             const tbody = document.getElementById("detalleTableBody");
             tbody.innerHTML = "";
 
-            const irradiacionArray = Object.values(resultados.irradiacionMensual).filter(v => typeof v === "number");
-
             for (let i = 0; i < 12; i++) {
                 const row = document.createElement("div");
                 row.className = "table-row";
 
-                const balance = resultados.balanceEnergetico[i];
-                const balanceClass = balance > 0 ? "positive" : "negative";
-
                 row.innerHTML = `
                     <div class="table-cell">${mesesCompletos[i]}</div>
-                    <div class="table-cell">${irradiacionArray[i]?.toFixed(2) || "-"} kWh/m²/día</div>
-                    <div class="table-cell">${resultados.produccionMensual[i]?.toFixed(0) || "-"} kWh</div>
-                    <div class="table-cell ${balanceClass}">${balance?.toFixed(0) || "-"} kWh</div>
+                    <div class="table-cell">0 kWh/m²/día</div>
+                    <div class="table-cell">0 kWh</div>
+                    <div class="table-cell">0 kWh</div>
                 `;
 
                 tbody.appendChild(row);
