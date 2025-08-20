@@ -16,6 +16,8 @@ const mesesCompletos = [
   "Diciembre",
 ]
 
+const eficincia = 0.76;
+
 // Funciones globales (fuera del DOMContentLoaded para que sean accesibles desde HTML)
 function updateConsumoFields() {
   const tipoPeriodo = document.getElementById("tipoPeriodo").value
@@ -33,7 +35,6 @@ function updateConsumoFields() {
 
     // Valores por defecto para el ejemplo
     if (tipoPeriodo === "bimestral") {
-      const valoresDefault = [690, 631, 422, 970, 1011, 752]
       input.value = valoresDefault[i] || ""
     }
 

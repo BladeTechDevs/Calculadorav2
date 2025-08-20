@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexa Solar - Calculadora Inteligente</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Changed to white background */
+            background: #ffffff;
+            color: #1a202c;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Barra superior delgada */
+        .top-bar {
+            height: 60px;
+            /* Updated background for white theme */
+            background: rgba(29, 50, 70, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(29, 50, 70, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        /* Added logo image styling */
+        .logo-image {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .logo i {
+            /* Updated icon color to green */
+            color: #73b248;
+            font-size: 1.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #e2e8f0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            /* Updated status dot color to green */
+            background: #73b248;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            height: 100vh;
+            padding-top: 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* Panel izquierdo - Formulario */
+        .form-panel {
+            /* Updated background for white theme */
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(29, 50, 70, 0.1);
+            padding: 2rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(29, 50, 70, 0.3) transparent;
+        }
+
+        .form-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .form-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .form-panel::-webkit-scrollbar-thumb {
+            background: rgba(29, 50, 70, 0.3);
+            border-radius: 3px;
+        }
+
+        /* Panel derecho - Resultados */
+        .results-panel {
+            /* Updated background for white theme */
+            background: rgba(240, 253, 244, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(16, 110, 58, 0.3) transparent;
+        }
+
+        .results-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .results-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .results-panel::-webkit-scrollbar-thumb {
+            background: rgba(16, 110, 58, 0.3);
+            border-radius: 3px;
+        }
+
+        /* Secciones del formulario */
+        .form-section {
+            /* Updated background for white theme */
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(29, 50, 70, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            border-color: rgba(115, 178, 72, 0.4);
+            box-shadow: 0 0 20px rgba(115, 178, 72, 0.1);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            font-size: 1rem;
+            /* Updated text color for white theme */
+            color: #1a202c;
+        }
+
+        .section-title i {
+            /* Updated icon color to light green */
+            color: #73b248;
+            font-size: 1.2rem;
+        }
+
+        /* Campos del formulario */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            /* Updated label color for white theme */
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            /* Updated input background for white theme */
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(29, 50, 70, 0.2);
+            border-radius: 8px;
+            /* Updated input text color for white theme */
+            color: #1a202c;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            /* Updated focus border color to light green */
+            border-color: #73b248;
+            box-shadow: 0 0 0 3px rgba(115, 178, 72, 0.1);
+        }
+
+        .form-group input::placeholder {
+            /* Updated placeholder color for white theme */
+            color: #a0aec0;
+        }
+
+        /* Grid de consumo */
+        .consumo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .consumo-input {
+            padding: 0.75rem 0.5rem;
+            /* Updated consumo input background for white theme */
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(29, 50, 70, 0.2);
+            border-radius: 6px;
+            /* Updated consumo input text color for white theme */
+            color: #1a202c;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .consumo-input:focus {
+            /* Updated focus border color to light green */
+            border-color: #73b248;
+            box-shadow: 0 0 0 2px rgba(115, 178, 72, 0.1);
+        }
+
+        /* Checkbox personalizado */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            /* Updated checkbox container background for white theme */
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-container:hover {
+            /* Updated hover background for white theme */
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            /* Updated checkbox accent color to light green */
+            accent-color: #73b248;
+        }
+
+        /* Botón de cálculo */
+        .calculate-btn {
+            width: 100%;
+            padding: 1rem;
+            /* Updated button gradient with green colors */
+            background: linear-gradient(135deg, #73b248 0%, #106e3a 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .calculate-btn:hover {
+            /* Updated hover gradient with darker green colors */
+            background: linear-gradient(135deg, #106e3a 0%, #0f5132 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(115, 178, 72, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Panel de resultados */
+        .results-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(16, 110, 58, 0.2);
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            /* Updated results title color for white theme */
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            /* Updated results subtitle color for white theme */
+            color: #4a5568;
+            font-size: 0.875rem;
+        }
+
+        /* Grid de métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            /* Updated metric card background for white theme */
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(16, 110, 58, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(115, 178, 72, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            /* Updated metric icon color to light green */
+            color: #73b248;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            /* Updated metric value color for white theme */
+            color: #1a202c;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            /* Updated metric label color for white theme */
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tabla de detalles */
+        .details-table {
+            /* Updated table background for white theme */
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(16, 110, 58, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: rgba(115, 178, 72, 0.2);
+            padding: 1rem;
+            font-weight: 600;
+            /* Updated table header color for white theme */
+            color: #1a202c;
+            border-bottom: 1px solid rgba(16, 110, 58, 0.2);
+        }
+
+        .table-content {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(16, 110, 58, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .table-row:hover {
+            /* Updated hover background for white theme */
+            background: rgba(240, 253, 244, 0.6);
+        }
+
+        .table-cell {
+            /* Updated table cell color for white theme */
+            color: #2d3748;
+        }
+
+        .table-cell.positive {
+            /* Updated positive color to light green */
+            color: #73b248;
+        }
+
+        .table-cell.negative {
+            color: #ef4444;
+        }
+
+        /* Botón de exportar */
+        .export-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1d3246 0%, #2563eb 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-content {
+            /* Updated loading content background with blue color */
+            background: rgba(29, 50, 70, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .loading-spinner {
+            font-size: 3rem;
+            /* Updated loading spinner color to light green */
+            color: #73b248;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtext {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        /* Estado inicial de resultados */
+        .results-placeholder {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+
+        .results-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .results-placeholder h3 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .results-placeholder p {
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+            
+            .form-panel,
+            .results-panel {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 0 1rem;
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .consumo-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .form-panel,
+            .results-panel {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar {
+                height: 50px;
+            }
+            
+            .main-container {
+                padding-top: 50px;
+            }
+            
+            .consumo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Ocultar resultados inicialmente */
+        .results-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra superior -->
+    <div class="top-bar">
+        <div class="logo">
+            <!-- Added logo image with generic path -->
+            <img src="/assets/logo.png" alt="Hexa Solar Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+            <i class="fas fa-solar-panel" style="display: none;"></i>
+            <span>Hexa Solar Power Solutions</span>
+        </div>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Sistema Activo</span>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Panel izquierdo - Formulario -->
+        <div class="form-panel">
+            <!-- Información del proyecto -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Información del Proyecto</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombreCliente">Cliente</label>
+                        <input type="text" id="nombreCliente" placeholder="Nombre del cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombreEjecutivo">Ejecutivo</label>
+                        <input type="text" id="nombreEjecutivo" placeholder="Su nombre">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos de consumo -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Consumo Energético</span>
+                </div>
+                <div class="form-group">
+                    <label for="tipoPeriodo">Período de Facturación</label>
+                    <select id="tipoPeriodo" onchange="updateConsumoFields()">
+                        <option value="mensual">Mensual (12 valores)</option>
+                        <option value="bimestral">Bimestral (6 valores)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Consumo Histórico (kWh)</label>
+                    <div id="consumoInputs" class="consumo-grid">
+                        <!-- Se genera dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Ubicación Geográfica</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="latitud">Latitud</label>
+                        <input type="number" id="latitud" step="0.000001" placeholder="20.676667" value="20.676667">
+                    </div>
+                    <div class="form-group">
+                        <label for="longitud">Longitud</label>
+                        <input type="number" id="longitud" step="0.000001" placeholder="-99.1332" value="-99.1332">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Especificaciones del panel -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-solar-panel"></i>
+                    <span>Especificaciones del Panel</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="potenciaPanel">Potencia (W)</label>
+                        <input type="number" id="potenciaPanel" placeholder="565" value="565">
+                    </div>
+                    <div class="form-group">
+                        <label for="anchoPanel">Ancho (cm)</label>
+                        <input type="number" id="anchoPanel" placeholder="113.4" value="113.4">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="altoPanel">Alto (cm)</label>
+                        <input type="number" id="altoPanel" placeholder="227.8" value="227.8">
+                    </div>
+                    <div class="form-group">
+                        <label for="pesoPanel">Peso (kg)</label>
+                        <input type="number" id="pesoPanel" placeholder="28" value="28">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración del sistema -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-cogs"></i>
+                    <span>Configuración del Sistema</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eficiencia">Eficiencia del Sistema</label>
+                        <input type="number" id="eficiencia" step="0.01" min="0" max="1" placeholder="0.76" value="0.76">
+                    </div>
+                    <div class="form-group">
+                        <label for="porcentajeAhorro">% de Ahorro Requerido</label>
+                        <input type="number" id="porcentajeAhorro" placeholder="100" value="100">
+                    </div>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="limitacionEspacio">
+                    <label for="limitacionEspacio">Limitación de Espacio Disponible</label>
+                </div>
+
+                <div class="form-group" id="areaGroup" style="display: none;">
+                    <label for="areaDisponible">Área Disponible (m²)</label>
+                    <input type="number" id="areaDisponible" placeholder="40" value="40">
+                </div>
+
+                <div class="form-group">
+                    <label for="pesoEstructura">Peso de Estructura por Módulo (kg)</label>
+                    <input type="number" id="pesoEstructura" placeholder="20" value="20">
+                </div>
+            </div>
+
+            <!-- Botón de cálculo -->
+            <button class="calculate-btn" onclick="calcularSistema()">
+                <i class="fas fa-calculator"></i>
+                <span>Calcular Sistema Solar</span>
+            </button>
+        </div>
+
+        <!-- Panel derecho - Resultados -->
+        <div class="results-panel">
+            <!-- Estado inicial -->
+            <div class="results-placeholder" id="resultsPlaceholder">
+                <i class="fas fa-solar-panel"></i>
+                <h3>Análisis Solar Inteligente</h3>
+                <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados detallados</p>
+            </div>
+
+            <!-- Contenido de resultados -->
+            <div class="results-content" id="resultsContent">
+                <div class="results-header">
+                    <div class="results-title">Análisis Completado</div>
+                    <div class="results-subtitle">Sistema Solar Fotovoltaico Optimizado</div>
+                </div>
+
+                <!-- Grid de métricas principales -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="metric-value" id="consumoAnual">-</div>
+                        <div class="metric-label">Consumo Anual</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-solar-panel"></i></div>
+                        <div class="metric-value" id="numeroModulos">-</div>
+                        <div class="metric-label">Módulos Requeridos</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-plug"></i></div>
+                        <div class="metric-value" id="potenciaInstalada">-</div>
+                        <div class="metric-label">Potencia Instalada</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+                        <div class="metric-value" id="areaRequerida">-</div>
+                        <div class="metric-label">Área Requerida</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-sun"></i></div>
+                        <div class="metric-value" id="hsp">-</div>
+                        <div class="metric-label">Horas Solares Pico</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-industry"></i></div>
+                        <div class="metric-value" id="generacionAnual">-</div>
+                        <div class="metric-label">Generación Anual</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-weight"></i></div>
+                        <div class="metric-value" id="pesoTotalSistema">-</div>
+                        <div class="metric-label">Peso Total Sistema</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-leaf"></i></div>
+                        <div class="metric-value" id="ahorroCO2">-</div>
+                        <div class="metric-label">Ahorro CO₂</div>
+                    </div>
+                </div>
+
+                <!-- Tabla de detalles mensuales -->
+                <div class="details-table">
+                    <div class="table-header">
+                        <i class="fas fa-table"></i> Análisis Mensual Detallado
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row" style="font-weight: 600; background: rgba(16, 185, 129, 0.1);">
+                            <div class="table-cell">Mes</div>
+                            <div class="table-cell">Irradiación</div>
+                            <div class="table-cell">Producción</div>
+                            <div class="table-cell">Balance</div>
+                        </div>
+                        <div id="detalleTableBody">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de exportar -->
+                <button class="export-btn" onclick="exportResultsToPdf()">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Exportar Reporte PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fas fa-solar-panel fa-spin"></i>
+            </div>
+            <div class="loading-text">Procesando Datos</div>
+            <div class="loading-subtext">Consultando irradiación solar...</div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        const mesesCompletos = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
+        // Inicialización
+        document.addEventListener("DOMContentLoaded", () => {
+            updateConsumoFields();
+            
+            // Event listener para limitación de espacio
+            document.getElementById("limitacionEspacio").addEventListener("change", function() {
+                const areaGroup = document.getElementById("areaGroup");
+                areaGroup.style.display = this.checked ? "block" : "none";
+            });
+        });
+
+        function updateConsumoFields() {
+            const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+            const container = document.getElementById("consumoInputs");
+            const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
+
+            container.innerHTML = "";
+
+            for (let i = 0; i < numCampos; i++) {
+                const input = document.createElement("input");
+                input.type = "number";
+                input.className = "consumo-input";
+                input.placeholder = tipoPeriodo === "mensual" ? meses[i] : `Bim ${i + 1}`;
+                input.id = `consumo${i}`;
+                container.appendChild(input);
+            }
+        }
+
+        async function calcularSistema() {
+            // Mostrar loading
+            document.getElementById("loading").style.display = "flex";
+
+            try {
+                // Obtener datos del formulario
+                const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+                const latitud = parseFloat(document.getElementById("latitud").value);
+                const longitud = parseFloat(document.getElementById("longitud").value);
+                const eficiencia = parseFloat(document.getElementById("eficiencia").value);
+                const potenciaPanel = parseInt(document.getElementById("potenciaPanel").value);
+                const anchoPanel = parseFloat(document.getElementById("anchoPanel").value);
+                const altoPanel = parseFloat(document.getElementById("altoPanel").value);
+                const pesoPanel = parseFloat(document.getElementById("pesoPanel").value);
+                const porcentajeAhorro = parseFloat(document.getElementById("porcentajeAhorro").value);
+                const limitacionEspacio = document.getElementById("limitacionEspacio").checked;
+                const areaDisponible = parseFloat(document.getElementById("areaDisponible").value) || 0;
+                const pesoEstructura = parseFloat(document.getElementById("pesoEstructura").value);
+
+                // Obtener consumo actual
+                const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
+                const consumoActual = [];
+                for (let i = 0; i < numCampos; i++) {
+                    const valor = parseFloat(document.getElementById(`consumo${i}`).value) || 0;
+                    consumoActual.push(valor);
+                }
+
+                // Validaciones básicas
+                if (consumoActual.every(v => v === 0)) {
+                    alert("Por favor ingrese los valores de consumo");
+                    return;
+                }
+
+                // Obtener datos de irradiación de NASA
+                const irradiacionMensual = await obtenerDatosNASA(latitud, longitud);
+
+                // Cálculos principales
+                const esBimestral = tipoPeriodo === "bimestral";
+                
+                // 1. Consumo anual
+                const consumoAnual = consumoActual.reduce((sum, val) => sum + val, 0);
+                const consumoDiario = consumoAnual / 365;
+                const promedioConsumo = consumoAnual / (esBimestral ? 6 : 12);
+                const consumoMensual = esBimestral ? promedioConsumo / 2 : promedioConsumo;
+
+                // 2. HSP (Horas Solares Pico)
+                const valoresIrradiacion = Object.values(irradiacionMensual)
+                    .filter(v => typeof v === "number")
+                    .slice(0, -1);
+                const hsp = valoresIrradiacion.reduce((sum, val) => sum + val, 0) / valoresIrradiacion.length;
+
+                // 3. Potencia Fotovoltaica
+                const PFV = consumoDiario / (hsp * eficiencia);
+
+                // 4. Cálculo de módulos
+                const anchoPanelM = anchoPanel / 100;
+                const altoPanelM = altoPanel / 100;
+                const areaPanelM2 = anchoPanelM * altoPanelM;
+
+                let numeroModulos = 0;
+
+                if (limitacionEspacio && areaDisponible > 0) {
+                    numeroModulos = Math.floor((areaDisponible * 0.85) / areaPanelM2);
+                } else {
+                    numeroModulos = Math.ceil((consumoDiario * (porcentajeAhorro / 100) * 1000) / (hsp * potenciaPanel * 0.75));
+                }
+
+                // 5. Cálculos derivados
+                const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
+                const areaRequerida = Math.ceil(areaPanelM2 * numeroModulos);
+                const kwInstaladoConEficiencia = (potenciaPanel * numeroModulos * eficiencia) / 1000;
+
+                // 6. Peso
+                const pesoTotalPaneles = numeroModulos * pesoPanel;
+                const pesoTotalEstructura = pesoEstructura * numeroModulos;
+                const pesoTotal = pesoTotalPaneles + pesoTotalEstructura;
+
+                // 7. Producción mensual
+                const diasPorMes = [];
+                for (let i = 1; i <= 12; i++) {
+                    diasPorMes.push(obtenerDiasDelMes(i));
+                }
+
+                const produccionMensual = valoresIrradiacion.map((irradiacion, index) => {
+                    return irradiacion * kwInstaladoConEficiencia * diasPorMes[index];
+                });
+
+                const produccionAnual = produccionMensual.reduce((sum, val) => sum + (isNaN(val) ? 0 : val), 0);
+
+                // 8. Consumo mensual expandido
+                let consumoMensualExpandido = [];
+                if (esBimestral) {
+                    for (let i = 0; i < 6; i++) {
+                        consumoMensualExpandido.push(consumoActual[i]);
+                        consumoMensualExpandido.push(0);
+                    }
+                } else {
+                    consumoMensualExpandido = [...consumoActual];
+                }
+
+                // 9. Balance energético
+                const balanceEnergetico = produccionMensual.map((produccion, index) => {
+                    return produccion - consumoMensualExpandido[index];
+                });
+
+                // 10. Impacto ambiental
+                const ahorroCO2 = (produccionAnual * 439.963) / 1000000;
+
+                // Mostrar resultados
+                mostrarResultados({
+                    consumoAnual,
+                    numeroModulos,
+                    potenciaInstalada,
+                    areaRequerida,
+                    hsp,
+                    produccionAnual,
+                    pesoTotal,
+                    ahorroCO2,
+                    irradiacionMensual,
+                    produccionMensual,
+                    balanceEnergetico
+                });
+
+            } catch (error) {
+                console.error("Error en el cálculo:", error);
+                alert("Error en el cálculo. Por favor verifique los datos ingresados.");
+            } finally {
+                document.getElementById("loading").style.display = "none";
+            }
+        }
+
+        async function obtenerDatosNASA(latitud, longitud) {
+            const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&latitude=${latitud}&longitude=${longitud}&format=JSON`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.properties.parameter.ALLSKY_SFC_SW_DWN;
+            } catch (error) {
+                console.error("Error al obtener datos de NASA:", error);
+                return {
+                    JAN: 4.6039, FEB: 5.4578, MAR: 6.3456, APR: 6.774,
+                    MAY: 6.6502, JUN: 6.1733, JUL: 6.0362, AUG: 6.0024,
+                    SEP: 5.1854, OCT: 5.0666, NOV: 4.6538, DEC: 4.5002
+                };
+            }
+        }
+
+        function obtenerDiasDelMes(mes, anio = 2025) {
+            return new Date(anio, mes, 0).getDate();
+        }
+
+        function mostrarResultados(resultados) {
+            // Ocultar placeholder y mostrar resultados
+            document.getElementById("resultsPlaceholder").style.display = "none";
+            document.getElementById("resultsContent").style.display = "block";
+
+            // Actualizar métricas principales
+            document.getElementById("consumoAnual").textContent = `${resultados.consumoAnual.toFixed(0)} kWh`;
+            document.getElementById("numeroModulos").textContent = `${resultados.numeroModulos}`;
+            document.getElementById("potenciaInstalada").textContent = `${resultados.potenciaInstalada.toFixed(2)} kW`;
+            document.getElementById("areaRequerida").textContent = `${resultados.areaRequerida} m²`;
+            document.getElementById("hsp").textContent = `${resultados.hsp.toFixed(2)} h`;
+            document.getElementById("generacionAnual").textContent = `${resultados.produccionAnual.toFixed(0)} kWh`;
+            document.getElementById("pesoTotalSistema").textContent = `${resultados.pesoTotal.toFixed(0)} kg`;
+            document.getElementById("ahorroCO2").textContent = `${resultados.ahorroCO2.toFixed(3)} t/año`;
+
+            // Llenar tabla de detalles
+            llenarTablaDetalle(resultados);
+        }
+
+        function llenarTablaDetalle(resultados) {
+            const tbody = document.getElementById("detalleTableBody");
+            tbody.innerHTML = "";
+
+            const irradiacionArray = Object.values(resultados.irradiacionMensual).filter(v => typeof v === "number");
+
+            for (let i = 0; i < 12; i++) {
+                const row = document.createElement("div");
+                row.className = "table-row";
+
+                const balance = resultados.balanceEnergetico[i];
+                const balanceClass = balance > 0 ? "positive" : "negative";
+
+                row.innerHTML = `
+                    <div class="table-cell">${mesesCompletos[i]}</div>
+                    <div class="table-cell">${irradiacionArray[i]?.toFixed(2) || "-"} kWh/m²/día</div>
+                    <div class="table-cell">${resultados.produccionMensual[i]?.toFixed(0) || "-"} kWh</div>
+                    <div class="table-cell ${balanceClass}">${balance?.toFixed(0) || "-"} kWh</div>
+                `;
+
+                tbody.appendChild(row);
+            }
+        }
+
+        function exportResultsToPdf() {
+            const nombreCliente = document.getElementById("nombreCliente")?.value || "Cliente no especificado";
+            const nombreEjecutivo = document.getElementById("nombreEjecutivo")?.value || "Ejecutivo no especificado";
+
+            const element = document.getElementById("resultsContent");
+            const clone = element.cloneNode(true);
+
+            const header = document.createElement("div");
+            header.style.cssText = `
+                padding: 30px;
+                background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+                color: white;
+                margin-bottom: 30px;
+                border-radius: 12px;
+                page-break-inside: avoid;
+            `;
+            header.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-solar-panel" style="font-size: 2.5rem; color: #10b981;"></i>
+                        <div>
+                            <h1 style="margin: 0; font-size: 2rem; font-weight: 800;">Hexa Solar Power Solutions</h1>
+                            <p style="margin: 5px 0 0 0; opacity: 0.9;">Energía Solar Inteligente</p>
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.9rem;">
+                        <div>Reporte Generado</div>
+                        <div>${new Date().toLocaleDateString()}</div>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px;">
+                    <h2 style="margin: 0 0 15px 0;">Análisis de Sistema Solar Fotovoltaico</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div><strong>Cliente:</strong> ${nombreCliente}</div>
+                        <div><strong>Ejecutivo:</strong> ${nombreEjecutivo}</div>
+                    </div>
+                </div>
+            `;
+
+            clone.insertBefore(header, clone.firstChild);
+
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename: `Hexa_Solar_${nombreCliente.replace(/ /g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`,
+                image: { type: "jpeg", quality: 0.95 },
+                html2canvas: { scale: 1.5, backgroundColor: "#ffffff" },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+            };
+
+            document.getElementById("loading").style.display = "flex";
+
+            setTimeout(() => {
+                window.html2pdf().set(opt).from(clone).save().then(() => {
+                    document.getElementById("loading").style.display = "none";
+                }).catch((err) => {
+                    console.error("Error al generar PDF:", err);
+                    document.getElementById("loading").style.display = "none";
+                    alert("Error al generar el PDF. Por favor intente nuevamente.");
+                });
+            }, 800);
+        }
+    </script>
+</body>
+</html>
