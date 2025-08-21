@@ -219,6 +219,32 @@ async function calcularSistema() {
 document.addEventListener("DOMContentLoaded", () => {
   updateConsumoFields()
 
+  // Tarifas por tipo de proyecto
+  const tarifasPorProyecto = {
+    residencial: ["1", "1A", "1B", "1C", "1D", "1E", "1F", "DAC"],
+    comercial: ["2", "3", "PDBT", "GDBT", "GDMTO", "GDMTH"],
+    industrial: ["HM", "OM", "HMC", "HMS", "AP"]
+  };
+
+  const tipoProyectoSelect = document.getElementById("tipoProyecto");
+  const tipoTarifaSelect = document.getElementById("tipoTarifa");
+
+  function actualizarTarifas() {
+    const tipo = tipoProyectoSelect.value;
+    tipoTarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
+    if (tarifasPorProyecto[tipo]) {
+      tarifasPorProyecto[tipo].forEach(tarifa => {
+        const opt = document.createElement("option");
+        opt.value = tarifa;
+        opt.textContent = tarifa;
+        tipoTarifaSelect.appendChild(opt);
+      });
+    }
+  }
+
+  tipoProyectoSelect.addEventListener("change", actualizarTarifas);
+  actualizarTarifas();
+
   // Event listener para limitación de espacio
   document.getElementById("limitacionEspacio").addEventListener("change", function () {
     const areaGroup = document.getElementById("areaGroup")

@@ -680,6 +680,14 @@
     </style>
 </head>
 <body>
+    <style>
+        .form-group {
+            margin-bottom: 0.35rem !important;
+        }
+        .form-group label {
+            margin-bottom: 0.32rem !important;
+        }
+    </style>
     <!-- Barra superior -->
     <div class="top-bar">
         <div class="logo">
@@ -709,41 +717,74 @@
         <div class="form-panel">
             <!-- Datos del Cliente -->
             <div class="form-section">
-                <!-- Reorganized into Datos del Cliente section -->
-                <div class="section-title">
-                    <i class="fas fa-user"></i>
-                    <span>Datos del Cliente</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombreCliente">Nombre del Cliente</label>
-                        <input type="text" id="nombreCliente" placeholder="Nombre completo">
+                    <div class="section-title">
+                        <i class="fas fa-user"></i>
+                        <span>Datos del Cliente</span>
                     </div>
-                    <div class="form-group">
-                        <label for="direccionCliente">Dirección</label>
-                        <input type="text" id="direccionCliente" placeholder="Calle y número">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreCliente">Nombre</label>
+                            <input type="text" id="nombreCliente" placeholder="Nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="direccionCliente">Dirección</label>
+                            <input type="text" id="direccionCliente" placeholder="Calle y número">
+                        </div>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="coloniaCliente">Colonia</label>
-                        <input type="text" id="coloniaCliente" placeholder="Colonia">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estadoCliente">Estado</label>
+                                                    <select id="estadoCliente" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                <option value="">Selecciona un estado</option>
+                                <option value="Aguascalientes">Aguascalientes</option>
+                                <option value="Baja California">Baja California</option>
+                                <option value="Baja California Sur">Baja California Sur</option>
+                                <option value="Campeche">Campeche</option>
+                                <option value="Chiapas">Chiapas</option>
+                                <option value="Chihuahua">Chihuahua</option>
+                                <option value="Ciudad de México">Ciudad de México</option>
+                                <option value="Coahuila">Coahuila</option>
+                                <option value="Colima">Colima</option>
+                                <option value="Durango">Durango</option>
+                                <option value="Estado de México">Estado de México</option>
+                                <option value="Guanajuato">Guanajuato</option>
+                                <option value="Guerrero">Guerrero</option>
+                                <option value="Hidalgo">Hidalgo</option>
+                                <option value="Jalisco">Jalisco</option>
+                                <option value="Michoacán">Michoacán</option>
+                                <option value="Morelos">Morelos</option>
+                                <option value="Nayarit">Nayarit</option>
+                                <option value="Nuevo León">Nuevo León</option>
+                                <option value="Oaxaca">Oaxaca</option>
+                                <option value="Puebla">Puebla</option>
+                                <option value="Querétaro">Querétaro</option>
+                                <option value="Quintana Roo">Quintana Roo</option>
+                                <option value="San Luis Potosí">San Luis Potosí</option>
+                                <option value="Sinaloa">Sinaloa</option>
+                                <option value="Sonora">Sonora</option>
+                                <option value="Tabasco">Tabasco</option>
+                                <option value="Tamaulipas">Tamaulipas</option>
+                                <option value="Tlaxcala">Tlaxcala</option>
+                                <option value="Veracruz">Veracruz</option>
+                                <option value="Yucatán">Yucatán</option>
+                                <option value="Zacatecas">Zacatecas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipioCliente">Municipio / Ciudad</label>
+                            <input type="text" id="municipioCliente" placeholder="Municipio o Ciudad">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="estadoCliente">Estado</label>
-                        <input type="text" id="estadoCliente" placeholder="Estado">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefonoCliente">Teléfono</label>
+                            <input type="text" id="telefonoCliente" placeholder="Teléfono">
+                        </div>
+                        <div class="form-group">
+                            <label for="correoCliente">Correo</label>
+                            <input type="email" id="correoCliente" placeholder="Correo electrónico">
+                        </div>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cpCliente">Código Postal</label>
-                        <input type="text" id="cpCliente" placeholder="00000">
-                    </div>
-                    <div class="form-group">
-                        <label for="municipioCliente">Municipio</label>
-                        <input type="text" id="municipioCliente" placeholder="Municipio">
-                    </div>
-                </div>
             </div>
 
             <!-- Added Datos del Ejecutivo section -->
@@ -773,7 +814,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tipoProyecto">Tipo de Proyecto</label>
-                        <select id="tipoProyecto">
+                        <select id="tipoProyecto" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                             <option value="">Seleccionar tipo</option>
                             <option value="residencial">Residencial</option>
                             <option value="comercial">Comercial</option>
@@ -782,64 +823,133 @@
                     </div>
                     <div class="form-group">
                         <label for="tipoTarifa">Tipo de Tarifa</label>
-                        <input type="text" id="tipoTarifa" placeholder="Ej: DAC, GDMTH, etc.">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="calleProyecto">Calle del Proyecto</label>
-                        <input type="text" id="calleProyecto" placeholder="Calle y número">
-                    </div>
-                    <div class="form-group">
-                        <label for="coloniaProyecto">Colonia</label>
-                        <input type="text" id="coloniaProyecto" placeholder="Colonia">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="estadoProyecto">Estado del Proyecto</label>
-                        <select id="estadoProyecto" onchange="actualizarHSP()">
-                            <option value="">Seleccionar estado</option>
+                        <select id="tipoTarifa" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                            <option value="">Selecciona una tarifa</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="cpProyecto">Código Postal</label>
-                        <input type="text" id="cpProyecto" placeholder="00000">
+                        <label for="notaProyecto">Nota</label>
+                        <input type="text" id="notaProyecto" placeholder="Nota del proyecto">
+                    </div>
+                    <div class="form-group">
+                        <label for="estadoProyecto">Estado</label>
+                        <select id="estadoProyecto" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                            <option value="">Selecciona un estado</option>
+                            <option value="Aguascalientes">Aguascalientes</option>
+                            <option value="Baja California">Baja California</option>
+                            <option value="Baja California Sur">Baja California Sur</option>
+                            <option value="Campeche">Campeche</option>
+                            <option value="Chiapas">Chiapas</option>
+                            <option value="Chihuahua">Chihuahua</option>
+                            <option value="Ciudad de México">Ciudad de México</option>
+                            <option value="Coahuila">Coahuila</option>
+                            <option value="Colima">Colima</option>
+                            <option value="Durango">Durango</option>
+                            <option value="Estado de México">Estado de México</option>
+                            <option value="Guanajuato">Guanajuato</option>
+                            <option value="Guerrero">Guerrero</option>
+                            <option value="Hidalgo">Hidalgo</option>
+                            <option value="Jalisco">Jalisco</option>
+                            <option value="Michoacán">Michoacán</option>
+                            <option value="Morelos">Morelos</option>
+                            <option value="Nayarit">Nayarit</option>
+                            <option value="Nuevo León">Nuevo León</option>
+                            <option value="Oaxaca">Oaxaca</option>
+                            <option value="Puebla">Puebla</option>
+                            <option value="Querétaro">Querétaro</option>
+                            <option value="Quintana Roo">Quintana Roo</option>
+                            <option value="San Luis Potosí">San Luis Potosí</option>
+                            <option value="Sinaloa">Sinaloa</option>
+                            <option value="Sonora">Sonora</option>
+                            <option value="Tabasco">Tabasco</option>
+                            <option value="Tamaulipas">Tamaulipas</option>
+                            <option value="Tlaxcala">Tlaxcala</option>
+                            <option value="Veracruz">Veracruz</option>
+                            <option value="Yucatán">Yucatán</option>
+                            <option value="Zacatecas">Zacatecas</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="municipioProyecto">Municipio</label>
-                        <input type="text" id="municipioProyecto" placeholder="Municipio">
+                        <label for="municipioProyecto">Ciudad / Municipio</label>
+                        <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio">
+                    </div>
+                    <div class="form-group">
+                        <label for="zonaCFE">Zona CFE</label>
+                        <input type="text" id="zonaCFE" placeholder="Zona CFE">
                     </div>
                 </div>
-            </div>
-
-            <!-- Datos de consumo Energético -->
-            <div class="form-section">
-                <div class="section-title">
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="requerimientosProyecto">Requerimientos</label>
+                        <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto" style="width:100%;">
+                    </div>
+                </div>
+                <!-- Consumo -->
+                <div class="section-title" style="margin-top:24px;">
                     <i class="fas fa-chart-line"></i>
                     <span>Datos de Consumo Energético</span>
                 </div>
-                <div class="form-group">
-                    <label for="tipoPeriodo">Período de Facturación</label>
-                    <select id="tipoPeriodo" onchange="updateConsumoFields()">
-                        <option value="mensual">Mensual (12 valores)</option>
-                        <option value="bimestral">Bimestral (6 valores)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Consumo Histórico (kWh)</label>
-                    <div id="consumoInputs" class="consumo-grid">
-                        <!-- Se genera dinámicamente -->
+                    <div style="display: flex; gap: 2rem; align-items: flex-start;">
+                        <div style="flex:2; min-width:0; display:flex; flex-direction:column; justify-content:flex-start;">
+                            <div style="margin-bottom:1rem;">
+                                <label for="tipoPeriodo" style="display:block; font-weight:500; font-size:0.87rem; color:#1a202c; margin-bottom:0.32rem;">Período de Facturación</label>
+                                <select id="tipoPeriodo" onchange="generarTablaConsumo()" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                    <option value="mensual">Mensual (12 valores)</option>
+                                    <option value="bimestral">Bimestral (6 valores)</option>
+                                </select>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; font-size:0.83rem; text-align:center;">
+                            <thead style="background:#f0fdf4;">
+                                <tr>
+                                    <th style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:center;">Mes/Bim</th>
+                                    <th style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:center;">$ Tarifa</th>
+                                    <th style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:center;">Consumo / kW</th>
+                                    <th style="padding:8px; border-bottom:1px solid #e2e8f0; text-align:center;">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaConsumoBody">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                            <tfoot style="background:#f7fafc;">
+                                <tr>
+                                    <td style="padding:8px; font-weight:bold; text-align:center;">Total / Prom</td>
+                                    <td id="totalTarifa" style="padding:8px; text-align:center;"></td>
+                                    <td id="totalConsumo" style="padding:8px; text-align:center;"></td>
+                                    <td id="totalImporte" style="padding:8px; text-align:center;"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
-                </div>
-                
-                <!-- Removed checkbox, datos de pago always visible -->
-                <div class="form-group">
-                    <label>Pagos por Período ($)</label>
-                    <div id="pagoInputs" class="consumo-grid">
-                        <!-- Se genera dinámicamente -->
+                    <div style="flex:1; background:#f7fafc; border-radius:8px; padding:1rem; min-width:220px; align-self:auto; margin-top:72px;">
+                        <div style="font-weight:600; margin-bottom:14px; font-size:1.05rem; color:#1a202c; letter-spacing:0.5px;">Consumo</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="kwhMesResumen">kWh mes:</label>
+                                <input type="text" id="kwhMesResumen" readonly placeholder="kWh mes">
+                            </div>
+                            <div class="form-group">
+                                <label for="porcentajeAhorroResumen">% de ahorro:</label>
+                                <input type="text" id="porcentajeAhorroResumen" readonly placeholder="% de ahorro">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tarifaPromResumen">Tarifa prom:</label>
+                                <input type="text" id="tarifaPromResumen" readonly placeholder="Tarifa prom">
+                            </div>
+                            <div class="form-group">
+                                <label for="tempMinResumen">Temp min:</label>
+                                <input type="text" id="tempMinResumen" readonly placeholder="Temp min">
+                            </div>
+                            <div class="form-group">
+                                <label for="tempMaxResumen">Temp max:</label>
+                                <input type="text" id="tempMaxResumen" readonly placeholder="Temp max">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1019,6 +1129,104 @@
     </div>
 
     <script>
+        // Generar tabla de consumo dinámica
+        function generarTablaConsumo() {
+            const tipoPeriodo = document.getElementById('tipoPeriodo').value;
+            const tablaBody = document.getElementById('tablaConsumoBody');
+            const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const bimestres = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
+            tablaBody.innerHTML = '';
+            let totalTarifa = 0, totalConsumo = 0, totalImporte = 0, count = 0;
+            const periodos = tipoPeriodo === 'mensual' ? meses : bimestres;
+            for (let i = 0; i < periodos.length; i++) {
+                tablaBody.innerHTML += `
+                    <tr>
+                        <td style='padding:6px;'>${periodos[i]}</td>
+                        <td style='padding:6px;'><input type='number' id='tarifa${i}' style='width:80px;'></td>
+                        <td style='padding:6px;'><input type='number' id='consumo${i}' style='width:80px;'></td>
+                        <td style='padding:6px;'><input type='number' id='importe${i}' style='width:80px;'></td>
+                    </tr>`;
+            }
+            // Actualizar totales al cambiar inputs
+            tablaBody.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', actualizarTotalesConsumo);
+            });
+            actualizarTotalesConsumo();
+        }
+
+        function actualizarTotalesConsumo() {
+            const tipoPeriodo = document.getElementById('tipoPeriodo').value;
+            const n = tipoPeriodo === 'mensual' ? 12 : 6;
+            let totalTarifa = 0, totalConsumo = 0, totalImporte = 0, count = 0;
+            for (let i = 0; i < n; i++) {
+                const tarifa = parseFloat(document.getElementById('tarifa'+i)?.value) || 0;
+                const consumo = parseFloat(document.getElementById('consumo'+i)?.value) || 0;
+                const importe = parseFloat(document.getElementById('importe'+i)?.value) || 0;
+                if (tarifa) { totalTarifa += tarifa; count++; }
+                totalConsumo += consumo;
+                totalImporte += importe;
+            }
+            document.getElementById('totalTarifa').textContent = count ? (totalTarifa/count).toFixed(2) : '0.00';
+            document.getElementById('totalConsumo').textContent = totalConsumo.toFixed(2);
+            document.getElementById('totalImporte').textContent = totalImporte.toFixed(2);
+        }
+
+        // Inicializar tabla al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            generarTablaConsumo();
+        });
+        // Tarifas por tipo de proyecto
+        const tarifasPorProyecto = {
+            residencial: [
+                {grupo: "Tarifa 1", subcategorias: ["1", "1A", "1B", "1C", "1D", "1E", "1F"]},
+                {grupo: "Tarifa DAC", subcategorias: ["DAC (Doméstica de Alto Consumo)"]}
+            ],
+            comercial: [
+                {grupo: "PDBT", subcategorias: ["Pequeña Demanda en Baja Tensión"]},
+                {grupo: "GDBT", subcategorias: ["Gran Demanda en Baja Tensión"]},
+                {grupo: "APBT", subcategorias: ["Alumbrado Público en Baja Tensión"]},
+                {grupo: "RABT", subcategorias: ["Riego Agrícola en Baja Tensión"]}
+            ],
+            industrial: [
+                {grupo: "GDMTH", subcategorias: ["Gran Demanda en Media Tensión Horaria"]},
+                {grupo: "GDMTO", subcategorias: ["Gran Demanda en Media Tensión Ordinaria"]},
+                {grupo: "RAMT", subcategorias: ["Riego Agrícola en Media Tensión"]},
+                {grupo: "DIST", subcategorias: ["Demanda Industrial en Subtransmisión"]},
+                {grupo: "DIT", subcategorias: ["Demanda Industrial en Transmisión"]}
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoProyectoSelect = document.getElementById('tipoProyecto');
+            const tipoTarifaSelect = document.getElementById('tipoTarifa');
+
+            function actualizarTarifas() {
+                const tipo = tipoProyectoSelect.value;
+                tipoTarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
+                if (tarifasPorProyecto[tipo]) {
+                    tarifasPorProyecto[tipo].forEach(grupo => {
+                        if (grupo.subcategorias.length > 1) {
+                            // Solo mostrar subcategorías, sin optgroup ni título
+                            grupo.subcategorias.forEach(sub => {
+                                const opt = document.createElement('option');
+                                opt.value = sub;
+                                opt.textContent = sub;
+                                tipoTarifaSelect.appendChild(opt);
+                            });
+                        } else {
+                            // Grupo sin subcategorías
+                            const opt = document.createElement('option');
+                            opt.value = grupo.grupo;
+                            opt.textContent = grupo.grupo + (grupo.subcategorias[0] ? ` - ${grupo.subcategorias[0]}` : '');
+                            tipoTarifaSelect.appendChild(opt);
+                        }
+                    });
+                }
+            }
+
+            tipoProyectoSelect.addEventListener('change', actualizarTarifas);
+            actualizarTarifas();
+        });
         let hspData = {};
         let csvData = [];
 
