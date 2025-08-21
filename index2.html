@@ -700,6 +700,7 @@
                 <i class="fas fa-map-marker-alt"></i>
                 <span>Cancún | Playa del Carmen | Tulum</span>
             </div>
+
             <div class="contact-item">
                 <i class="fas fa-phone-alt"></i>
                 <span>984 231 2287</span>
@@ -958,33 +959,213 @@
 
             <!-- Especificaciones del panel -->
             <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-solar-panel"></i>
-                    <span>Especificaciones del Panel</span>
+                <div class="section-title" style="margin-bottom:1.2rem;">
+                    <i class="fas fa-drafting-compass"></i>
+                    <span>Diseño y dimensionamiento</span>
                 </div>
-                <!-- Only keeping potencia del panel -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="potenciaPanel">Potencia (W)</label>
-                        <input type="number" id="potenciaPanel" placeholder="565" value="565">
+                
+                <style>
+                .panel-spec-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.2rem 2.2rem;
+                    position: relative;
+                }
+                .panel-spec-grid::before {
+                    content: "";
+                    position: absolute;
+                    top: 0.2rem;
+                    bottom: 0.2rem;
+                    left: 50%;
+                    width: 1px;
+                    background: #e2e8f0;
+                    z-index: 1;
+                }
+                .panel-spec-grid > div {
+                    position: relative;
+                    z-index: 2;
+                }
+                .panel-spec-row {
+                    display: flex;
+                    gap: 1rem;
+                }
+                .panel-checkbox-group {
+                    display: flex;
+                    gap: 1.2rem;
+                    align-items: center;
+                }
+                .panel-checkbox-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.45rem;
+                    font-weight: 400;
+                }
+                .panel-divider {
+                    border: none;
+                    border-top: 1px solid #e2e8f0;
+                    margin: 1.1rem 0 1.1rem 0;
+                }
+                </style>
+                <div class="panel-spec-grid">
+                    <div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="potenciaPanel">Potencia Panel</label>
+                                <input type="number" id="potenciaPanel" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="marcaPanel">Marca</label>
+                                <input type="text" id="marcaPanel" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="modeloPanel">Modelo</label>
+                                <input type="text" id="modeloPanel" placeholder="">
+                            </div>
+                        </div>
+                        <hr class="panel-divider">
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="inversorPanel">Inversor</label>
+                                <select id="inversorPanel" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                    <option value="">Seleccione</option>
+                                    <option value="hibrido">Híbrido</option>
+                                    <option value="central">Central</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="potenciaInversor">Potencia</label>
+                                <input type="number" id="potenciaInversor" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Mantenimiento</label>
+                                <div class="panel-checkbox-group">
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoSi">Sí</label>
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoNo">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="panel-divider">
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Transformador</label>
+                                <div class="panel-checkbox-group">
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="transformadorSi">Sí</label>
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="transformadorNo">No</label>
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya tiene</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="potenciaTransformador">Potencia del transformador</label>
+                                <input type="number" id="potenciaTransformador" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>¿Compartido?</label>
+                                <div class="panel-checkbox-group">
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="compartidoSi">Sí</label>
+                                    <label class="panel-checkbox-label"><input type="checkbox" id="compartidoNo">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="numModulos"># módulos</label>
+                                <input type="number" id="numModulos" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="numInversores"># inversor</label>
+                                <input type="number" id="numInversores" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="potenciaTotalInstalada">Potencia total instalada</label>
+                                <input type="number" id="potenciaTotalInstalada" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="numEstructura"># de estructura</label>
+                                <input type="number" id="numEstructura" placeholder="">
+                            </div>
+                        </div>
+                                                                        <hr class="panel-divider">
+
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="instalacionElectrica">Instalación eléctrica</label>
+                                <select id="instalacionElectrica" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                    <option value="">Seleccione</option>
+                                    <option value="bif">Bifasica</option>
+                                    <option value="monof">Monofasica</option>
+                                    <option value="tet">Trifasica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="numHilos"># de hilos</label>
+                                <select id="numHilos" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                    <option value="">Seleccione</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="voltajeOperacion">Voltaje oper.</label>
+                                <select id="voltajeOperacion" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                                    <option value="">Seleccione</option>
+                                    <option value="220">220</option>
+                                    <option value="440">440</option>
+                                    <option value="480">480</option>
+                                </select>
+                            </div>
+                        </div>
+                                                                        <hr class="panel-divider">
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="areaAprox">Área aprox</label>
+                                <input type="number" id="areaAprox" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="ahorroCO2">Ahorro CO2</label>
+                                <input type="number" id="ahorroCO2" placeholder="">
+                            </div>
+                        </div>
+                        <div class="panel-spec-row">
+                            <div class="form-group" style="flex:1;">
+                                <label for="cables">Árboles</label>
+                                <input type="text" id="cables" placeholder="">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Configuración del sistema -->
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-cogs"></i>
-                    <span>Configuración del Sistema</span>
-                </div>
-                <!-- Only keeping area aproximada requerida -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="areaAproximada">Área Aproximada Requerida (m²)</label>
-                        <input type="number" id="areaAproximada" placeholder="40" value="40">
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- Botón de cálculo -->
             <button class="calculate-btn" onclick="calcularSistemaSolar()">
