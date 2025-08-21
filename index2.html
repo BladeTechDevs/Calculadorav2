@@ -700,7 +700,6 @@
                 <i class="fas fa-map-marker-alt"></i>
                 <span>Cancún | Playa del Carmen | Tulum</span>
             </div>
-
             <div class="contact-item">
                 <i class="fas fa-phone-alt"></i>
                 <span>984 231 2287</span>
@@ -1161,6 +1160,74 @@
                                 <input type="text" id="cables" placeholder="">
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generación y Ahorros (card aparte, layout imagen) -->
+                <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
+                    <div class="section-title" style="margin-bottom:1.2rem;">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Generación y Ahorros</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
+                        <div>
+                            <div class="form-group" style="margin-bottom:0.7rem;">
+                                <label for="generacionAnual" style="font-weight:500;">Generación anual aprox:</label>
+                                <input type="number" id="generacionAnual" style="width:100%;" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="porcentajeGeneracion" style="font-weight:500;">Porcentaje de generación:</label>
+                                <input type="number" id="porcentajeGeneracion" style="width:100%;" placeholder="">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group" style="margin-bottom:0.7rem;">
+                                <label for="inversionMXN" style="font-weight:500;">Inversión (MXN):</label>
+                                <input type="number" id="inversionMXN" style="width:100%;" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="roi" style="font-weight:500;">ROI:</label>
+                                <input type="number" id="roi" style="width:100%;" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; padding:1.1rem; text-align:center; font-size:1.05rem; color:#64748b;">
+                        <span>Gráfico (Impacto de la generación en el consumo)</span>
+                        <!-- Aquí irá el gráfico -->
+                    </div>
+                </div>
+
+                 <!-- Cotización P.U. (card aparte, layout imagen) -->
+            <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
+                <div class="section-title" style="margin-bottom:1.2rem;">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Cotización P.U.</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
+                    <div>
+                        <div class="form-group"><label for="panel" style="font-weight:500;">Panel:</label><input type="number" id="panel" style="width:100%;"></div>
+                        <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input type="number" id="inversor" style="width:100%;"></div>
+                        <div class="form-group"><label for="mantenimiento" style="font-weight:500;">Mantenimiento:</label><input type="number" id="mantenimiento" style="width:100%;"></div>
+                        <div class="form-group"><label for="estructura" style="font-weight:500;">Estructura:</label><input type="number" id="estructura" style="width:100%;"></div>
+                        <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input type="number" id="materiales" style="width:100%;"></div>
+                        <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input type="number" id="instalacion" style="width:100%;"></div>
+                        <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta (Pog):</label><input type="number" id="carpeta" style="width:100%;"></div>
+                    </div>
+                    <div>
+                        <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input type="number" id="flete" style="width:100%;"></div>
+                        <div class="form-group"><label for="interconexion" style="font-weight:500;">Interconexión:</label><input type="number" id="interconexion" style="width:100%;"></div>
+                        <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input type="number" id="uve" style="width:100%;"></div>
+                        <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input type="number" id="uie" style="width:100%;"></div>
+                        <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input type="number" id="medidor" style="width:100%;"></div>
+                    </div>
+                    <div>
+                        <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number" id="profit" style="width:100%;"></div>
+                        <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number" id="watts" style="width:100%;"></div>
+                        <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
+                        <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number" id="subtotal" style="width:100%;"></div>
+                        <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input type="number" id="iva" style="width:100%;"></div>
+                        <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input type="number" id="total" style="width:100%;"></div>
                     </div>
                 </div>
             </div>
