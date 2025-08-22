@@ -1064,3 +1064,391 @@ function actualizarTotales() {
   document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`
   document.getElementById("importeTotal").textContent = `$${totalImporte.toFixed(2)}`
 }
+
+async function exportToBasePdf() {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+
+  // === 0) UI de carga ===
+  const loading = document.getElementById("loading");
+  const loadingText = document.querySelector(".loading-text");
+  const loadingSub = document.querySelector(".loading-subtext");
+  if (loading) {
+    loading.style.display = "flex";
+    loadingText.textContent = "Generando PDF";
+    loadingSub.textContent = "Escribiendo en Base.pdf...";
+  }
+
+  try {
+    // === 1) Recolectar datos del formulario y cálculos ===
+    // Si aún no has presionado "Calcular", forzamos un cálculo rápido para tener métricas
+    try { calcularSistemaSolar(); } catch (e) {}
+
+    const getVal = (id, fallback = "") => (document.getElementById(id)?.value ?? fallback).toString().trim();
+    const getTxt = (id, fallback = "") => (document.getElementById(id)?.textContent ?? fallback).toString().trim();
+
+    const datos = {
+      // Cliente
+      nombreCliente: getVal("nombreCliente"),
+      direccionCliente: getVal("direccionCliente"),
+      estadoCliente: getVal("estadoCliente"),
+      municipioCliente: getVal("municipioCliente"),
+      telefonoCliente: getVal("telefonoCliente"),
+      correoCliente: getVal("correoCliente"),
+      // Ejecutivo
+      nombreEjecutivo: getVal("nombreEjecutivo"),
+      correoEjecutivo: getVal("correoEjecutivo"),
+      // Proyecto
+      tipoProyecto: getVal("tipoProyecto"),
+      tipoTarifa: getVal("tipoTarifa"),
+      estadoProyecto: getVal("estadoProyecto"),
+      municipioProyecto: getVal("municipioProyecto"),
+      zonaCFE: getVal("zonaCFE"),
+      notaProyecto: getVal("notaProyecto"),
+      requerimientosProyecto: getVal("requerimientosProyecto"),
+      // Métricas ya pintadas en UI
+      consumoAnual: getTxt("consumoAnual", "0 kWh"),
+      consumoMensual: getTxt("consumoMensual", "0 kWh"),
+      consumoDiario: getTxt("consumoDiario", "0 kWh"),
+      importeTotal: getTxt("importeTotal", "$0"),
+      importePromedio: getTxt("importePromedio", "$0"),
+      tarifaPromedio: getTxt("tarifaPromedio", "$0"),
+      potenciaNecesaria: getTxt("potenciaNecesaria", "0 kW"),
+      numeroModulos: getTxt("numeroModulos", "0"),
+      generacionAnual: getTxt("generacionAnual", "0 kWh"),
+      potenciaInstalada: getTxt("potenciaInstalada", "0 kW"),
+      hsp: getTxt("hsp", "0 h"),
+      ahorroCO2: getTxt("ahorroCO2", "0 t"),
+      porcentajeAhorro: getTxt("porcentajeAhorro", "0%"),
+      tempMin: getTxt("tempMin", "-"),
+      tempMax: getTxt("tempMax", "-"),
+      arboles: getTxt("arboles", "0"),
+      potenciaPanel: getVal("potenciaPanel", "—"),
+      areaAprox: getVal("areaAprox", "—"),
+      fechaHoy: new Date().toLocaleDateString("es-MX"),
+    };
+
+    // Construye arrays de detalle (consumos/importes/tarifas) desde inputs
+    const tipoPeriodo = document.getElementById("tipoPeriodo")?.value || "mensual";
+    const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
+    const etiquetas = tipoPeriodo === "mensual"
+      ? ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+      : ["Bim 1","Bim 2","Bim 3","Bim 4","Bim 5","Bim 6"];
+
+    const filasDetalle = [];
+    for (let i = 0; i < numPeriodos; i++) {
+      const c = parseFloat(document.getElementById(`consumo${i}`)?.value || "0");
+      const m = parseFloat(document.getElementById(`importe${i}`)?.value || "0");
+      const t = c > 0 ? m / c : 0;
+      filasDetalle.push([
+        etiquetas[i],
+        `${c.toFixed(0)} kWh`,
+        `$${m.toFixed(2)}`,
+        `$${t.toFixed(3)}`
+      ]);
+    }
+
+    // === 2) Cargar Base.pdf ===
+    // const baseBytes = await fetch("./Base.pdf").then(r => r.arrayBuffer());
+    const baseBytes = await obtenerBasePdfBytes();
+
+    const pdfDoc = await PDFDocument.load(baseBytes);
+
+    // Tipografías estándar
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // === 3) Helpers de layout ===
+    const mm = v => v * 2.834645669; // mm -> pt
+    const firstTop = mm(30); // 3 cm en primera hoja
+    const nextTop = mm(20);  // 2 cm top en siguientes
+    const bottom = mm(20);   // 2 cm bottom en todas
+    const left = mm(20);     // margen izq recomendado
+    const right = mm(20);    // margen der recomendado
+
+    let pageIndex = 0;
+    let page = pdfDoc.getPage(0) || pdfDoc.addPage();
+    let { width: PW, height: PH } = page.getSize();
+    let y = PH - firstTop;
+    const contentWidth = PW - left - right;
+
+    const colorText = rgb(0.12, 0.14, 0.18);
+    const colorLabel = rgb(0.35, 0.4, 0.45);
+    const green = rgb(0.45, 0.70, 0.28);
+
+    const fontSize = 10;
+    const lh = 14; // line height
+
+    const ensure = (h) => {
+      if (y - h < bottom) newPage();
+    };
+    const newPage = () => {
+      pageIndex++;
+      page = pdfDoc.addPage([PW, PH]); // mismo tamaño que la primera
+      y = PH - nextTop;
+    };
+
+    const drawTitle = (txt) => {
+      ensure(lh * 2);
+      page.drawText(txt, { x: left, y, size: 12, font: fontBold, color: colorText });
+      y -= lh;
+      page.drawLine({
+        start: { x: left, y: y - 4 },
+        end: { x: left + contentWidth, y: y - 4 },
+        thickness: 1,
+        color: green
+      });
+      y -= (lh - 4);
+    };
+
+    const widthOf = (t, size = fontSize, f = font) => f.widthOfTextAtSize(t, size);
+    const wrapText = (text, maxWidth, size = fontSize, f = font) => {
+      const words = (text || "").toString().split(/\s+/);
+      const lines = [];
+      let line = "";
+      words.forEach(w => {
+        const test = line ? line + " " + w : w;
+        if (widthOf(test, size, f) <= maxWidth) {
+          line = test;
+        } else {
+          if (line) lines.push(line);
+          line = w;
+        }
+      });
+      if (line) lines.push(line);
+      return lines.length ? lines : [""];
+    };
+
+    const drawLabelValue = (label, value) => {
+      const maxW = contentWidth;
+      const lines = wrapText(`${value}`, maxW, fontSize, font);
+      const needed = lh * (1 + lines.length);
+      ensure(needed);
+      page.drawText(label, { x: left, y, size: fontSize, font: fontBold, color: colorLabel });
+      y -= lh;
+      lines.forEach(line => {
+        page.drawText(line, { x: left, y, size: fontSize, font, color: colorText });
+        y -= lh;
+      });
+      y -= 2;
+    };
+
+    const drawCols = (pairs /* [[label, value], ...] */) => {
+      // 2 columnas
+      const colW = (contentWidth - mm(6)) / 2;
+      // Medir alto requerido (máx # de líneas en cualquiera)
+      const blockHeights = pairs.map(([label, value]) => {
+        const lines = wrapText(String(value || ""), colW, fontSize, font);
+        return lh * (1 + lines.length) + 2;
+      });
+      const needed = Math.max(...blockHeights);
+      ensure(needed);
+
+      const x1 = left;
+      const x2 = left + colW + mm(6);
+      let yStart = y;
+
+      const drawBlock = (x, label, value) => {
+        page.drawText(label, { x, y: yStart, size: fontSize, font: fontBold, color: colorLabel });
+        let yy = yStart - lh;
+        wrapText(String(value || ""), colW, fontSize, font).forEach(line => {
+          page.drawText(line, { x, y: yy, size: fontSize, font, color: colorText });
+          yy -= lh;
+        });
+      };
+
+      const [a, b] = pairs;
+      if (a) drawBlock(x1, a[0], a[1]);
+      if (b) drawBlock(x2, b[0], b[1]);
+      y = yStart - needed;
+    };
+
+    const drawTable = (headers, rows) => {
+      const paddingH = 4; // padding vertical
+      const rowH = lh + paddingH; // alto de fila
+      const cols = headers.length;
+      // Proporciones: [20, 25, 25, 30] => suma 100
+      const pcts = [20, 25, 25, 30];
+      const colWidths = pcts.map(p => (contentWidth * p) / 100);
+
+      // Header
+      ensure(rowH + 6);
+      let x = left;
+      page.drawRectangle({
+        x: left, y: y - rowH + 2, width: contentWidth, height: rowH,
+        color: rgb(0.93, 0.98, 0.94), borderColor: green, borderWidth: 0.5
+      });
+      for (let i = 0; i < cols; i++) {
+        page.drawText(headers[i], { x: x + 2, y: y - lh + 6, size: fontSize, font: fontBold, color: colorText });
+        x += colWidths[i];
+      }
+      y -= rowH + 2;
+
+      // Filas
+      rows.forEach(r => {
+        ensure(rowH);
+        let xx = left;
+        for (let i = 0; i < cols; i++) {
+          page.drawText(String(r[i] ?? ""), { x: xx + 2, y: y - lh + 6, size: fontSize, font, color: colorText });
+          xx += colWidths[i];
+        }
+        y -= rowH;
+        // salto de página: reimprimir header
+        if (y - rowH < bottom) {
+          newPage();
+          // header otra vez
+          let hx = left;
+          page.drawRectangle({
+            x: left, y: y - rowH + 2, width: contentWidth, height: rowH,
+            color: rgb(0.93, 0.98, 0.94), borderColor: green, borderWidth: 0.5
+          });
+          for (let i = 0; i < cols; i++) {
+            page.drawText(headers[i], { x: hx + 2, y: y - lh + 6, size: fontSize, font: fontBold, color: colorText });
+            hx += colWidths[i];
+          }
+          y -= rowH + 2;
+        }
+      });
+      y -= 4;
+    };
+
+    const drawCanvasImageIfAny = async (canvasId, widthMM, heightMM) => {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const pngBytes = dataURLToUint8Array(dataUrl);
+        const png = await pdfDoc.embedPng(pngBytes);
+        const w = mm(widthMM), h = mm(heightMM);
+        ensure(h + 8);
+        page.drawImage(png, { x: left, y: y - h, width: w, height: h });
+        y -= h + 6;
+      } catch (e) {
+        console.warn("No se pudo insertar la gráfica:", e);
+      }
+    };
+    const dataURLToUint8Array = (dataURL) => {
+      const base64 = dataURL.split(",")[1];
+      const raw = atob(base64);
+      const arr = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+      return arr;
+    };
+
+    // === 4) Componer el documento dentro del área útil ===
+    // Encabezado informativo
+    drawTitle("COTIZACIÓN / ANÁLISIS SFVI");
+
+    drawCols(
+      ["Cliente", `${datos.nombreCliente || "—"}\n${datos.direccionCliente || "—"}\n${datos.municipioCliente || "—"}, ${datos.estadoCliente || "—"}\nTel: ${datos.telefonoCliente || "—"}\nCorreo: ${datos.correoCliente || "—"}`],
+      ["Ejecutivo", `${datos.nombreEjecutivo || "—"}\n${datos.correoEjecutivo || "—"}\nFecha: ${datos.fechaHoy}`]
+    );
+
+    drawTitle("DATOS DEL PROYECTO");
+    drawCols(
+      ["Tipo de proyecto", datos.tipoProyecto || "—"],
+      ["Tarifa", datos.tipoTarifa || "—"]
+    );
+    drawCols(
+      ["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
+      ["Zona CFE", datos.zonaCFE || "—"]
+    );
+    if (datos.notaProyecto) drawLabelValue("Nota", datos.notaProyecto);
+    if (datos.requerimientosProyecto) drawLabelValue("Requerimientos", datos.requerimientosProyecto);
+
+    drawTitle("MÉTRICAS CLAVE");
+    drawCols(
+      ["Consumo anual", datos.consumoAnual],
+      ["Consumo mensual", datos.consumoMensual]
+    );
+    drawCols(
+      ["Consumo diario", datos.consumoDiario],
+      ["Tarifa promedio", datos.tarifaPromedio]
+    );
+    drawCols(
+      ["Gasto anual", datos.importeTotal],
+      ["% Ahorro estimado", datos.porcentajeAhorro]
+    );
+    drawCols(
+      ["HSP promedio", datos.hsp],
+      ["Ahorro CO₂", datos.ahorroCO2 + "/año"]
+    );
+
+    drawTitle("DISEÑO DEL SISTEMA");
+    drawCols(
+      ["Potencia necesaria", datos.potenciaNecesaria],
+      ["Potencia instalada", datos.potenciaInstalada]
+    );
+    drawCols(
+      ["N.º de módulos", datos.numeroModulos],
+      ["Potencia por panel", `${datos.potenciaPanel} W`]
+    );
+    drawCols(
+      ["Generación anual", datos.generacionAnual],
+      ["Área requerida", `${datos.areaAprox} m²`]
+    );
+
+    // (Opcional) insertar la gráfica si existe
+    await drawCanvasImageIfAny("irradiacionChart", 160 /*mm*/, 80 /*mm*/);
+
+    drawTitle("ANÁLISIS DETALLADO POR PERÍODO");
+    drawTable(["Período", "Consumo (kWh)", "Importe ($)", "Tarifa ($/kWh)"], filasDetalle);
+
+    // === 5) Guardar y descargar ===
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `HexaSolar_Cotizacion_${(datos.nombreCliente || "Cliente").replace(/\s+/g, "_")}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error generando PDF base:", err);
+    alert("No se pudo generar el PDF. Revisa la ruta de Base.pdf y vuelve a intentar.");
+  } finally {
+    if (loading) loading.style.display = "none";
+  }
+}
+
+// Guarda los bytes del PDF base en memoria (una sola vez)
+let basePdfBytes = null;
+
+async function obtenerBasePdfBytes() {
+  // Si ya lo cargamos antes, reusar
+  if (basePdfBytes) return basePdfBytes;
+
+  // Si estás sirviendo por http/https, intentamos fetch primero (no file://)
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    try {
+      const resp = await fetch("Base.pdf");
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      basePdfBytes = await resp.arrayBuffer();
+      return basePdfBytes;
+    } catch (_) {
+      /* ignorar y caer al selector */
+    }
+  }
+
+  // Fallback: pedir el archivo local con un <input type="file">
+  return new Promise((resolve, reject) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/pdf";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return reject(new Error("No se seleccionó archivo"));
+      const reader = new FileReader();
+      reader.onload = () => {
+        basePdfBytes = reader.result;   // ArrayBuffer
+        resolve(basePdfBytes);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    };
+    input.click();
+  });
+}
+

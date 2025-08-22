@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
 </head>
 <body>
     <!-- Barra superior -->
@@ -608,15 +610,21 @@
                 </div>
 
                 <!-- Botones de exportar -->
-                <button class="export-btn" onclick="exportResultsToPdf()">
+                <!-- <button class="export-btn" onclick="exportResultsToPdf()">
                     <i class="fas fa-file-pdf"></i>
                     <span>Exportar Reporte PDF</span>
-                </button>
+                </button> -->
                 
                 <button class="export-btn" onclick="exportQuotationToPdf()" style="margin-top: 1rem; background: linear-gradient(135deg, #73b248 0%, #106e3a 100%);">
                     <i class="fas fa-file-contract"></i>
                     <span>Generar Cotización SFVI</span>
                 </button>
+
+                <button class="export-btn" onclick="exportToBasePdf()" style="margin-top: 1rem; background: linear-gradient(135deg, #73b248 0%, #106e3a 100%);">
+  <i class="fas fa-file-contract"></i>
+  <span>Generar Cotización SFVI (Base.pdf)</span>
+</button>
+
             </div>
         </div>
     </div>
