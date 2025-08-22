@@ -97,12 +97,12 @@ async function exportToBasePdf() {
     let contentWidth = PW - left - right
     let y = PH - firstTop
 
-    // Colores
+    // Colores – marca #1E924B
     const ink    = rgb(0.12, 0.12, 0.12)
     const mute   = rgb(0.45, 0.45, 0.45)
-    const prime  = rgb(0.10, 0.55, 0.45)
-    const primeD = rgb(0.07, 0.42, 0.34)
-    const primeL = rgb(0.90, 0.96, 0.94)
+    const prime  = rgb(0x1E/255, 0x92/255, 0x4B/255) // #1E924B
+    const primeD = rgb(0x15/255, 0x72/255, 0x3A/255) // más oscuro
+    const primeL = rgb(0.93, 0.98, 0.95)             // tinte claro
     const grayL  = rgb(0.96, 0.96, 0.96)
     const white  = rgb(1, 1, 1)
 
@@ -285,11 +285,14 @@ async function exportToBasePdf() {
       y -= 1
     }
 
-    // Gráfica desde canvas (centrada + espacio extra)
+    // === Ajuste de “Promedio anual” en la gráfica (Chart.js) + captura centrada
     const drawCanvasImageIfAny = async (canvasId, widthMM, heightMM) => {
       const canvas = document.getElementById(canvasId)
       if (!canvas) return
       try {
+        // Intento: bajar el texto de “Promedio anual” si usas Chart.js
+        try { shiftAverageLabelDown(canvas) } catch (_) {}
+
         const dataUrl = canvas.toDataURL("image/png")
         const pngBytes = dataURLToUint8Array(dataUrl)
         const png = await pdfDoc.embedPng(pngBytes)
@@ -302,9 +305,8 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
-    // === NUEVO: Términos y Condiciones (compacto)
+    // === Términos y Condiciones (compacto)
     const drawTerms = () => {
-      // textos combinados en una sola tabla (sin folio)
       const items = [
         "La actual cotización es PRELIMINAR, previa a un levantamiento técnico a detalle (precio sujeto a cambio).",
         "El suministro de equipos es proporcionado por el contratista con entrega en sitio (estructura, inversor, módulos).",
@@ -318,11 +320,10 @@ async function exportToBasePdf() {
         "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo."
       ]
 
-      const fsTiny = 7 // más chico que el resto
+      const fsTiny = 7
       const lhTiny = 10
       const pad = 8
 
-      // Título barra completa
       const title = "TÉRMINOS Y CONDICIONES"
       const titleH = 16
       ensure(titleH + 8)
@@ -331,7 +332,6 @@ async function exportToBasePdf() {
       page.drawText(title, { x: left + (contentWidth - tw) / 2, y: y - 12, size: fsBase, font: fontBold, color: white })
       y -= titleH + 4
 
-      // Calcular alto del cuadro según líneas
       const maxW = contentWidth - pad * 2
       let totalLines = 0
       const wrapped = items.map((t, i) => {
@@ -343,13 +343,11 @@ async function exportToBasePdf() {
       const boxH = pad + totalLines * lhTiny + pad
 
       ensure(boxH)
-      // Caja clara con borde
       page.drawRectangle({
         x: left, y: y - boxH, width: contentWidth, height: boxH,
-        color: rgb(0.93, 0.96, 0.98), borderColor: prime, borderWidth: 0.4, borderRadius: 6
+        color: rgb(0.94, 0.98, 0.96), borderColor: prime, borderWidth: 0.4, borderRadius: 6
       })
 
-      // Pintar texto
       let yy = y - pad - fsTiny
       wrapped.forEach(lines => {
         lines.forEach(line => {
@@ -368,7 +366,7 @@ async function exportToBasePdf() {
       return arr
     }
 
-    // === 4) Composición (arranca en la PÁGINA 1 del Base.pdf) ===
+    // === 4) Composición ===
     section("COTIZACIÓN / ANÁLISIS SFVI")
 
     draw2Cols([
@@ -381,7 +379,7 @@ async function exportToBasePdf() {
     section("DATOS DEL PROYECTO")
     draw2Cols([["Tipo de proyecto", datos.tipoProyecto || "—"], ["Tarifa", datos.tipoTarifa || "—"]])
     draw2Cols([["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`], ["Zona CFE", datos.zonaCFE || "—"]])
-    // Nota y Requerimientos eliminados
+    // Nota y Requerimientos originales (si decides mostrarlos, descomenta):
     // if (datos.notaProyecto) field("Nota", datos.notaProyecto)
     // if (datos.requerimientosProyecto) field("Requerimientos", datos.requerimientosProyecto)
 
@@ -401,7 +399,7 @@ async function exportToBasePdf() {
     section("ANÁLISIS DETALLADO POR PERÍODO")
     drawTable(["Período", "Consumo (kWh)", "Importe ($)", "Tarifa ($/kWh)"], filasDetalle)
 
-    // === NUEVO: Términos y Condiciones (después de la tabla)
+    // Términos y Condiciones
     drawTerms()
 
     // Footer final
@@ -453,4 +451,50 @@ async function obtenerBasePdfBytes() {
     }
     input.click()
   })
+}
+
+/**
+ * OPCIONAL (para Chart.js): Baja el texto "Promedio anual" y agrega padding inferior
+ * Llama automáticamente desde drawCanvasImageIfAny si la gráfica es Chart.js.
+ */
+function shiftAverageLabelDown(canvas) {
+  const Chart = window.Chart
+  if (!Chart || !Chart.getChart) return
+  const chart = Chart.getChart(canvas)
+  if (!chart) return
+
+  // Asegurar padding inferior para que quepa el texto bajo los meses
+  const pad = chart.options.layout?.padding
+  if (typeof pad === "number") {
+    chart.options.layout.padding = { top: pad, right: pad, bottom: Math.max(28, pad), left: pad }
+  } else {
+    chart.options.layout = chart.options.layout || {}
+    chart.options.layout.padding = Object.assign({}, pad, { bottom: Math.max(28, (pad && pad.bottom) || 0) })
+  }
+
+  // Plugin que dibuja el texto debajo de las etiquetas de meses
+  const data = chart.data?.datasets?.[0]?.data || []
+  const avg = data.length ? data.reduce((a, b) => a + (Number(b) || 0), 0) / data.length : null
+  const text = avg != null ? `Promedio anual: ${avg.toFixed(3)} kWh/m²/día` : ""
+
+  const plugin = {
+    id: "avgLabelPDF",
+    afterDatasetsDraw(c) {
+      if (!text) return
+      const { ctx, chartArea } = c
+      if (!chartArea) return
+      ctx.save()
+      ctx.font = "12px Helvetica"
+      ctx.fillStyle = "rgba(0,0,0,0.75)"
+      ctx.textAlign = "center"
+      ctx.fillText(text, (chartArea.left + chartArea.right) / 2, chartArea.bottom + 16)
+      ctx.restore()
+    }
+  }
+
+  // Evitar duplicados
+  const has = (chart.config.plugins || []).some(p => p.id === "avgLabelPDF")
+  if (!has) chart.config.plugins = [...(chart.config.plugins || []), plugin]
+
+  chart.update()
 }
