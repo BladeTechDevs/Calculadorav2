@@ -658,73 +658,73 @@ function crearGraficaIrradiacion(estado) {
   console.log("[v0] Solar irradiation bar chart created successfully")
 }
 
-function exportResultsToPdf() {
-  const nombreCliente = document.getElementById("nombreCliente")?.value || "Cliente no especificado"
-  const nombreEjecutivo = document.getElementById("nombreEjecutivo")?.value || "Ejecutivo no especificado"
+// function exportResultsToPdf() {
+//   const nombreCliente = document.getElementById("nombreCliente")?.value || "Cliente no especificado"
+//   const nombreEjecutivo = document.getElementById("nombreEjecutivo")?.value || "Ejecutivo no especificado"
 
-  const element = document.getElementById("resultsContent")
-  const clone = element.cloneNode(true)
+//   const element = document.getElementById("resultsContent")
+//   const clone = element.cloneNode(true)
 
-  const header = document.createElement("div")
-  header.style.cssText = `
-        padding: 30px;
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-        color: white;
-        margin-bottom: 30px;
-        border-radius: 12px;
-        page-break-inside: avoid;
-    `
-  header.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <i class="fas fa-solar-panel" style="font-size: 2.5rem; color: #10b981;"></i>
-                <div>
-                    <h1 style="margin: 0; font-size: 2rem; font-weight: 800;">Hexa Solar Power Solutions</h1>
-                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Energía Solar Inteligente</p>
-                </div>
-            </div>
-            <div style="text-align: right; font-size: 0.9rem;">
-                <div>Reporte Generado</div>
-                <div>${new Date().toLocaleDateString()}</div>
-            </div>
-        </div>
-        <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px;">
-            <h2 style="margin: 0 0 15px 0;">Análisis de Sistema Solar Fotovoltaico</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div><strong>Cliente:</strong> ${nombreCliente}</div>
-                <div><strong>Ejecutivo:</strong> ${nombreEjecutivo}</div>
-            </div>
-        </div>
-    `
+//   const header = document.createElement("div")
+//   header.style.cssText = `
+//         padding: 30px;
+//         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+//         color: white;
+//         margin-bottom: 30px;
+//         border-radius: 12px;
+//         page-break-inside: avoid;
+//     `
+//   header.innerHTML = `
+//         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+//             <div style="display: flex; align-items: center; gap: 15px;">
+//                 <i class="fas fa-solar-panel" style="font-size: 2.5rem; color: #10b981;"></i>
+//                 <div>
+//                     <h1 style="margin: 0; font-size: 2rem; font-weight: 800;">Hexa Solar Power Solutions</h1>
+//                     <p style="margin: 5px 0 0 0; opacity: 0.9;">Energía Solar Inteligente</p>
+//                 </div>
+//             </div>
+//             <div style="text-align: right; font-size: 0.9rem;">
+//                 <div>Reporte Generado</div>
+//                 <div>${new Date().toLocaleDateString()}</div>
+//             </div>
+//         </div>
+//         <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px;">
+//             <h2 style="margin: 0 0 15px 0;">Análisis de Sistema Solar Fotovoltaico</h2>
+//             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+//                 <div><strong>Cliente:</strong> ${nombreCliente}</div>
+//                 <div><strong>Ejecutivo:</strong> ${nombreEjecutivo}</div>
+//             </div>
+//         </div>
+//     `
 
-  clone.insertBefore(header, clone.firstChild)
+//   clone.insertBefore(header, clone.firstChild)
 
-  const opt = {
-    margin: [15, 15, 15, 15],
-    filename: `Hexa_Solar_${nombreCliente.replace(/ /g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`,
-    image: { type: "jpeg", quality: 0.95 },
-    html2canvas: { scale: 1.5, backgroundColor: "#ffffff" },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  }
+//   const opt = {
+//     margin: [15, 15, 15, 15],
+//     filename: `Hexa_Solar_${nombreCliente.replace(/ /g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`,
+//     image: { type: "jpeg", quality: 0.95 },
+//     html2canvas: { scale: 1.5, backgroundColor: "#ffffff" },
+//     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+//   }
 
-  document.getElementById("loading").style.display = "flex"
+//   document.getElementById("loading").style.display = "flex"
 
-  setTimeout(() => {
-    window
-      .html2pdf()
-      .set(opt)
-      .from(clone)
-      .save()
-      .then(() => {
-        document.getElementById("loading").style.display = "none"
-      })
-      .catch((err) => {
-        console.error("Error al generar PDF:", err)
-        document.getElementById("loading").style.display = "none"
-        alert("Error al generar el PDF. Por favor intente nuevamente.")
-      })
-  }, 800)
-}
+//   setTimeout(() => {
+//     window
+//       .html2pdf()
+//       .set(opt)
+//       .from(clone)
+//       .save()
+//       .then(() => {
+//         document.getElementById("loading").style.display = "none"
+//       })
+//       .catch((err) => {
+//         console.error("Error al generar PDF:", err)
+//         document.getElementById("loading").style.display = "none"
+//         alert("Error al generar el PDF. Por favor intente nuevamente.")
+//       })
+//   }, 800)
+// }
 
 function exportQuotationToPdf() {
   console.log("[v0] Generating professional SFVI quotation")
