@@ -162,7 +162,7 @@ async function exportToBasePdf() {
       y -= h + 9
     }
 
-    // ========= PANEL Cliente + Ejecutivo con ICONOS SVG (espaciado mejorado) =========
+    // ========= PANEL Cliente + Ejecutivo con ICONOS SVG =========
     const iconCache = {}
     async function loadSvgAsPngBytes(src, wPx, hPx) {
       let url = src
@@ -194,16 +194,15 @@ async function exportToBasePdf() {
     }
 
     async function drawInfoPanelWithIcons() {
-      // Espaciados más amplios para evitar amontonamiento
       const padX = 16, padY = 14
       const titleH = 18
       const radius = 10
       const midGap = mm(10)
       const colW = (contentWidth - padX * 2 - midGap) / 2
-      const rowGap = 16                  // ↑ antes 6
-      const rowLH = 24                  // ↑ antes 12
-      const iconMM = 3.8                // ↑ antes 4.5
-      const iconPad = 5                 // ↑ antes 3
+      const rowGap = 16
+      const rowLH = 24
+      const iconMM = 3.8
+      const iconPad = 5
       const labelColor = rgb(0.18,0.18,0.18)
 
       const leftRows = [
@@ -236,12 +235,12 @@ async function exportToBasePdf() {
 
       // contenedor
       page.drawRectangle({ x: left, y: y - H, width: contentWidth, height: H, color: white, borderColor: prime, borderWidth: 1, borderRadius: radius })
-      // encabezado #EDFAF2
+      // encabezado
       page.drawRectangle({ x: left, y: y - titleH, width: contentWidth, height: titleH, color: headerSoft, borderRadius: radius })
       const title = "Información del cliente y ejecutivo"
       page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: primeD })
 
-      // separador vertical
+      // separador
       page.drawLine({
         start: { x: left + padX + colW + midGap / 2, y: y - titleH - 6 },
         end:   { x: left + padX + colW + midGap / 2, y: y - H + padY },
@@ -254,17 +253,14 @@ async function exportToBasePdf() {
           const icon = await getIconEmbedded(r.icon, iconMM)
           const iconW = mm(iconMM), iconH = mm(iconMM)
 
-          // icono
           page.drawImage(icon, { x: baseX, y: yy - iconH + 7, width: iconW, height: iconH })
 
-          // label
           const lbl = r.label + ": "
           const lblW = widthOf(lbl, fsBase, fontBold)
           const textStartX = baseX + iconW + iconPad + lblW
           const textW = colW - (iconW + iconPad + lblW)
           page.drawText(lbl, { x: baseX + iconW + iconPad, y: yy - 1, size: fsBase, font: fontBold, color: labelColor })
 
-          // valor (con interlínea más alta)
           const lines = wrapText(String(r.value || "—"), textW, fsBase, font)
           page.drawText(lines[0] || "", { x: textStartX, y: yy - 1, size: fsBase, font, color: ink })
           for (let i = 1; i < lines.length; i++) {
@@ -339,36 +335,41 @@ async function exportToBasePdf() {
       y -= 1
     }
 
+    // ======= TABLA CENTRADA =======
     const drawTable = (headers, rows) => {
       const rowH = 18
       const pcts = [20, 25, 25, 30]
       const colW = pcts.map(p => (contentWidth * p) / 100)
+
+      const colStartX = i => left + colW.slice(0, i).reduce((a, b) => a + b, 0)
+      const centerX = (i, txt, size = fsBase, f = font) =>
+        colStartX(i) + (colW[i] - widthOf(txt, size, f)) / 2
+
       const drawHeader = () => {
         ensure(rowH + 3)
         page.drawRectangle({ x: left, y: y - rowH, width: contentWidth, height: rowH, color: primeD, borderRadius: 5 })
-        let x = left
-        headers.forEach((h, i) => { page.drawText(String(h), { x: x + 6, y: y - 12, size: fsBase, font: fontBold, color: white }); x += colW[i] })
+        headers.forEach((h, i) => {
+          const txt = String(h)
+          page.drawText(txt, { x: centerX(i, txt, fsBase, fontBold), y: y - 12, size: fsBase, font: fontBold, color: white })
+        })
         y -= rowH + 3
       }
+
       drawHeader()
+
       rows.forEach((r, idx) => {
         ensure(rowH + 2)
         const isAlt = idx % 2 === 1
-        page.drawRectangle({ x: left, y: y - rowH, width: contentWidth, height: rowH,
-          color: isAlt ? grayL : white, borderColor: prime, borderWidth: 0.25, borderRadius: 4 })
-        let x = left
+        page.drawRectangle({
+          x: left, y: y - rowH, width: contentWidth, height: rowH,
+          color: isAlt ? grayL : white, borderColor: prime, borderWidth: 0.25, borderRadius: 4
+        })
+
         r.forEach((cell, i) => {
           const txt = String(cell ?? "")
-          const isNum = /^[\s\$]?[0-9]/.test(txt)
-          const pad = 6
-          if (isNum) {
-            const tw = widthOf(txt, fsBase, font)
-            page.drawText(txt, { x: x + colW[i] - tw - pad, y: y - 12, size: fsBase, font, color: ink })
-          } else {
-            page.drawText(txt, { x: x + pad, y: y - 12, size: fsBase, font, color: ink })
-          }
-          x += colW[i]
+          page.drawText(txt, { x: centerX(i, txt), y: y - 12, size: fsBase, font, color: ink })
         })
+
         y -= rowH + 2
         if (y - rowH < bottom) { newPage(); drawHeader() }
       })
@@ -393,8 +394,7 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
-
-    const drawCanvasImageIfAny2= async (canvasId, widthMM, heightMM) => {
+    const drawCanvasImageIfAny2 = async (canvasId, widthMM, heightMM) => {
       const canvas = document.getElementById(canvasId)
       if (!canvas) return
       try {
@@ -406,14 +406,11 @@ async function exportToBasePdf() {
         const xCentered = left + (contentWidth - w) / 2
         page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h })
         y -= h + 6
-        y -= 20 // aire visual antes de la tabla
+        y -= 20
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
-    // === NUEVO: Términos y Condiciones (compacto)
-
-    // Términos y condiciones
-
+    // === Términos y condiciones
     const drawTerms = () => {
       const items = [
         "La actual cotización es PRELIMINAR, previa a un levantamiento técnico a detalle (precio sujeto a cambio).",
@@ -466,7 +463,7 @@ async function exportToBasePdf() {
     // === 4) Composición ===
     section("COTIZACIÓN / ANÁLISIS SFVI")
 
-    // Panel con espaciado corregido
+    // Panel (cliente y ejecutivo)
     await drawInfoPanelWithIcons()
 
     section("DATOS DEL PROYECTO")
@@ -483,17 +480,14 @@ async function exportToBasePdf() {
     draw2Cols([["Potencia por panel", `${datos.potenciaPanel} W`], ["Generación anual", datos.generacionAnual]])
     draw2Cols([["Área requerida", `${datos.areaAprox} m²`], ["Rango térmico", `${datos.tempMin} — ${datos.tempMax}`]])
 
-
-    // Gráfica (opcional, centrada)
-    //pinta grafica de irradiacion
-    // await drawCanvasImageIfAny("irradiacionChart", 150, 65)
-    await drawCanvasImageIfAny2("impactoChart", 150, 65)
-
-    // await drawCanvasImageIfAny("irradiacionChart", 150, 65)
-
-
+    // *** ORDEN SOLICITADO ***
+    // 1) Primero la tabla
     section("ANÁLISIS DETALLADO POR PERÍODO")
     drawTable(["Período", "Consumo (kWh)", "Importe ($)", "Tarifa ($/kWh)"], filasDetalle)
+
+    // 2) Después la gráfica
+    await drawCanvasImageIfAny2("impactoChart", 150, 65)
+    // (opcional) await drawCanvasImageIfAny("irradiacionChart", 150, 65)
 
     drawTerms()
     drawFooter()
