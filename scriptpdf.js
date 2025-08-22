@@ -302,6 +302,22 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
+    const drawCanvasImageIfAny2= async (canvasId, widthMM, heightMM) => {
+      const canvas = document.getElementById(canvasId)
+      if (!canvas) return
+      try {
+        const dataUrl = canvas.toDataURL("image/png")
+        const pngBytes = dataURLToUint8Array(dataUrl)
+        const png = await pdfDoc.embedPng(pngBytes)
+        const w = mm(widthMM), h = mm(heightMM)
+        ensure(h + 6)
+        const xCentered = left + (contentWidth - w) / 2
+        page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h })
+        y -= h + 6
+        y -= 20 // aire visual antes de la tabla
+      } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
+    }
+
     // === NUEVO: Términos y Condiciones (compacto)
     const drawTerms = () => {
       // textos combinados en una sola tabla (sin folio)
@@ -396,7 +412,9 @@ async function exportToBasePdf() {
     draw2Cols([["Área requerida", `${datos.areaAprox} m²`], ["Rango térmico", `${datos.tempMin} — ${datos.tempMax}`]])
 
     // Gráfica (opcional, centrada)
-    await drawCanvasImageIfAny("irradiacionChart", 150, 65)
+    //pinta grafica de irradiacion
+    // await drawCanvasImageIfAny("irradiacionChart", 150, 65)
+    await drawCanvasImageIfAny2("impactoChart", 150, 65)
 
     section("ANÁLISIS DETALLADO POR PERÍODO")
     drawTable(["Período", "Consumo (kWh)", "Importe ($)", "Tarifa ($/kWh)"], filasDetalle)

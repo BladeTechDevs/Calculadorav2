@@ -1,3 +1,6 @@
+ document.getElementById("estadoProyecto")
+  .addEventListener("change", actualizarHSP);
+
 // Variables globales
 let hspData = {}
 let csvData = []
@@ -138,7 +141,7 @@ async function loadCSVData() {
       "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hsp_Hoja1-kr8ml1Lz0SvIbQmWD96PSGcSC2lQAt.csv",
     )
     const csvText = await response.text()
-
+    console.log(csvText)
     // Parse CSV
     const lines = csvText.split("\n")
     const headers = lines[0].split(",")
@@ -161,10 +164,8 @@ async function loadCSVData() {
         }
       }
     }
-
-    console.log("CSV data loaded successfully:", csvData.length, "states")
-    console.log("CSV data structure:", csvData[0]) // Log first row to see structure
-    console.log("hsp", hspData)
+    console.log("CSV data loaded successfully:", csvData)
+  
     inicializarEstados()
   } catch (error) {
     console.error("Error loading CSV data:", error)
@@ -227,10 +228,10 @@ function actualizarHSP() {
   if (estadoSeleccionado && hspData[estadoSeleccionado]) {
     // Store HSP value for calculations
     window.hspValue = hspData[estadoSeleccionado]
-
+    console.log("[v0] HSP for state:", window.hspValue)
     // Find detailed data for the selected state
     const estadoData = csvData.find((row) => row.Estado === estadoSeleccionado)
-
+    console.log("[v0] Estado seleccionado:", estadoSeleccionado)
     if (estadoData) {
       // Display irradiation data in console for now (you can modify this to show in UI)
       console.log(`Datos de irradiación para ${estadoSeleccionado}:`, {
@@ -252,95 +253,98 @@ function actualizarHSP() {
       })
 
       mostrarDatosIrradiacion(estadoData)
+      console.log("[v0] Estado data:", estadoData)
     }
   }
 }
 
-function mostrarDatosIrradiacion(estadoData) {
-  // Create or update irradiation data display
-  let irradiacionDiv = document.getElementById("irradiacionData")
+  // function mostrarDatosIrradiacion(estadoData) {
+  //   // Create or update irradiation data display
+  //   let irradiacionDiv = document.getElementById("irradiacionData")
 
-  if (!irradiacionDiv) {
-    irradiacionDiv = document.createElement("div")
-    irradiacionDiv.id = "irradiacionData"
-    irradiacionDiv.className = "form-section"
+  //   if (!irradiacionDiv) {
+  //     irradiacionDiv = document.createElement("div")
+  //     irradiacionDiv.id = "irradiacionData"
+  //     irradiacionDiv.className = "form-section"
 
-    // Insert after the Datos del Proyecto section
-    const proyectoSection = document.querySelector("#estadoProyecto").closest(".form-section")
-    proyectoSection.parentNode.insertBefore(irradiacionDiv, proyectoSection.nextSibling)
-  }
+  //     // Insert after the Datos del Proyecto section
+  //     const proyectoSection = document.querySelector("#estadoProyecto").closest(".form-section")
+  //     proyectoSection.parentNode.insertBefore(irradiacionDiv, proyectoSection.nextSibling)
+  //   }
 
-  irradiacionDiv.innerHTML = `
-        <div class="section-title">
-            <i class="fas fa-sun"></i>
-            <span>Datos de Irradiación Solar - ${estadoData.Estado}</span>
-        </div>
-        <div class="irradiation-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Enero</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Enero} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Febrero</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Febrero} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Marzo</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Marzo} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Abril</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Abril} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Mayo</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Mayo} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Junio</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Junio} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Julio</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Julio} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Agosto</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Agosto} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Septiembre</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Septiembre} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Octubre</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Octubre} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Noviembre</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Noviembre} kWh/m²</div>
-            </div>
-            <div class="irradiation-item">
-                <label style="font-size: 0.75rem; color: #4a5568;">Diciembre</label>
-                <div style="font-weight: 600; color: #1a202c;">${estadoData.Diciembre} kWh/m²</div>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Irradiación Mínima</label>
-                <input type="text" value="${estadoData.Minima} kWh/m²" readonly style="background: #f7fafc;">
-            </div>
-            <div class="form-group">
-                <label>Irradiación Máxima</label>
-                <input type="text" value="${estadoData.Maxima} kWh/m²" readonly style="background: #f7fafc;">
-            </div>
-        </div>
-        <div class="form-group">
-            <label>Irradiación Promedio Anual</label>
-            <input type="text" value="${estadoData.Promedio} kWh/m²" readonly style="background: #e6fffa; font-weight: 600;">
-        </div>
-    `
-}
+  //   irradiacionDiv.innerHTML = `
+  //         <div class="section-title">
+  //             <i class="fas fa-sun"></i>
+  //             <span>Datos de Irradiación Solar - ${estadoData.Estado}</span>
+  //         </div>
+  //         <div class="irradiation-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Enero</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Enero} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Febrero</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Febrero} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Marzo</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Marzo} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Abril</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Abril} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Mayo</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Mayo} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Junio</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Junio} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Julio</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Julio} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Agosto</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Agosto} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Septiembre</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Septiembre} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Octubre</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Octubre} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Noviembre</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Noviembre} kWh/m²</div>
+  //             </div>
+  //             <div class="irradiation-item">
+  //                 <label style="font-size: 0.75rem; color: #4a5568;">Diciembre</label>
+  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Diciembre} kWh/m²</div>
+  //             </div>
+  //         </div>
+  //         <div class="form-row">
+  //             <div class="form-group">
+  //                 <label>Irradiación Mínima</label>
+  //                 <input type="text" value="${estadoData.Minima} kWh/m²" readonly style="background: #f7fafc;">
+  //             </div>
+  //             <div class="form-group">
+  //                 <label>Irradiación Máxima</label>
+  //                 <input type="text" value="${estadoData.Maxima} kWh/m²" readonly style="background: #f7fafc;">
+  //             </div>
+  //         </div>
+  //         <div class="form-group">
+  //             <label>Irradiación Promedio Anual</label>
+  //             <input type="text" value="${estadoData.Promedio} kWh/m²" readonly style="background: #e6fffa; font-weight: 600;">
+  //         </div>
+  //     `
+  // }
+/**
+ * 
 
 function generarInputsConsumo() {
   const tipoPeriodo = document.getElementById("tipoPeriodo").value
@@ -402,6 +406,69 @@ function generarInputsConsumo() {
   // Initialize totals
   actualizarTotales()
 }
+ */
+
+function generarInputsConsumo() {
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const container = document.getElementById("consumoInputsGrid");
+
+  // Tus valores fijos de prueba
+  const consumosDemo = [690, 631, 422, 970, 1011, 752];
+  const importesDemo = [1695, 1685, 489, 2798, 2998, 2269];
+
+  // Según tipoPeriodo decides si usar 12 o 6 periodos
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
+  const periodos =
+    tipoPeriodo === "mensual"
+      ? [
+          "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+          "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
+        ]
+      : ["Bimestre 1","Bimestre 2","Bimestre 3","Bimestre 4","Bimestre 5","Bimestre 6"];
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < numPeriodos; i++) {
+    // Si hay datos en el arreglo, los usamos; si no, dejamos vacío
+    const consumoDemo = consumosDemo[i] ?? "";
+    const importeDemo = importesDemo[i] ?? "";
+
+    const periodoCard = document.createElement("div");
+    periodoCard.style.cssText = `
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    `;
+
+    periodoCard.innerHTML = `
+      <div style="font-weight: 600; color: #1e40af; margin-bottom: 0.5rem; text-align: center; font-size: 0.85rem;">
+        ${periodos[i]}
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>
+          <label style="display: block; font-size: 0.7rem; color: #64748b; margin-bottom: 0.2rem;">Consumo (kWh)</label>
+          <input type="number" id="consumo${i}" placeholder="0" value="${consumoDemo}"
+                 style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem;"
+                 oninput="calcularTarifaAutomatica(${i})">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.7rem; color: #64748b; margin-bottom: 0.2rem;">Importe ($)</label>
+          <input type="number" id="importe${i}" placeholder="0" value="${importeDemo}"
+                 style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem;"
+                 oninput="actualizarTotales()">
+        </div>
+      </div>
+    `;
+
+    container.appendChild(periodoCard);
+  }
+
+  // Inicializar totales
+  actualizarTotales();
+}
+
 
 function calcularTarifaAutomatica(index) {
   const consumo = Number.parseFloat(document.getElementById(`consumo${index}`).value) || 0
@@ -438,7 +505,7 @@ function generarInputsPago() {
 }
 
 function calcularSistemaSolar() {
-  console.log("[v0] Starting comprehensive solar system calculation")
+  // console.log("[v0] Starting comprehensive solar system calculation")
 
   // Get consumption and payment data
   const tipoPeriodo = document.getElementById("tipoPeriodo").value
@@ -460,14 +527,19 @@ function calcularSistemaSolar() {
 
   // Calculate energy consumption metrics
   const consumoTotal = consumos.reduce((sum, val) => sum + val, 0)
-  const consumoAnual = tipoPeriodo === "mensual" ? consumoTotal : consumoTotal * 2 // If bimonthly, multiply by 2
+  const consumoAnual = consumoTotal;
   const consumoMensual = consumoAnual / 12
   const consumoDiario = consumoAnual / 365
 
   // Calculate financial metrics
-  const importeTotal = importes.reduce((sum, val) => sum + val, 0)
-  const importeTotalAnual = tipoPeriodo === "mensual" ? importeTotal : importeTotal * 2
-  const importePromedio = importeTotalAnual / (tipoPeriodo === "mensual" ? 12 : 6)
+  console.log(importes)
+    let importeTotal = 0; // usar let en lugar de const
+for (let i = 0; i < importes.length; i++) {
+  importeTotal += importes[i]; // usar += en lugar de =+
+}
+  // const importeTotal = importes.reduce((sum, val) => sum + val, 0)
+  const importeTotalAnual = importeTotal
+  const importePromedio = importeTotalAnual / 12
 
   // Calculate tariffs for each period
   const tarifas = []
@@ -489,16 +561,22 @@ function calcularSistemaSolar() {
   console.log("[v0] Average tariff:", tarifaPromedio)
 
   // Get solar data
+ 
+
   const estado = document.getElementById("estadoProyecto").value
-  const hspPromedio = window.hspValue || 5.0
+  const hspPromedio = window.hspValue
 
   // Get panel specifications
-  const potenciaPanel = Number.parseFloat(document.getElementById("potenciaPanel")?.value || 400) // Default 400W
+  const potenciaPanel = Number.parseFloat(document.getElementById("potenciaPanel")?.value) // Default 400W
+  console.log("[v0] Panel power:", potenciaPanel)
+  console.log("[v0] Average HSP for state:", hspPromedio)
 
   // Calculate solar system requirements
-  const potenciaNecesaria = (consumoDiario / hspPromedio) * 0.76
+  const potenciaNecesaria = consumoDiario / ( hspPromedio * 0.76)
+  console.log("[v0] Required power for solar system:", potenciaNecesaria)
   const numeroModulos = Math.ceil((consumoDiario * 1000) / (hspPromedio * potenciaPanel * 0.76))
   const generacionAnual = numeroModulos * (potenciaPanel / 1000) * hspPromedio * 365
+  console.log("generacion anual", generacionAnual)
   const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000
 
   console.log("[v0] Solar calculations completed")
@@ -506,14 +584,15 @@ function calcularSistemaSolar() {
   console.log("[v0] Number of modules:", numeroModulos)
   console.log("[v0] Annual generation:", generacionAnual)
   console.log("[v0] Installed power:", potenciaInstalada)
+  console.log("mensual:", consumoMensual)
 
   // Calculate CO2 savings (0.5 kg CO2 per kWh)
-  const ahorroCO2 = (generacionAnual * 0.5) / 1000 // Convert to tons
+  const ahorroCO2 = (consumoMensual * 439.963) / 1000 // Convert to tons
 
-  const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1)
+  // const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1)
   const tempMin = 18 // Example temperature values
   const tempMax = 35
-  const arboles = Math.round(ahorroCO2 * 45) // Approximate trees equivalent
+  const arboles = Math.round(ahorroCO2 * 155) // Approximate trees equivalent
 
   // Update display
   document.getElementById("resultsPlaceholder").style.display = "none"
@@ -528,7 +607,7 @@ function calcularSistemaSolar() {
   document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`
   document.getElementById("potenciaNecesaria").textContent = `${potenciaNecesaria.toFixed(2)} kW`
   document.getElementById("numeroModulos").textContent = `${numeroModulos}`
-  document.getElementById("generacionAnual").textContent = `${generacionAnual.toFixed(0)} kWh`
+  document.getElementById("generacionAnual").textContent = `${generacionAnual} kWh`
   document.getElementById("potenciaInstalada").textContent = `${potenciaInstalada.toFixed(2)} kW`
   document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`
   document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`
@@ -698,6 +777,149 @@ function crearGraficaIrradiacion(estado) {
 
   console.log("[v0] Solar irradiation bar chart created successfully")
 }
+
+// Etiquetas (12 meses)
+const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+
+// Consumos (12 valores). Si trabajas bimestral, duplica o interpola.
+const consumosMensuales = [690, 631, 422, 970, 1011, 752, 690, 631, 422, 970, 1011, 752];
+
+// Producción (12 valores). Ejemplo: repartir la generación anual uniformemente:
+const produccionMensual = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
+
+// Llamada:
+crearGraficaImpacto(mesesDisplay, consumosMensuales, produccionMensual);
+function crearGraficaImpacto(labels, consumoArr, produccionArr) {
+  const canvas = document.getElementById("impactoChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  // Saneos básicos
+  const L = Math.min(consumoArr.length, produccionArr.length, labels.length);
+  const lab = labels.slice(0, L);
+  const consumo = consumoArr.slice(0, L).map(v => Number(v) || 0);
+  const prod    = produccionArr.slice(0, L).map(v => Number(v) || 0);
+
+  // Dimensiones
+  const padding = 100;
+  const chartWidth  = canvas.width  - 2 * padding;
+  const chartHeight = canvas.height - 2 * padding;
+
+  // Escala
+  const maxData = Math.max(...consumo, ...prod, 0);
+  const maxValue = maxData > 0 ? maxData : 1; // evitar 0
+  const valueRange = maxValue;
+
+  // Limpiar
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Ejes
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padding, padding);
+  ctx.lineTo(padding, canvas.height - padding);
+  ctx.lineTo(canvas.width - padding, canvas.height - padding);
+  ctx.stroke();
+
+  // Grid + etiquetas Y
+  ctx.strokeStyle = "#e0e0e0";
+  ctx.lineWidth = 1;
+  ctx.fillStyle = "#666";
+  ctx.font = "12px Arial";
+  for (let i = 0; i <= 5; i++) {
+    const y = padding + (chartHeight * i) / 5;
+    const value = maxValue - (valueRange * i) / 5;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(canvas.width - padding, y);
+    ctx.stroke();
+    ctx.fillText(value.toFixed(0), 10, y + 4);
+  }
+
+  // X labels
+  ctx.textAlign = "center";
+  for (let i = 0; i < L; i++) {
+    const xCenter = padding + (chartWidth * (i + 0.5)) / L;
+    ctx.fillText(lab[i], xCenter, canvas.height - 20);
+  }
+
+  // Barras por grupo (dos barras: consumo y producción)
+  const groupWidth = chartWidth / L;
+  const barWidth   = groupWidth * 0.35;
+  const gapBars    = groupWidth * 0.05; // separacion entre las dos barras
+
+  for (let i = 0; i < L; i++) {
+    const xGroupStart = padding + groupWidth * i;
+    const xConsumo = xGroupStart + (groupWidth - (2 * barWidth + gapBars)) / 2;
+    const xProducc = xConsumo + barWidth + gapBars;
+
+    // Alturas
+    const hC = (consumo[i] / valueRange) * chartHeight;
+    const hP = (prod[i]    / valueRange) * chartHeight;
+
+    const yC = canvas.height - padding - hC;
+    const yP = canvas.height - padding - hP;
+
+    // Consumo (azul grisáceo)
+    const gradC = ctx.createLinearGradient(0, yC, 0, yC + hC);
+    gradC.addColorStop(0, "#7a8aa0");
+    gradC.addColorStop(1, "#3a4a60");
+    ctx.fillStyle = gradC;
+    ctx.fillRect(xConsumo, yC, barWidth, hC);
+    ctx.strokeStyle = "#2f3a48";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(xConsumo, yC, barWidth, hC);
+
+    // Producción (verde)
+    const gradP = ctx.createLinearGradient(0, yP, 0, yP + hP);
+    gradP.addColorStop(0, "#73b248");
+    gradP.addColorStop(1, "#106e3a");
+    ctx.fillStyle = gradP;
+    ctx.fillRect(xProducc, yP, barWidth, hP);
+    ctx.strokeStyle = "#106e3a";
+    ctx.strokeRect(xProducc, yP, barWidth, hP);
+
+    // Valores encima
+    ctx.fillStyle = "#333";
+    ctx.font = "10px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(consumo[i].toFixed(0), xConsumo + barWidth / 2, yC - 5);
+    ctx.fillText(prod[i].toFixed(0),    xProducc + barWidth / 2, yP - 5);
+  }
+
+  // Título y subtítulo
+  ctx.fillStyle = "#333";
+  ctx.font = "bold 16px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Impacto de la Generación vs Consumo", canvas.width / 2, 30);
+  ctx.font = "14px Arial";
+  ctx.fillText("(kWh por mes)", canvas.width / 2, 50);
+
+  // Leyenda
+  const legendX = canvas.width - padding - 160;
+  const legendY = padding - 30;
+  const box = (x, y, w, h, g1, g2, stroke) => {
+    const grad = ctx.createLinearGradient(0, y, 0, y + h);
+    grad.addColorStop(0, g1);
+    grad.addColorStop(1, g2);
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = stroke;
+    ctx.strokeRect(x, y, w, h);
+  };
+  // Consumo
+  box(legendX, legendY, 16, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
+  ctx.fillStyle = "#333";
+  ctx.font = "12px Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("Consumo", legendX + 22, legendY + 11);
+  // Producción
+  box(legendX + 80, legendY, 16, 12, "#73b248", "#106e3a", "#106e3a");
+  ctx.fillStyle = "#333";
+  ctx.fillText("Producción", legendX + 102, legendY + 11);
+}
+
 
 // function exportResultsToPdf() {
 //   const nombreCliente = document.getElementById("nombreCliente")?.value || "Cliente no especificado"
