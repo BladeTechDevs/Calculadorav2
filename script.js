@@ -19,10 +19,51 @@ const mesesCompletos = [
 
 // Tarifas por tipo de proyecto
 const tarifasPorProyecto = {
-  residencial: ["1A", "1B", "1C", "1D", "1E", "1F"],
-  comercial: ["PDBT", "GDBT", "GDMTO", "GDMTH"],
-  industrial: ["DIST", "DIT"],
+  residencial: [
+    { value: "1A", text: "Tarifa 1A" },
+    { value: "1B", text: "Tarifa 1B" },
+    { value: "1C", text: "Tarifa 1C" },
+    { value: "1D", text: "Tarifa 1D" },
+    { value: "1E", text: "Tarifa 1E" },
+    { value: "1F", text: "Tarifa 1F" },
+    { value: "dac", text: "Tarifa DAC (Doméstica de Alto Consumo)" }
+  ],
+  comercial: [
+    { value: "pdbt", text: "PDBT – Pequeña Demanda en Baja Tensión" },
+    { value: "gdbt", text: "GDBT – Gran Demanda en Baja Tensión" },
+    { value: "apbt", text: "APBT – Alumbrado Público en Baja Tensión" },
+    { value: "rabt", text: "RABT – Riego Agrícola en Baja Tensión" }
+  ],
+  industrial: [
+    { value: "gdmth", text: "GDMTH – Gran Demanda en Media Tensión Horaria" },
+    { value: "gdmto", text: "GDMTO – Gran Demanda en Media Tensión Ordinaria" },
+    { value: "ramt", text: "RAMT – Riego Agrícola en Media Tensión" },
+    { value: "dist", text: "DIST – Demanda Industrial en Subtransmisión" },
+    { value: "dit", text: "DIT – Demanda Industrial en Transmisión" }
+  ]
+};
+
+function actualizarTarifasPorProyecto() {
+  const tipoProyecto = document.getElementById("tipoProyecto").value;
+  const tarifaSelect = document.getElementById("tipoTarifa");
+  tarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
+  if (tarifasPorProyecto[tipoProyecto]) {
+    tarifasPorProyecto[tipoProyecto].forEach(t => {
+      const option = document.createElement('option');
+      option.value = t.value;
+      option.textContent = t.text;
+      tarifaSelect.appendChild(option);
+    });
+  }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tipoProyectoSelect = document.getElementById("tipoProyecto");
+  if (tipoProyectoSelect) {
+    tipoProyectoSelect.addEventListener('change', actualizarTarifasPorProyecto);
+    actualizarTarifasPorProyecto(); // Inicializa al cargar
+  }
+});
 
 // Generar tabla de consumo dinámica
 function generarTablaConsumo() {

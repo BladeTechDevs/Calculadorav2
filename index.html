@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hexa Solar - Calculadora Inteligente</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -17,7 +18,7 @@
         <div class="logo">
             <img src="logo.png" alt="Hexa Solar Logo" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
             <i class="fas fa-solar-panel" style="display: none;"></i>
-            <span>Hexa Solar Power Solutions</span>
+            <span>Hexa Solar Power Solution</span>
         </div>
         <div class="contact-info">
             <div class="contact-item">
@@ -48,11 +49,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombreCliente">Nombre</label>
-                        <input type="text" id="nombreCliente" placeholder="Nombre completo">
+                        <input type="text" id="nombreCliente" placeholder="Nombre completo" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                     <div class="form-group">
                         <label for="direccionCliente">Dirección</label>
-                        <input type="text" id="direccionCliente" placeholder="Calle y número">
+                        <input type="text" id="direccionCliente" placeholder="Calle y número" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
                 <div class="form-row">
@@ -96,17 +97,17 @@
                     </div>
                     <div class="form-group">
                         <label for="municipioCliente">Municipio / Ciudad</label>
-                        <input type="text" id="municipioCliente" placeholder="Municipio o Ciudad">
+                        <input type="text" id="municipioCliente" placeholder="Municipio o Ciudad" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="telefonoCliente">Teléfono</label>
-                        <input type="text" id="telefonoCliente" placeholder="Teléfono">
+                        <input type="text" id="telefonoCliente" placeholder="Teléfono" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                     <div class="form-group">
                         <label for="correoCliente">Correo</label>
-                        <input type="email" id="correoCliente" placeholder="Correo electrónico">
+                        <input type="email" id="correoCliente" placeholder="Correo electrónico" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
             </div>
@@ -120,11 +121,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombreEjecutivo">Nombre del Ejecutivo</label>
-                        <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo">
+                        <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                     <div class="form-group">
                         <label for="correoEjecutivo">Correo Electrónico</label>
-                        <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com">
+                        <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
             </div>
@@ -155,7 +156,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="notaProyecto">Nota</label>
-                        <input type="text" id="notaProyecto" placeholder="Nota del proyecto">
+                        <input type="text" id="notaProyecto" placeholder="Nota del proyecto" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                     <div class="form-group">
                         <label for="estadoProyecto">Estado</label>
@@ -199,17 +200,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="municipioProyecto">Ciudad / Municipio</label>
-                        <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio">
+                        <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                     <div class="form-group">
                         <label for="zonaCFE">Zona CFE</label>
-                        <input type="text" id="zonaCFE" placeholder="Zona CFE">
+                        <input type="text" id="zonaCFE" placeholder="Zona CFE" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group" style="grid-column: span 2;">
                         <label for="requerimientosProyecto">Requerimientos</label>
-                        <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto" style="width:100%;">
+                        <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto" style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                     </div>
                 </div>
                 
@@ -233,19 +234,6 @@
                 <div id="consumoContainer" style="background:#f8fafc; border-radius:12px; padding:1.5rem; margin-bottom:1rem;">
                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;" id="consumoInputsGrid">
                         <!-- Se llenará dinámicamente -->
-                    </div>
-                    
-                    <div style="margin-top:1.5rem; padding-top:1rem; border-top:2px solid #e2e8f0;">
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; text-align:center;">
-                            <div style="background:#fff; padding:1rem; border-radius:8px; border:1px solid #e2e8f0;">
-                                <div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">CONSUMO TOTAL</div>
-                                <div id="totalConsumoDisplay" style="font-size:1.25rem; font-weight:600; color:#1e40af;">0 kWh</div>
-                            </div>
-                            <div style="background:#fff; padding:1rem; border-radius:8px; border:1px solid #e2e8f0;">
-                                <div style="font-size:0.75rem; color:#64748b; margin-bottom:0.25rem;">IMPORTE TOTAL</div>
-                                <div id="totalImporteDisplay" style="font-size:1.25rem; font-weight:600; color:#dc2626;">$0.00</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <!-- Removed summary section from here, moved to Analysis Completed -->
@@ -483,7 +471,7 @@
         <div class="results-panel">
             <!-- Estado inicial -->
             <div class="results-placeholder" id="resultsPlaceholder">
-                <i class="fas fa-solar-panel"></i>
+                <img src="logo.png" alt="Hexa Solar Logo" style="height:64px; margin-bottom:12px; opacity:0.5;">
                 <h3>Análisis Solar Inteligente</h3>
                 <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados detallados</p>
             </div>
@@ -615,14 +603,9 @@
                     <span>Exportar Reporte PDF</span>
                 </button> -->
                 
-                <button class="export-btn" onclick="exportQuotationToPdf()" style="margin-top: 1rem; background: linear-gradient(135deg, #73b248 0%, #106e3a 100%);">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Generar Cotización SFVI</span>
-                </button>
-
-                <button class="export-btn" onclick="exportToBasePdf()" style="margin-top: 1rem; background: linear-gradient(135deg, #73b248 0%, #106e3a 100%);">
+                <button class="calculate-btn" onclick="exportToBasePdf()" >
   <i class="fas fa-file-contract"></i>
-  <span>Generar Cotización SFVI (Base.pdf)</span>
+  <span>Generar Cotización</span>
 </button>
 
             </div>
