@@ -12,19 +12,19 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
-  <!-- 🔧 Barra resizable (empieza en la mitad y permite pasarla) -->
+  <!-- 🔧 Split bar (empieza a la mitad y permite pasarla) + consumo responsivo -->
   <style>
+    /* ---------- Split layout ---------- */
     .main-container{
-      display:flex;               /* fuerza flex por si tu CSS define otra cosa */
+      display:flex;
       width:100%;
       min-height:calc(100vh - 64px);
       overflow:hidden;
     }
     .form-panel{
-      flex:0 0 50%;               /* mitad a mitad al iniciar */
-      width:50%;                  /* 👈 base inicial */
+      flex:0 0 50%;
+      width:50%;
       min-width:320px;
-      /* sin max-width para permitir pasar de la mitad */
       overflow:auto;
     }
     .results-panel{
@@ -56,6 +56,55 @@
     }
     .resizer.is-dragging{ background:#cfeadc; }
     body.is-resizing{ cursor:col-resize; user-select:none; }
+
+    /* ---------- Consumo: diseño anterior pero con inputs idénticos al resto y 100% responsivo ---------- */
+    .consumo-panel{
+      background:#fff;
+      border:1px solid #e2e8f0;
+      border-radius:12px;
+      padding:1rem 1rem 1.2rem;
+    }
+    .consumo-row{ margin-top:.9rem; }
+    .consumo-row-label{
+      font-weight:600;
+      color:#2d3748;
+      font-size:.95rem;
+      margin-bottom:.55rem;
+    }
+
+    /* Grid auto-fit para adaptarse a 6 o 12 valores y al ancho disponible */
+    .consumo-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap:.8rem 1rem;
+    }
+    /* en pantallas medianas bajamos el mínimo para que quepan más columnas */
+    @media (max-width: 1200px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 900px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    }
+    @media (max-width: 640px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    }
+
+    /* Mismo look & feel que tus demás inputs (coincide con los inline styles que usas) */
+    .consumo-input{
+      width:100%;
+      background:#fff;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      padding:5px 7px;
+      font-size:.87rem;      /* igual a los inputs del resto del formulario */
+      color:#1a202c;
+      text-align:center;
+    }
+    .consumo-input:focus{
+      outline:none;
+      border-color:#73b248;
+      box-shadow:0 0 0 3px rgba(115,178,72,0.10);
+    }
   </style>
 </head>
 
@@ -222,6 +271,7 @@
             <select id="estadoProyecto"
               style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
               <option value="">Selecciona un estado</option>
+              <!-- opciones... (mismas que arriba) -->
               <option value="Aguascalientes">Aguascalientes</option>
               <option value="Baja California">Baja California</option>
               <option value="Baja California Sur">Baja California Sur</option>
@@ -258,18 +308,6 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label for="municipioProyecto">Ciudad / Municipio</label>
-            <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio"
-              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-          </div>
-          <div class="form-group">
-            <label for="zonaCFE">Zona CFE</label>
-            <input type="text" id="zonaCFE" placeholder="Zona CFE"
-              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-          </div>
-        </div>
-        <div class="form-row">
           <div class="form-group" style="grid-column: span 2;">
             <label for="requerimientosProyecto">Requerimientos</label>
             <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto"
@@ -283,7 +321,6 @@
           <span>Datos de Consumo Energético</span>
         </div>
 
-        <!-- Simplified consumption data input design -->
         <div class="form-row" style="margin-bottom: 1rem;">
           <div class="form-group">
             <label for="tipoPeriodo">Período de Facturación</label>
@@ -295,14 +332,22 @@
           </div>
         </div>
 
-        <div id="consumoContainer"
-          style="background:#f8fafc; border-radius:12px; padding:1.5rem; margin-bottom:1rem;">
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;"
-            id="consumoInputsGrid">
-            <!-- Se llenará dinámicamente -->
+        <!-- Panel consumo responsivo -->
+        <div id="consumoContainer" class="consumo-panel">
+          <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Consumo Histórico (kWh)</label>
+              <div id="kwhRow" class="consumo-grid"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Pagos por Período ($)</label>
+              <div id="pagoRow" class="consumo-grid"></div>
+            </div>
           </div>
         </div>
-        <!-- Removed summary section from here, moved to Analysis Completed -->
+        <!-- /panel consumo -->
       </div>
 
       <!-- Especificaciones del panel -->
@@ -366,8 +411,7 @@
                 <div class="panel-checkbox-group">
                   <label class="panel-checkbox-label"><input type="checkbox" id="transformadorSi">Sí</label>
                   <label class="panel-checkbox-label"><input type="checkbox" id="transformadorNo">No</label>
-                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya
-                    tiene</label>
+                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya tiene</label>
                 </div>
               </div>
             </div>
@@ -459,7 +503,6 @@
                 <input type="number" id="areaAprox" placeholder="">
               </div>
             </div>
-            <!-- Removed CO2 savings and trees fields as they are now in Analysis Completed -->
           </div>
         </div>
       </div>
@@ -548,8 +591,7 @@
       <div class="results-placeholder" id="resultsPlaceholder">
         <img src="logo.png" alt="Hexa Solar Logo" style="height:64px; margin-bottom:12px; opacity:0.5;">
         <h3>Análisis Solar Inteligente</h3>
-        <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados
-          detallados</p>
+        <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados detallados</p>
       </div>
 
       <!-- Contenido de resultados -->
@@ -559,107 +601,32 @@
           <div class="results-subtitle">Sistema Solar Fotovoltaico Optimizado</div>
         </div>
 
-        <!-- Grid de métricas principales -->
         <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-bolt"></i></div>
-            <div class="metric-value" id="consumoAnual">-</div>
-            <div class="metric-label">Consumo Anual (kWh)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
-            <div class="metric-value" id="consumoMensual">-</div>
-            <div class="metric-label">Consumo Mensual Promedio</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-sun"></i></div>
-            <div class="metric-value" id="consumoDiario">-</div>
-            <div class="metric-label">Consumo Diario Promedio</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
-            <div class="metric-value" id="importeTotal">-</div>
-            <div class="metric-label">Importe Total Anual</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-coins"></i></div>
-            <div class="metric-value" id="importePromedio">-</div>
-            <div class="metric-label">Importe Promedio</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-calculator"></i></div>
-            <div class="metric-value" id="tarifaPromedio">-</div>
-            <div class="metric-label">Tarifa Promedio ($/kWh)</div>
-          </div>
-          <!-- Added summary metrics from consumption section -->
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-percentage"></i></div>
-            <div class="metric-value" id="porcentajeAhorro">-</div>
-            <div class="metric-label">% de Ahorro</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
-            <div class="metric-value" id="tempMin">-</div>
-            <div class="metric-label">Temp Min (°C)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-thermometer-full"></i></div>
-            <div class="metric-value" id="tempMax">-</div>
-            <div class="metric-label">Temp Max (°C)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-plug"></i></div>
-            <div class="metric-value" id="potenciaNecesaria">-</div>
-            <div class="metric-label">Potencia Necesaria (kW)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-solar-panel"></i></div>
-            <div class="metric-value" id="numeroModulos">-</div>
-            <div class="metric-label">Módulos Requeridos</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-industry"></i></div>
-            <div class="metric-value" id="generacionAnual">-</div>
-            <div class="metric-label">Generación Anual (kWh)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div>
-            <div class="metric-value" id="potenciaInstalada">-</div>
-            <div class="metric-label">Potencia Instalada (kW)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-sun"></i></div>
-            <div class="metric-value" id="hsp">-</div>
-            <div class="metric-label">Horas Solares Pico</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-leaf"></i></div>
-            <div class="metric-value" id="ahorroCO2">-</div>
-            <div class="metric-label">Ahorro CO₂ (t/año)</div>
-          </div>
-          <!-- Added trees metric -->
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-tree"></i></div>
-            <div class="metric-value" id="arboles">-</div>
-            <div class="metric-label">Árboles Equivalentes</div>
-          </div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-bolt"></i></div><div class="metric-value" id="consumoAnual">-</div><div class="metric-label">Consumo Anual (kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-day"></i></div><div class="metric-value" id="consumoMensual">-</div><div class="metric-label">Consumo Mensual Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="consumoDiario">-</div><div class="metric-label">Consumo Diario Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-dollar-sign"></i></div><div class="metric-value" id="importeTotal">-</div><div class="metric-label">Importe Total Anual</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-coins"></i></div><div class="metric-value" id="importePromedio">-</div><div class="metric-label">Importe Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calculator"></i></div><div class="metric-value" id="tarifaPromedio">-</div><div class="metric-label">Tarifa Promedio ($/kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-percentage"></i></div><div class="metric-value" id="porcentajeAhorro">-</div><div class="metric-label">% de Ahorro</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-half"></i></div><div class="metric-value" id="tempMin">-</div><div class="metric-label">Temp Min (°C)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-full"></i></div><div class="metric-value" id="tempMax">-</div><div class="metric-label">Temp Max (°C)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-plug"></i></div><div class="metric-value" id="potenciaNecesaria">-</div><div class="metric-label">Potencia Necesaria (kW)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-solar-panel"></i></div><div class="metric-value" id="numeroModulos">-</div><div class="metric-label">Módulos Requeridos</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-industry"></i></div><div class="metric-value" id="generacionAnual">-</div><div class="metric-label">Generación Anual (kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div><div class="metric-value" id="potenciaInstalada">-</div><div class="metric-label">Potencia Instalada (kW)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="hsp">-</div><div class="metric-label">Horas Solares Pico</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-leaf"></i></div><div class="metric-value" id="ahorroCO2">-</div><div class="metric-label">Ahorro CO₂ (t/año)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-tree"></i></div><div class="metric-value" id="arboles">-</div><div class="metric-label">Árboles Equivalentes</div></div>
         </div>
 
-        <!-- Solar irradiation chart section -->
         <div class="chart-section">
-          <div class="chart-header">
-            <i class="fas fa-chart-bar"></i> Gráfica de Irradiación Solar
-          </div>
-          <div class="chart-container">
-            <canvas id="irradiacionChart" width="800" height="400"></canvas>
-          </div>
+          <div class="chart-header"><i class="fas fa-chart-bar"></i> Gráfica de Irradiación Solar</div>
+          <div class="chart-container"><canvas id="irradiacionChart" width="800" height="400"></canvas></div>
         </div>
 
-        <!-- Detailed tariff analysis table -->
         <div class="details-table">
-          <div class="table-header">
-            <i class="fas fa-table"></i> Análisis Detallado por Período
-          </div>
+          <div class="table-header"><i class="fas fa-table"></i> Análisis Detallado por Período</div>
           <div class="table-content">
             <div class="table-row" style="font-weight: 600; background: rgba(16, 185, 129, 0.1);">
               <div class="table-cell">Período</div>
@@ -667,32 +634,19 @@
               <div class="table-cell">Importe ($)</div>
               <div class="table-cell">Tarifa ($/kWh)</div>
             </div>
-            <div id="detalleTableBody">
-              <!-- Se llena dinámicamente -->
-            </div>
+            <div id="detalleTableBody"></div>
           </div>
         </div>
 
         <div class="chart-section">
-          <div class="chart-header">
-            <i class="fas fa-chart-bar"></i> Impacto de la Generación vs Consumo
-          </div>
-          <div class="chart-container">
-            <canvas id="impactoChart" width="800" height="400"></canvas>
-          </div>
+          <div class="chart-header"><i class="fas fa-chart-bar"></i> Impacto de la Generación vs Consumo</div>
+          <div class="chart-container"><canvas id="impactoChart" width="800" height="400"></canvas></div>
         </div>
-
-        <!-- Botones de exportar -->
-        <!-- <button class="export-btn" onclick="exportResultsToPdf()">
-          <i class="fas fa-file-pdf"></i>
-          <span>Exportar Reporte PDF</span>
-        </button> -->
 
         <button class="calculate-btn" onclick="exportToBasePdf()">
           <i class="fas fa-file-contract"></i>
           <span>Generar Cotización</span>
         </button>
-
       </div>
     </div>
   </div>
@@ -700,9 +654,7 @@
   <!-- Loading overlay -->
   <div class="loading-overlay" id="loading">
     <div class="loading-content">
-      <div class="loading-spinner">
-        <i class="fas fa-solar-panel fa-spin"></i>
-      </div>
+      <div class="loading-spinner"><i class="fas fa-solar-panel fa-spin"></i></div>
       <div class="loading-text">Procesando Datos</div>
       <div class="loading-subtext">Consultando irradiación solar...</div>
     </div>
@@ -711,7 +663,7 @@
   <script src="script.js"></script>
   <script src="scriptpdf.js"></script>
 
-  <!-- JS de la barra resizable (mitad inicial y sin tope en la mitad) -->
+  <!-- JS de la barra resizable -->
   <script>
     (function () {
       const container = document.querySelector('.main-container');
@@ -722,28 +674,22 @@
       const MIN_LEFT = 320;   // px
       const MIN_RIGHT = 320;  // px
 
-      let startX = 0;
-      let startW = 0;
-      let dragging = false;
+      let startX = 0, startW = 0, dragging = false;
 
       function clampLeftWidth(px){
         const total = container.getBoundingClientRect().width;
-        const maxByRight = total - MIN_RIGHT;  // permite >50% mientras quede espacio a la derecha
+        const maxByRight = total - MIN_RIGHT;
         return Math.max(MIN_LEFT, Math.min(maxByRight, px));
       }
-
       function setLeftWidth(px){
         const w = clampLeftWidth(px);
         left.style.width = w + 'px';
         left.style.flex = `0 0 ${w}px`;
       }
-
-      // Inicializar exactamente a la mitad
       function setHalf(){
         const total = container.getBoundingClientRect().width;
         setLeftWidth(total / 2);
       }
-
       function onPointerDown(e){
         dragging = true;
         startX = (e.touches ? e.touches[0].clientX : e.clientX);
@@ -758,24 +704,9 @@
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onPointerUp);
       }
-
-      function onPointerMove(e){
-        if(!dragging) return;
-        const dx = e.clientX - startX;
-        setLeftWidth(startW + dx);
-      }
-      function onMouseMove(e){
-        if(!dragging) return;
-        const dx = e.clientX - startX;
-        setLeftWidth(startW + dx);
-      }
-      function onTouchMove(e){
-        if(!dragging) return;
-        e.preventDefault();
-        const dx = e.touches[0].clientX - startX;
-        setLeftWidth(startW + dx);
-      }
-
+      function onPointerMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onMouseMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onTouchMove(e){ if(!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
       function onPointerUp(){
         dragging = false;
         document.body.classList.remove('is-resizing');
@@ -787,17 +718,41 @@
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onPointerUp);
       }
-
       resizer.addEventListener('pointerdown', onPointerDown);
       resizer.addEventListener('mousedown', onPointerDown);
       resizer.addEventListener('touchstart', onPointerDown, { passive:true });
-
-      // Colocar en la mitad al cargar y también si cambia el tamaño de la ventana
       window.addEventListener('load', setHalf);
       window.addEventListener('resize', setHalf);
-      // ajuste inicial por si layout tarda
       setTimeout(setHalf, 0);
     })();
+  </script>
+
+  <!-- JS para el panel de Consumo (misma UI, ahora responsivo y mismo tamaño de input) -->
+  <script>
+    function generarInputsConsumo(){
+      const select = document.getElementById('tipoPeriodo');
+      const n = (select && select.value === 'mensual') ? 12 : 6;
+
+      const kwhRow = document.getElementById('kwhRow');
+      const pagoRow = document.getElementById('pagoRow');
+      if(!kwhRow || !pagoRow) return;
+
+      kwhRow.innerHTML = '';
+      pagoRow.innerHTML = '';
+
+      for(let i=0;i<n;i++){
+        const k = document.createElement('input');
+        k.type = 'number';
+        k.className = 'consumo-input';
+        kwhRow.appendChild(k);
+
+        const p = document.createElement('input');
+        p.type = 'number';
+        p.className = 'consumo-input';
+        pagoRow.appendChild(p);
+      }
+    }
+    window.addEventListener('load', generarInputsConsumo);
   </script>
 </body>
 </html>
