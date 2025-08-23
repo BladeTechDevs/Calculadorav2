@@ -58,13 +58,12 @@ async function exportToBasePdf() {
       areaAprox: getVal("areaAprox", "—"),
     }
 
-    // Detalle por periodo
+    // Detalle por periodo (no se renderiza tabla, se mantiene solo por si lo usas)
     const tipoPeriodo = document.getElementById("tipoPeriodo")?.value || "mensual"
     const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
     const etiquetas = tipoPeriodo === "mensual"
       ? ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
       : ["Bim 1","Bim 2","Bim 3","Bim 4","Bim 5","Bim 6"]
-
     const filasDetalle = []
     for (let i = 0; i < numPeriodos; i++) {
       const c = Number.parseFloat(document.getElementById(`consumo${i}`)?.value || "0")
@@ -95,15 +94,15 @@ async function exportToBasePdf() {
     let contentWidth = PW - left - right
     let y = PH - firstTop
 
-    // Colores – marca #1E924B
+    // Colores
     const ink    = rgb(0.12, 0.12, 0.12)
     const mute   = rgb(0.45, 0.45, 0.45)
     const prime  = rgb(0x1E/255, 0x92/255, 0x4B/255) // #1E924B
-    const primeD = rgb(0x15/255, 0x72/255, 0x3A/255) // más oscuro
-    const primeL = rgb(0.93, 0.98, 0.95)             // tinte claro
+    const primeD = rgb(0x15/255, 0x72/255, 0x3A/255)
+    const primeL = rgb(0.93, 0.98, 0.95)
     const grayL  = rgb(0.96, 0.96, 0.96)
     const white  = rgb(1, 1, 1)
-    const headerSoft = rgb(0xED/255, 0xFA/255, 0xF2/255) // #EDFAF2
+    const headerSoft = rgb(0xED/255, 0xFA/255, 0xF2/255)
 
     // Escalas
     const fsBase  = 8
@@ -306,9 +305,10 @@ async function exportToBasePdf() {
       y -= H + 6
     }
 
-    const kpiRow = (items) => {
+    // ========= kpiRow FLEXIBLE: cols a elección =========
+    const kpiRow = (items, colsOverride) => {
       const gap = mm(5)
-      const cols = 3
+      const cols = Math.max(1, colsOverride || items.length)
       const colW = (contentWidth - gap * (cols - 1)) / cols
       const H = 44
       ensure(H + 6)
@@ -335,48 +335,7 @@ async function exportToBasePdf() {
       y -= 1
     }
 
-    // ======= TABLA CENTRADA =======
-    const drawTable = (headers, rows) => {
-      const rowH = 18
-      const pcts = [20, 25, 25, 30]
-      const colW = pcts.map(p => (contentWidth * p) / 100)
-
-      const colStartX = i => left + colW.slice(0, i).reduce((a, b) => a + b, 0)
-      const centerX = (i, txt, size = fsBase, f = font) =>
-        colStartX(i) + (colW[i] - widthOf(txt, size, f)) / 2
-
-      const drawHeader = () => {
-        ensure(rowH + 3)
-        page.drawRectangle({ x: left, y: y - rowH, width: contentWidth, height: rowH, color: primeD, borderRadius: 5 })
-        headers.forEach((h, i) => {
-          const txt = String(h)
-          page.drawText(txt, { x: centerX(i, txt, fsBase, fontBold), y: y - 12, size: fsBase, font: fontBold, color: white })
-        })
-        y -= rowH + 3
-      }
-
-      drawHeader()
-
-      rows.forEach((r, idx) => {
-        ensure(rowH + 2)
-        const isAlt = idx % 2 === 1
-        page.drawRectangle({
-          x: left, y: y - rowH, width: contentWidth, height: rowH,
-          color: isAlt ? grayL : white, borderColor: prime, borderWidth: 0.25, borderRadius: 4
-        })
-
-        r.forEach((cell, i) => {
-          const txt = String(cell ?? "")
-          page.drawText(txt, { x: centerX(i, txt), y: y - 12, size: fsBase, font, color: ink })
-        })
-
-        y -= rowH + 2
-        if (y - rowH < bottom) { newPage(); drawHeader() }
-      })
-      y -= 1
-    }
-
-    // Gráfica centrada + “Promedio anual” más abajo
+    // Gráfica centrada
     const drawCanvasImageIfAny = async (canvasId, widthMM, heightMM) => {
       const canvas = document.getElementById(canvasId)
       if (!canvas) return
@@ -410,7 +369,7 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
-    // === Términos y condiciones
+    // === Términos y condiciones con FOLIO naranja ===
     const drawTerms = () => {
       const items = [
         "La actual cotización es PRELIMINAR, previa a un levantamiento técnico a detalle (precio sujeto a cambio).",
@@ -425,14 +384,27 @@ async function exportToBasePdf() {
         "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo."
       ]
       const fsTiny = 7, lhTiny = 10, pad = 8
-      const title = "TÉRMINOS Y CONDICIONES"
       const titleH = 16
+      const folioText = `Folio: SFVI-19325` // ponlo dinámico si gustas
+
       ensure(titleH + 8)
-      page.drawRectangle({ x: left, y: y - titleH, width: contentWidth, height: titleH, color: primeD, borderRadius: 4 })
+
+      // Folio naranja
+      const folioW = widthOf(folioText, fsBase, fontBold) + 20
+      page.drawRectangle({ x: left, y: y - titleH, width: folioW, height: titleH, color: rgb(1, 0.7, 0) })
+      page.drawText(folioText, { x: left + 6, y: y - 12, size: fsBase, font: fontBold, color: rgb(0,0,0) })
+
+      // Título oscuro
+      const title = "TÉRMINOS Y CONDICIONES"
+      const titleX = left + folioW + 4
+      const titleW = contentWidth - folioW - 4
+      page.drawRectangle({ x: titleX, y: y - titleH, width: titleW, height: titleH, color: primeD })
       const tw = widthOf(title, fsBase, fontBold)
-      page.drawText(title, { x: left + (contentWidth - tw) / 2, y: y - 12, size: fsBase, font: fontBold, color: white })
+      page.drawText(title, { x: titleX + (titleW - tw) / 2, y: y - 12, size: fsBase, font: fontBold, color: white })
+
       y -= titleH + 4
 
+      // Cuerpo
       const maxW = contentWidth - pad * 2
       let totalLines = 0
       const wrapped = items.map((t, i) => {
@@ -448,7 +420,12 @@ async function exportToBasePdf() {
         color: rgb(0.94, 0.98, 0.96), borderColor: prime, borderWidth: 0.4, borderRadius: 6
       })
       let yy = y - pad - fsTiny
-      wrapped.forEach(lines => { lines.forEach(line => { page.drawText(line, { x: left + pad, y: yy, size: fsTiny, font, color: ink }); yy -= lhTiny }) })
+      wrapped.forEach(lines => {
+        lines.forEach(line => {
+          page.drawText(line, { x: left + pad, y: yy, size: fsTiny, font, color: ink })
+          yy -= lhTiny
+        })
+      })
       y -= boxH
     }
 
@@ -470,24 +447,28 @@ async function exportToBasePdf() {
     draw2Cols([["Tipo de proyecto", datos.tipoProyecto || "—"], ["Tarifa", datos.tipoTarifa || "—"]])
     draw2Cols([["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`], ["Zona CFE", datos.zonaCFE || "—"]])
 
-    section("MÉTRICAS CLAVE")
-    kpiRow([["Consumo anual", datos.consumoAnual], ["Consumo mensual", datos.consumoMensual], ["Consumo diario", datos.consumoDiario]])
-    kpiRow([["Gasto anual", datos.importeTotal], ["Tarifa promedio", datos.tarifaPromedio], ["% Ahorro estimado", datos.porcentajeAhorro]])
-    draw2Cols([["HSP promedio", datos.hsp], ["Ahorro CO2", `${datos.ahorroCO2}/año`]])
+    // KPIs en una sola fila (4)
+    kpiRow([
+      ["Consumo anual", datos.consumoAnual],
+      ["Gasto anual", datos.importeTotal],
+      ["Tarifa promedio", datos.tarifaPromedio],
+      ["% Ahorro estimado", datos.porcentajeAhorro]
+    ], 4)
 
     section("DISEÑO DEL SISTEMA")
-    kpiRow([["Potencia necesaria", datos.potenciaNecesaria], ["Potencia instalada", datos.potenciaInstalada], ["N.º de módulos", datos.numeroModulos]])
+    // Los 3 cuadros ocupan todo el ancho (3 columnas)
+    kpiRow([
+      ["Potencia necesaria", datos.potenciaNecesaria],
+      ["Potencia instalada", datos.potenciaInstalada],
+      ["N.º de módulos", datos.numeroModulos]
+    ], 3)
+
     draw2Cols([["Potencia por panel", `${datos.potenciaPanel} W`], ["Generación anual", datos.generacionAnual]])
     draw2Cols([["Área requerida", `${datos.areaAprox} m²`], ["Rango térmico", `${datos.tempMin} — ${datos.tempMax}`]])
 
-    // *** ORDEN SOLICITADO ***
-    // 1) Primero la tabla
+    // *** SOLO GRÁFICA (sin tabla) ***
     section("ANÁLISIS DETALLADO POR PERÍODO")
-    drawTable(["Período", "Consumo (kWh)", "Importe ($)", "Tarifa ($/kWh)"], filasDetalle)
-
-    // 2) Después la gráfica
     await drawCanvasImageIfAny2("impactoChart", 150, 65)
-    // (opcional) await drawCanvasImageIfAny("irradiacionChart", 150, 65)
 
     drawTerms()
     drawFooter()
