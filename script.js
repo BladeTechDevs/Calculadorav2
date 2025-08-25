@@ -773,7 +773,7 @@ function crearGraficaIrradiacion(estado) {
   ctx.fillText("(kWh/m²/día)", canvas.width / 2, 50)
 
   ctx.font = "14px Arial"
-  ctx.fillText(`Promedio anual: ${estadoData.Promedio} kWh/m²/día`, canvas.width / 2, canvas.height - 10)
+  ctx.fillText(`Promedio anual: ${estadoData.Promedio} kWh/m²/día`, canvas.width / 2, canvas.height + 5)
 
   console.log("[v0] Solar irradiation bar chart created successfully")
 }

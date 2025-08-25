@@ -57,7 +57,7 @@
     .resizer.is-dragging{ background:#cfeadc; }
     body.is-resizing{ cursor:col-resize; user-select:none; }
 
-    /* ---------- Consumo: diseño anterior pero con inputs idénticos al resto y 100% responsivo ---------- */
+    /* ---------- Consumo: inputs idénticos al resto y 100% responsivo ---------- */
     .consumo-panel{
       background:#fff;
       border:1px solid #e2e8f0;
@@ -71,14 +71,11 @@
       font-size:.95rem;
       margin-bottom:.55rem;
     }
-
-    /* Grid auto-fit para adaptarse a 6 o 12 valores y al ancho disponible */
     .consumo-grid{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap:.8rem 1rem;
     }
-    /* en pantallas medianas bajamos el mínimo para que quepan más columnas */
     @media (max-width: 1200px){
       .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
     }
@@ -88,15 +85,13 @@
     @media (max-width: 640px){
       .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
     }
-
-    /* Mismo look & feel que tus demás inputs (coincide con los inline styles que usas) */
     .consumo-input{
       width:100%;
       background:#fff;
       border:1px solid #cbd5e1;
       border-radius:8px;
       padding:5px 7px;
-      font-size:.87rem;      /* igual a los inputs del resto del formulario */
+      font-size:.87rem;
       color:#1a202c;
       text-align:center;
     }
@@ -260,6 +255,8 @@
             </select>
           </div>
         </div>
+
+        <!-- Nota + Estado -->
         <div class="form-row">
           <div class="form-group">
             <label for="notaProyecto">Nota</label>
@@ -271,7 +268,6 @@
             <select id="estadoProyecto"
               style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
               <option value="">Selecciona un estado</option>
-              <!-- opciones... (mismas que arriba) -->
               <option value="Aguascalientes">Aguascalientes</option>
               <option value="Baja California">Baja California</option>
               <option value="Baja California Sur">Baja California Sur</option>
@@ -307,6 +303,22 @@
             </select>
           </div>
         </div>
+
+        <!-- NUEVO: Municipio/Ciudad + Región tarifaria CFE (auto) -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="municipioProyecto">Municipio / Ciudad</label>
+            <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+          <div class="form-group">
+            <label for="regionTarifariaCFE">Región tarifaria CFE</label>
+            <input type="text" id="regionTarifariaCFE" placeholder="Se llena automáticamente"
+              readonly
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group" style="grid-column: span 2;">
             <label for="requerimientosProyecto">Requerimientos</label>
@@ -384,7 +396,7 @@
                 <select id="inversorPanel"
                   style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                   <option value="">Seleccione</option>
-                  <option value="hibrido">Híbrido</option>
+                  <option value="microinversor">Microinversor</option>
                   <option value="central">Central</option>
                 </select>
               </div>
@@ -534,10 +546,6 @@
               <input type="number" id="roi" style="width:100%;" placeholder="">
             </div>
           </div>
-        </div>
-        <div
-          style="background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; padding:1.1rem; text-align:center; font-size:1.05rem; color:#64748b;">
-          <span>Gráfico (Impacto de la generación en el consumo)</span>
         </div>
       </div>
 
@@ -727,7 +735,7 @@
     })();
   </script>
 
-  <!-- JS para el panel de Consumo (misma UI, ahora responsivo y mismo tamaño de input) -->
+  <!-- JS para el panel de Consumo -->
   <script>
     function generarInputsConsumo(){
       const select = document.getElementById('tipoPeriodo');
@@ -753,6 +761,44 @@
       }
     }
     window.addEventListener('load', generarInputsConsumo);
+  </script>
+
+  <!-- JS: Región tarifaria CFE automática según estado -->
+  <script>
+    (function(){
+      const estadoProyecto = document.getElementById('estadoProyecto');
+      const regionInput = document.getElementById('regionTarifariaCFE');
+
+      const regiones = {
+        "Región Norte": ["Chihuahua","Coahuila","Nuevo León","Durango"],
+        "Región Noreste": ["San Luis Potosí","Tamaulipas"],
+        "Región Noroeste": ["Sonora","Sinaloa"],
+        "Región Baja California": ["Baja California"],
+        "Región Baja California Sur": ["Baja California Sur"],
+        "Región Peninsular": ["Yucatán","Campeche","Quintana Roo"],
+        "Región Central": ["Ciudad de México","Estado de México","Morelos","Tlaxcala","Puebla","Hidalgo"],
+        "Región Sur": ["Zacatecas","Michoacán","Guerrero","Oaxaca","Chiapas","Veracruz","Tabasco", "Aguascalientes", "Colima", "Guanajuato", "Jalisco", "Nayarit", "Querétaro"]
+      };
+
+      function obtenerRegion(estado){
+        for (const [region, lista] of Object.entries(regiones)){
+          if (lista.includes(estado)) return region;
+        }
+        return "";
+      }
+
+      function actualizarRegion(){
+        const estadoSel = estadoProyecto ? estadoProyecto.value : "";
+        if (regionInput){
+          regionInput.value = obtenerRegion(estadoSel);
+        }
+      }
+
+      if (estadoProyecto){
+        estadoProyecto.addEventListener('change', actualizarRegion);
+        window.addEventListener('load', actualizarRegion);
+      }
+    })();
   </script>
 </body>
 </html>
