@@ -503,7 +503,9 @@ function generarInputsPago() {
     container.appendChild(pagoInput)
   }
 }
-
+  const consumos = []
+  const importes = []
+  let kwintsladaConEficiancia = 0;
 function calcularSistemaSolar() {
   // console.log("[v0] Starting comprehensive solar system calculation")
 
@@ -511,11 +513,10 @@ function calcularSistemaSolar() {
   const tipoPeriodo = document.getElementById("tipoPeriodo").value
   const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
 
-  const consumos = []
-  const importes = []
+
 
   // Collect consumption and payment data
-  for (let i = 0; i < numPeriodos; i++) {
+  for (let i = 1; i < numPeriodos + 1; i++) {
     const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value || 0)
     const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value || 0)
     consumos.push(consumo)
@@ -530,6 +531,14 @@ function calcularSistemaSolar() {
   const consumoAnual = consumoTotal;
   const consumoMensual = consumoAnual / 12
   const consumoDiario = consumoAnual / 365
+
+  console.log({
+    datos: "consumo totales",
+  consumoTotal: consumoTotal.toFixed(2),
+  consumoAnual: consumoAnual.toFixed(2),
+  consumoMensual: consumoMensual.toFixed(2),
+  consumoDiario: consumoDiario.toFixed(2)
+});
 
   // Calculate financial metrics
   console.log(importes)
@@ -578,7 +587,7 @@ for (let i = 0; i < importes.length; i++) {
   const generacionAnual = numeroModulos * (potenciaPanel / 1000) * hspPromedio * 365
   console.log("generacion anual", generacionAnual)
   const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000
-
+  kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000
   console.log("[v0] Solar calculations completed")
   console.log("[v0] Required power:", potenciaNecesaria)
   console.log("[v0] Number of modules:", numeroModulos)
@@ -625,6 +634,8 @@ for (let i = 0; i < importes.length; i++) {
 
   console.log("[v0] All calculations and displays updated successfully")
 }
+
+
 
 function llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo) {
   const tbody = document.getElementById("detalleTableBody")
@@ -779,89 +790,208 @@ function crearGraficaIrradiacion(estado) {
 }
 
 // Etiquetas (12 meses)
-const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic", "Total"];
 
 // Consumos (12 valores). Si trabajas bimestral, duplica o interpola.
-const consumosMensuales = [690, 631, 422, 970, 1011, 752, 690, 631, 422, 970, 1011, 752];
+const consumosMensuales = consumos;
 
 // Producción (12 valores). Ejemplo: repartir la generación anual uniformemente:
-const produccionMensual = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
+const produccionMensual = []
+// = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
+
+function diasEnMes(mes, anio) {
+// === Uso con el año actual ===
+const anioActual = new Date().getFullYear();
+  // mes: 1 = enero, 2 = febrero, ... 12 = diciembre
+  return new Date(anioActual, mes, 0).getDate();
+}
+const irradiacionMensual = [
+  4.27, // Enero
+  5.23, // Febrero
+  6.08, // Marzo
+  6.82, // Abril
+  6.86, // Mayo
+  6.39, // Junio
+  6.78, // Julio
+  6.54, // Agosto
+  5.77, // Septiembre
+  5.13, // Octubre
+  4.47, // Noviembre
+  3.97  // Diciembre
+];
+console.log(calcularProduccion(irradiacionMensual, kwintsladaConEficiancia))
+function calcularProduccion(irradiacionMensual, kWeficiencia) {
+  if (irradiacionMensual.length !== 12) {
+    throw new Error("El arreglo de irradiación debe tener exactamente 12 valores (uno por mes).");
+  }
+
+  const produccion = [];
+
+  for (let mes = 1; mes <= 12; mes++) {
+    const irradiacion = Number(irradiacionMensual[mes - 1]) || 0;
+    const dias = diasEnMes(mes);
+    const valor = irradiacion * kWeficiencia * dias;
+    produccion.push(valor);
+  }
+
+  return produccion;
+}
+
+
+
+// produccionMensual ya existe como arreglo
+const sum = produccionMensual.reduce((acc, val) => acc + Number(val || 0), 0);
+const avg = sum / (produccionMensual.length || 1);
+produccionMensual.push(avg);
+
+
+
 
 // Llamada:
-crearGraficaImpacto(mesesDisplay, consumosMensuales, produccionMensual);
-function crearGraficaImpacto(labels, consumoArr, produccionArr) {
+// Llama una vez después de que existan los elementos
+setupImpactoResponsive(mesesDisplay, consumosMensuales, produccionMensual);
+
+function setupImpactoResponsive(labels, consumoArr, produccionArr) {
+
   const canvas = document.getElementById("impactoChart");
   if (!canvas) return;
-  const ctx = canvas.getContext("2d");
 
-  // Saneos básicos
-  const L = Math.min(consumoArr.length, produccionArr.length, labels.length);
+  const redraw = () => {
+    // 1) Ajuste a contenedor + DPR
+    const parent = canvas.parentElement || canvas;
+    const cssWidth  = parent.clientWidth || 600;
+    const cssHeight = canvas.style.height ? parseInt(getComputedStyle(canvas).height) : 320;
+
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2)); // limitar DPR para perf
+    canvas.width  = Math.floor(cssWidth * dpr);
+    canvas.height = Math.floor(cssHeight * dpr);
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // para dibujar en “píxeles CSS”
+
+    // 2) Calcula tamaños relativos
+    const W = cssWidth;
+    const H = cssHeight;
+
+    const base = Math.max(12, Math.min(16, Math.floor(W / 60))); // fuente base adaptativa
+    const pad  = Math.max(40, Math.min(100, Math.floor(W * 0.08))); // padding relativo
+
+    // 3) Decide si rotar labels en X cuando hay poco ancho
+    const L = Math.min(labels.length, consumoArr.length, produccionArr.length);
+    const rotateX = (W < 480 && L > 6) || (W < 360 && L > 4);
+
+    // 4) Dibuja
+    crearGraficaImpactoResponsive({
+      canvas, ctx, labels, consumoArr, produccionArr,
+      baseFontPx: base, paddingPx: pad, rotateXLabels: rotateX
+    });
+  };
+
+  // Primera pintura
+  redraw();
+
+  // Redibujar al resize del contenedor / ventana
+  if ("ResizeObserver" in window) {
+    const ro = new ResizeObserver(redraw);
+    ro.observe(canvas.parentElement || canvas);
+  } else {
+    window.addEventListener("resize", redraw);
+  }
+}
+
+function crearGraficaImpactoResponsive(opts) {
+  const {
+    canvas, ctx, labels, consumoArr, produccionArr,
+    baseFontPx = 14, paddingPx = 80, rotateXLabels = false
+  } = opts;
+
+  // Sanitizado
+  const L = Math.min(labels.length, consumoArr.length, produccionArr.length);
   const lab = labels.slice(0, L);
   const consumo = consumoArr.slice(0, L).map(v => Number(v) || 0);
   const prod    = produccionArr.slice(0, L).map(v => Number(v) || 0);
 
-  // Dimensiones
-  const padding = 100;
-  const chartWidth  = canvas.width  - 2 * padding;
-  const chartHeight = canvas.height - 2 * padding;
+  // Dimensiones (en CSS px, ya transformados con DPR)
+  const W = Math.floor(canvas.clientWidth || parseInt(getComputedStyle(canvas).width));
+  const H = Math.floor(canvas.clientHeight || parseInt(getComputedStyle(canvas).height));
+  const padding = paddingPx;
 
-  // Escala
-  const maxData = Math.max(...consumo, ...prod, 0);
-  const maxValue = maxData > 0 ? maxData : 1; // evitar 0
-  const valueRange = maxValue;
+  const chartWidth  = Math.max(50, W - 2 * padding);
+  const chartHeight = Math.max(50, H - 2 * padding);
 
   // Limpiar
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, W, H);
+
+  // Fuente principal
+  const font = (w) => `${w}px Arial`;
+  ctx.textBaseline = "middle";
+
+  // Escala Y
+  const maxData = Math.max(...consumo, ...prod, 0);
+  const niceMax  = niceCeil(maxData);  // escalar a “bonito” (e.g. múltiplos)
+  const maxValue = niceMax > 0 ? niceMax : 1;
+  const ticks = 5;
 
   // Ejes
   ctx.strokeStyle = "#333";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(padding, padding);
-  ctx.lineTo(padding, canvas.height - padding);
-  ctx.lineTo(canvas.width - padding, canvas.height - padding);
+  ctx.lineTo(padding, H - padding);
+  ctx.lineTo(W - padding, H - padding);
   ctx.stroke();
 
   // Grid + etiquetas Y
   ctx.strokeStyle = "#e0e0e0";
   ctx.lineWidth = 1;
   ctx.fillStyle = "#666";
-  ctx.font = "12px Arial";
-  for (let i = 0; i <= 5; i++) {
-    const y = padding + (chartHeight * i) / 5;
-    const value = maxValue - (valueRange * i) / 5;
+  ctx.font = font(Math.max(10, baseFontPx - 2));
+  for (let i = 0; i <= ticks; i++) {
+    const y = padding + (chartHeight * i) / ticks;
+    const value = maxValue - (maxValue * i) / ticks;
     ctx.beginPath();
     ctx.moveTo(padding, y);
-    ctx.lineTo(canvas.width - padding, y);
+    ctx.lineTo(W - padding, y);
     ctx.stroke();
-    ctx.fillText(value.toFixed(0), 10, y + 4);
+    ctx.fillText(value.toFixed(0), Math.max(10, padding * 0.35), y);
   }
 
-  // X labels
+  // Labels X
+  ctx.fillStyle = "#666";
   ctx.textAlign = "center";
+  ctx.font = font(Math.max(10, baseFontPx - 2));
+  const xAxisY = H - padding + (rotateXLabels ? 10 : 18);
+
   for (let i = 0; i < L; i++) {
     const xCenter = padding + (chartWidth * (i + 0.5)) / L;
-    ctx.fillText(lab[i], xCenter, canvas.height - 20);
+    if (rotateXLabels) {
+      ctx.save();
+      ctx.translate(xCenter, xAxisY);
+      ctx.rotate(-Math.PI / 4); // -45°
+      ctx.fillText(lab[i], 0, 0);
+      ctx.restore();
+    } else {
+      ctx.fillText(lab[i], xCenter, H - padding + 14);
+    }
   }
 
-  // Barras por grupo (dos barras: consumo y producción)
-  const groupWidth = chartWidth / L;
-  const barWidth   = groupWidth * 0.35;
-  const gapBars    = groupWidth * 0.05; // separacion entre las dos barras
+  // Barras (dos por grupo)
+  const groupWidth = chartWidth / Math.max(1, L);
+  const barWidth   = Math.max(6, Math.min(24, groupWidth * 0.35)); // límites para pantallas chicas
+  const gapBars    = Math.min(8, groupWidth * 0.08);
 
   for (let i = 0; i < L; i++) {
     const xGroupStart = padding + groupWidth * i;
     const xConsumo = xGroupStart + (groupWidth - (2 * barWidth + gapBars)) / 2;
     const xProducc = xConsumo + barWidth + gapBars;
 
-    // Alturas
-    const hC = (consumo[i] / valueRange) * chartHeight;
-    const hP = (prod[i]    / valueRange) * chartHeight;
+    const hC = (consumo[i] / maxValue) * chartHeight;
+    const hP = (prod[i]    / maxValue) * chartHeight;
 
-    const yC = canvas.height - padding - hC;
-    const yP = canvas.height - padding - hP;
+    const yC = H - padding - hC;
+    const yP = H - padding - hP;
 
-    // Consumo (azul grisáceo)
+    // Consumo
     const gradC = ctx.createLinearGradient(0, yC, 0, yC + hC);
     gradC.addColorStop(0, "#7a8aa0");
     gradC.addColorStop(1, "#3a4a60");
@@ -871,7 +1001,7 @@ function crearGraficaImpacto(labels, consumoArr, produccionArr) {
     ctx.lineWidth = 1;
     ctx.strokeRect(xConsumo, yC, barWidth, hC);
 
-    // Producción (verde)
+    // Producción
     const gradP = ctx.createLinearGradient(0, yP, 0, yP + hP);
     gradP.addColorStop(0, "#73b248");
     gradP.addColorStop(1, "#106e3a");
@@ -880,45 +1010,56 @@ function crearGraficaImpacto(labels, consumoArr, produccionArr) {
     ctx.strokeStyle = "#106e3a";
     ctx.strokeRect(xProducc, yP, barWidth, hP);
 
-    // Valores encima
-    ctx.fillStyle = "#333";
-    ctx.font = "10px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(consumo[i].toFixed(0), xConsumo + barWidth / 2, yC - 5);
-    ctx.fillText(prod[i].toFixed(0),    xProducc + barWidth / 2, yP - 5);
+    // Valores encima (ocultarlos si hay muy poco espacio)
+    if (chartHeight > 140) {
+      ctx.fillStyle = "#333";
+      ctx.font = font(Math.max(9, baseFontPx - 4));
+      ctx.textAlign = "center";
+      ctx.fillText(String(Math.round(consumo[i])), xConsumo + barWidth / 2, Math.max(yC - 8, padding - 8));
+      ctx.fillText(String(Math.round(prod[i])),    xProducc + barWidth / 2, Math.max(yP - 8, padding - 8));
+    }
   }
 
-  // Título y subtítulo
+  // Títulos
   ctx.fillStyle = "#333";
-  ctx.font = "bold 16px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("Impacto de la Generación vs Consumo", canvas.width / 2, 30);
-  ctx.font = "14px Arial";
-  ctx.fillText("(kWh por mes)", canvas.width / 2, 50);
+  ctx.font = `bold ${Math.max(14, baseFontPx)}px Arial`;
+  ctx.fillText("Impacto de la Generación vs Consumo", W / 2, Math.max(24, padding * 0.45));
+  ctx.font = `${Math.max(12, baseFontPx - 2)}px Arial`;
+  ctx.fillText("(kWh por mes)", W / 2, Math.max(44, padding * 0.65));
 
-  // Leyenda
-  const legendX = canvas.width - padding - 160;
-  const legendY = padding - 30;
-  const box = (x, y, w, h, g1, g2, stroke) => {
-    const grad = ctx.createLinearGradient(0, y, 0, y + h);
-    grad.addColorStop(0, g1);
-    grad.addColorStop(1, g2);
-    ctx.fillStyle = grad;
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = stroke;
-    ctx.strokeRect(x, y, w, h);
+  // Leyenda compacta
+  const legendTop = padding * 0.6;
+  const legendLeft = Math.min(W - padding - 160, W / 2 + 120);
+  const drawLegendBox = (x, y, w, h, c1, c2, stroke) => {
+    const g = ctx.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, c1); g.addColorStop(1, c2);
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = stroke; ctx.strokeRect(x, y, w, h);
   };
-  // Consumo
-  box(legendX, legendY, 16, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
-  ctx.fillStyle = "#333";
-  ctx.font = "12px Arial";
-  ctx.textAlign = "left";
-  ctx.fillText("Consumo", legendX + 22, legendY + 11);
-  // Producción
-  box(legendX + 80, legendY, 16, 12, "#73b248", "#106e3a", "#106e3a");
-  ctx.fillStyle = "#333";
-  ctx.fillText("Producción", legendX + 102, legendY + 11);
+
+  ctx.font = `${Math.max(11, baseFontPx - 1)}px Arial`;
+  ctx.textAlign = "left"; ctx.fillStyle = "#333";
+  drawLegendBox(legendLeft, legendTop, 16, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
+  ctx.fillText("Consumo", legendLeft + 22, legendTop + 10);
+  drawLegendBox(legendLeft + 90, legendTop, 16, 12, "#73b248", "#106e3a", "#106e3a");
+  ctx.fillText("Producción", legendLeft + 112, legendTop + 10);
 }
+
+// Redondeo “bonito” para el máximo del eje Y
+function niceCeil(x) {
+  if (x <= 0) return 1;
+  const exp = Math.floor(Math.log10(x));
+  const base = Math.pow(10, exp);
+  const m = x / base;
+  let nice;
+  if (m <= 1) nice = 1;
+  else if (m <= 2) nice = 2;
+  else if (m <= 5) nice = 5;
+  else nice = 10;
+  return nice * base;
+}
+
 
 
 // function exportResultsToPdf() {

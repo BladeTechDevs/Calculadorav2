@@ -40,6 +40,7 @@ async function exportToBasePdf() {
       // Ejecutivo
       nombreEjecutivo: getVal("nombreEjecutivo"),
       correoEjecutivo: getVal("correoEjecutivo"),
+      whatsappEjecutivo: "7774457253",
       // Proyecto
       tipoProyecto: getVal("tipoProyecto"),
       tipoTarifa: getVal("tipoTarifa"),
@@ -122,6 +123,7 @@ async function exportToBasePdf() {
     const grayL  = rgb(0.96, 0.96, 0.96)
     const white  = rgb(1, 1, 1)
     const headerSoft = rgb(0xED/255, 0xFA/255, 0xF2/255)
+    const headerDark = rgb(0, 0, 0)
 
     // >>> Tonos verdes usados en la tabla de cotización
     const greenD = primeD                  // borde / textos oscuros
@@ -183,6 +185,18 @@ async function exportToBasePdf() {
       page.drawLine({ start: { x: left, y: y - h - 5 }, end: { x: left + contentWidth, y: y - h - 5 }, thickness: 0.5, color: primeL })
       y -= h + 9
     }
+    //este seolo se usa para el primer titulo "COTIZACIÓN PRELIMINAR"
+    const section2 = (txt) => {
+      const padY = 2, padX = 360
+      const w = widthOf(txt, fsTitle, fontBold) + padX * 2
+      const h = fsTitle + padY * 1.2
+      ensure(h + 8)
+      //no se usa el rectángulo por que va en negro
+      // page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
+      page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: fontBold, color: headerDark })
+      page.drawLine({ start: { x: left, y: y - h - 5 }, end: { x: left + contentWidth, y: y - h - 5 }, thickness: 0.5, color: primeL })
+      y -= h + 9
+    }
 
     // ========= PANEL Cliente + Ejecutivo con ICONOS SVG =========
     const iconCache = {}
@@ -236,6 +250,7 @@ async function exportToBasePdf() {
       const rightRows = [
         { icon: "nombreEjecutivo.svg", label: "Ejecutivo", value: datos.nombreEjecutivo || "—" },
         { icon: "correo.svg",          label: "Correo",    value: datos.correoEjecutivo || "—" },
+        { icon: "whatsapp.svg",        label: "Contacto",    value: datos.whatsappEjecutivo || "—" },
       ]
 
       const measureRowsHeight = rows => {
@@ -259,7 +274,7 @@ async function exportToBasePdf() {
       page.drawRectangle({ x: left, y: y - H, width: contentWidth, height: H, color: white, borderColor: prime, borderWidth: 1, borderRadius: radius })
       // encabezado
       page.drawRectangle({ x: left, y: y - titleH, width: contentWidth, height: titleH, color: headerSoft, borderRadius: radius })
-      const title = "Información del cliente y ejecutivo"
+      const title = "Información del cliente"
       page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: primeD })
 
       // separador
@@ -631,7 +646,7 @@ function drawCotizacionMantenimiento() {
     }
 
     // === 4) Composición ===
-    section("COTIZACIÓN / ANÁLISIS SFVI")
+    section2("COTIZACIÓN PRELIMINAR")
 
     // Panel (cliente y ejecutivo)
     await drawInfoPanelWithIcons()

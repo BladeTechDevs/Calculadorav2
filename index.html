@@ -15,90 +15,117 @@
   <!-- 🔧 Split bar (empieza a la mitad y permite pasarla) + consumo responsivo -->
   <style>
     /* ---------- Split layout ---------- */
-    .main-container{
-      display:flex;
-      width:100%;
-      min-height:calc(100vh - 64px);
-      overflow:hidden;
+    .main-container {
+      display: flex;
+      width: 100%;
+      min-height: calc(100vh - 64px);
+      overflow: hidden;
     }
-    .form-panel{
-      flex:0 0 50%;
-      width:50%;
-      min-width:320px;
-      overflow:auto;
+
+    .form-panel {
+      flex: 0 0 50%;
+      width: 50%;
+      min-width: 320px;
+      overflow: auto;
     }
-    .results-panel{
-      flex:1 1 auto;
-      min-width:320px;
-      overflow:auto;
+
+    .results-panel {
+      flex: 1 1 auto;
+      min-width: 320px;
+      overflow: auto;
     }
-    .resizer{
-      flex:0 0 8px;
-      width:8px;
-      background:linear-gradient(90deg,#eef8f3,#d7efe3);
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
-      cursor:col-resize;
-      align-self:stretch;
-      touch-action:none;
-      position:relative;
-      z-index:10;
+
+    .resizer {
+      flex: 0 0 8px;
+      width: 8px;
+      background: linear-gradient(90deg, #eef8f3, #d7efe3);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06);
+      cursor: col-resize;
+      align-self: stretch;
+      touch-action: none;
+      position: relative;
+      z-index: 10;
     }
-    .resizer::after{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:3px;
-      height:44px;
-      border-radius:2px;
-      background:rgba(30,146,75,.7);
+
+    .resizer::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 3px;
+      height: 44px;
+      border-radius: 2px;
+      background: rgba(30, 146, 75, .7);
     }
-    .resizer.is-dragging{ background:#cfeadc; }
-    body.is-resizing{ cursor:col-resize; user-select:none; }
+
+    .resizer.is-dragging {
+      background: #cfeadc;
+    }
+
+    body.is-resizing {
+      cursor: col-resize;
+      user-select: none;
+    }
 
     /* ---------- Consumo: inputs idénticos al resto y 100% responsivo ---------- */
-    .consumo-panel{
-      background:#fff;
-      border:1px solid #e2e8f0;
-      border-radius:12px;
-      padding:1rem 1rem 1.2rem;
+    .consumo-panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem 1rem 1.2rem;
     }
-    .consumo-row{ margin-top:.9rem; }
-    .consumo-row-label{
-      font-weight:600;
-      color:#2d3748;
-      font-size:.95rem;
-      margin-bottom:.55rem;
+
+    .consumo-row {
+      margin-top: .9rem;
     }
-    .consumo-grid{
-      display:grid;
+
+    .consumo-row-label {
+      font-weight: 600;
+      color: #2d3748;
+      font-size: .95rem;
+      margin-bottom: .55rem;
+    }
+
+    .consumo-grid {
+      display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap:.8rem 1rem;
+      gap: .8rem 1rem;
     }
-    @media (max-width: 1200px){
-      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+    @media (max-width: 1200px) {
+      .consumo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      }
     }
-    @media (max-width: 900px){
-      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    @media (max-width: 900px) {
+      .consumo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
     }
-    @media (max-width: 640px){
-      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+
+    @media (max-width: 640px) {
+      .consumo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      }
     }
-    .consumo-input{
-      width:100%;
-      background:#fff;
-      border:1px solid #cbd5e1;
-      border-radius:8px;
-      padding:5px 7px;
-      font-size:.87rem;
-      color:#1a202c;
-      text-align:center;
+
+    .consumo-input {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 5px 7px;
+      font-size: .87rem;
+      color: #1a202c;
+      text-align: center;
     }
-    .consumo-input:focus{
-      outline:none;
-      border-color:#73b248;
-      box-shadow:0 0 0 3px rgba(115,178,72,0.10);
+
+    .consumo-input:focus {
+      outline: none;
+      border-color: #73b248;
+      box-shadow: 0 0 0 3px rgba(115, 178, 72, 0.10);
     }
   </style>
 </head>
@@ -108,7 +135,7 @@
   <div class="top-bar">
     <div class="logo">
       <img src="logo.png" alt="Hexa Solar Logo" class="logo-image"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
       <i class="fas fa-solar-panel" style="display: none;"></i>
       <span>Hexa Solar Power Solution</span>
     </div>
@@ -313,8 +340,7 @@
           </div>
           <div class="form-group">
             <label for="regionTarifariaCFE">Región tarifaria CFE</label>
-            <input type="text" id="regionTarifariaCFE" placeholder="Se llena automáticamente"
-              readonly
+            <input type="text" id="regionTarifariaCFE" placeholder="Se llena automáticamente" readonly
               style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
           </div>
         </div>
@@ -557,28 +583,45 @@
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
           <div>
-            <div class="form-group"><label for="panel" style="font-weight:500;">Panel:</label><input type="number" id="panel" style="width:100%;"></div>
-            <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input type="number" id="inversor" style="width:100%;"></div>
-            <div class="form-group"><label for="mantenimiento" style="font-weight:500;">Mantenimiento:</label><input type="number" id="mantenimiento" style="width:100%;"></div>
-            <div class="form-group"><label for="estructura" style="font-weight:500;">Estructura:</label><input type="number" id="estructura" style="width:100%;"></div>
-            <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input type="number" id="materiales" style="width:100%;"></div>
-            <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input type="number" id="instalacion" style="width:100%;"></div>
-            <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta (Pog):</label><input type="number" id="carpeta" style="width:100%;"></div>
+            <div class="form-group"><label for="panel" style="font-weight:500;">Panel:</label><input type="number"
+                id="panel" style="width:100%;"></div>
+            <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input type="number"
+                id="inversor" style="width:100%;"></div>
+            <div class="form-group"><label for="mantenimiento" style="font-weight:500;">Mantenimiento:</label><input
+                type="number" id="mantenimiento" style="width:100%;"></div>
+            <div class="form-group"><label for="estructura" style="font-weight:500;">Estructura:</label><input
+                type="number" id="estructura" style="width:100%;"></div>
+            <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input
+                type="number" id="materiales" style="width:100%;"></div>
+            <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input
+                type="number" id="instalacion" style="width:100%;"></div>
+            <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta (Pog):</label><input
+                type="number" id="carpeta" style="width:100%;"></div>
           </div>
           <div>
-            <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input type="number" id="flete" style="width:100%;"></div>
-            <div class="form-group"><label for="interconexion" style="font-weight:500;">Interconexión:</label><input type="number" id="interconexion" style="width:100%;"></div>
-            <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input type="number" id="uve" style="width:100%;"></div>
-            <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input type="number" id="uie" style="width:100%;"></div>
-            <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input type="number" id="medidor" style="width:100%;"></div>
+            <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input type="number"
+                id="flete" style="width:100%;"></div>
+            <div class="form-group"><label for="interconexion" style="font-weight:500;">Interconexión:</label><input
+                type="number" id="interconexion" style="width:100%;"></div>
+            <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input type="number" id="uve"
+                style="width:100%;"></div>
+            <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input type="number" id="uie"
+                style="width:100%;"></div>
+            <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input type="number"
+                id="medidor" style="width:100%;"></div>
           </div>
           <div>
-            <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number" id="profit" style="width:100%;"></div>
-            <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number" id="watts" style="width:100%;"></div>
+            <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number"
+                id="profit" style="width:100%;"></div>
+            <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number"
+                id="watts" style="width:100%;"></div>
             <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
-            <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number" id="subtotal" style="width:100%;"></div>
-            <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input type="number" id="iva" style="width:100%;"></div>
-            <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input type="number" id="total" style="width:100%;"></div>
+            <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number"
+                id="subtotal" style="width:100%;"></div>
+            <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input type="number" id="iva"
+                style="width:100%;"></div>
+            <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input type="number"
+                id="total" style="width:100%;"></div>
           </div>
         </div>
       </div>
@@ -610,22 +653,86 @@
         </div>
 
         <div class="metrics-grid">
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-bolt"></i></div><div class="metric-value" id="consumoAnual">-</div><div class="metric-label">Consumo Anual (kWh)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-day"></i></div><div class="metric-value" id="consumoMensual">-</div><div class="metric-label">Consumo Mensual Promedio</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="consumoDiario">-</div><div class="metric-label">Consumo Diario Promedio</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-dollar-sign"></i></div><div class="metric-value" id="importeTotal">-</div><div class="metric-label">Importe Total Anual</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-coins"></i></div><div class="metric-value" id="importePromedio">-</div><div class="metric-label">Importe Promedio</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calculator"></i></div><div class="metric-value" id="tarifaPromedio">-</div><div class="metric-label">Tarifa Promedio ($/kWh)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-percentage"></i></div><div class="metric-value" id="porcentajeAhorro">-</div><div class="metric-label">% de Ahorro</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-half"></i></div><div class="metric-value" id="tempMin">-</div><div class="metric-label">Temp Min (°C)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-full"></i></div><div class="metric-value" id="tempMax">-</div><div class="metric-label">Temp Max (°C)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-plug"></i></div><div class="metric-value" id="potenciaNecesaria">-</div><div class="metric-label">Potencia Necesaria (kW)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-solar-panel"></i></div><div class="metric-value" id="numeroModulos">-</div><div class="metric-label">Módulos Requeridos</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-industry"></i></div><div class="metric-value" id="generacionAnual">-</div><div class="metric-label">Generación Anual (kWh)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div><div class="metric-value" id="potenciaInstalada">-</div><div class="metric-label">Potencia Instalada (kW)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="hsp">-</div><div class="metric-label">Horas Solares Pico</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-leaf"></i></div><div class="metric-value" id="ahorroCO2">-</div><div class="metric-label">Ahorro CO₂ (t/año)</div></div>
-          <div class="metric-card"><div class="metric-icon"><i class="fas fa-tree"></i></div><div class="metric-value" id="arboles">-</div><div class="metric-label">Árboles Equivalentes</div></div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-bolt"></i></div>
+            <div class="metric-value" id="consumoAnual">-</div>
+            <div class="metric-label">Consumo Anual (kWh)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="metric-value" id="consumoMensual">-</div>
+            <div class="metric-label">Consumo Mensual Promedio</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-sun"></i></div>
+            <div class="metric-value" id="consumoDiario">-</div>
+            <div class="metric-label">Consumo Diario Promedio</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="metric-value" id="importeTotal">-</div>
+            <div class="metric-label">Importe Total Anual</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-coins"></i></div>
+            <div class="metric-value" id="importePromedio">-</div>
+            <div class="metric-label">Importe Promedio</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-calculator"></i></div>
+            <div class="metric-value" id="tarifaPromedio">-</div>
+            <div class="metric-label">Tarifa Promedio ($/kWh)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-percentage"></i></div>
+            <div class="metric-value" id="porcentajeAhorro">-</div>
+            <div class="metric-label">% de Ahorro</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
+            <div class="metric-value" id="tempMin">-</div>
+            <div class="metric-label">Temp Min (°C)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-thermometer-full"></i></div>
+            <div class="metric-value" id="tempMax">-</div>
+            <div class="metric-label">Temp Max (°C)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-plug"></i></div>
+            <div class="metric-value" id="potenciaNecesaria">-</div>
+            <div class="metric-label">Potencia Necesaria (kW)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-solar-panel"></i></div>
+            <div class="metric-value" id="numeroModulos">-</div>
+            <div class="metric-label">Módulos Requeridos</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-industry"></i></div>
+            <div class="metric-value" id="generacionAnual">-</div>
+            <div class="metric-label">Generación Anual (kWh)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+            <div class="metric-value" id="potenciaInstalada">-</div>
+            <div class="metric-label">Potencia Instalada (kW)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-sun"></i></div>
+            <div class="metric-value" id="hsp">-</div>
+            <div class="metric-label">Horas Solares Pico</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-leaf"></i></div>
+            <div class="metric-value" id="ahorroCO2">-</div>
+            <div class="metric-label">Ahorro CO₂ (t/año)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-tree"></i></div>
+            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-label">Árboles Equivalentes</div>
+          </div>
         </div>
 
         <div class="chart-section">
@@ -646,10 +753,14 @@
           </div>
         </div>
 
-        <div class="chart-section">
+        <!-- <div class="chart-section">
           <div class="chart-header"><i class="fas fa-chart-bar"></i> Impacto de la Generación vs Consumo</div>
           <div class="chart-container"><canvas id="impactoChart" width="800" height="400"></canvas></div>
-        </div>
+        </div> -->
+
+        <div id="impactoWrapper" style="width:100%;max-width:900px">
+  <canvas id="impactoChart" style="width:100%;height:320px;"></canvas>
+</div>
 
         <button class="calculate-btn" onclick="exportToBasePdf()">
           <i class="fas fa-file-contract"></i>
@@ -684,21 +795,21 @@
 
       let startX = 0, startW = 0, dragging = false;
 
-      function clampLeftWidth(px){
+      function clampLeftWidth(px) {
         const total = container.getBoundingClientRect().width;
         const maxByRight = total - MIN_RIGHT;
         return Math.max(MIN_LEFT, Math.min(maxByRight, px));
       }
-      function setLeftWidth(px){
+      function setLeftWidth(px) {
         const w = clampLeftWidth(px);
         left.style.width = w + 'px';
         left.style.flex = `0 0 ${w}px`;
       }
-      function setHalf(){
+      function setHalf() {
         const total = container.getBoundingClientRect().width;
         setLeftWidth(total / 2);
       }
-      function onPointerDown(e){
+      function onPointerDown(e) {
         dragging = true;
         startX = (e.touches ? e.touches[0].clientX : e.clientX);
         startW = left.getBoundingClientRect().width;
@@ -707,15 +818,15 @@
 
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('touchmove', onTouchMove, { passive:false });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onPointerUp);
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onPointerUp);
       }
-      function onPointerMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-      function onMouseMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-      function onTouchMove(e){ if(!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
-      function onPointerUp(){
+      function onPointerMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onMouseMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onTouchMove(e) { if (!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
+      function onPointerUp() {
         dragging = false;
         document.body.classList.remove('is-resizing');
         resizer.classList.remove('is-dragging');
@@ -728,7 +839,7 @@
       }
       resizer.addEventListener('pointerdown', onPointerDown);
       resizer.addEventListener('mousedown', onPointerDown);
-      resizer.addEventListener('touchstart', onPointerDown, { passive:true });
+      resizer.addEventListener('touchstart', onPointerDown, { passive: true });
       window.addEventListener('load', setHalf);
       window.addEventListener('resize', setHalf);
       setTimeout(setHalf, 0);
@@ -737,123 +848,170 @@
 
   <!-- JS para el panel de Consumo -->
   <script>
-    function generarInputsConsumo(){
+    //     function generarInputsConsumo() {
+    //   const select = document.getElementById('tipoPeriodo');
+    //   const n = (select && select.value === 'mensual') ? 12 : 6;
+
+    //   const kwhRow = document.getElementById('kwhRow');
+    //   const pagoRow = document.getElementById('pagoRow');
+    //   if (!kwhRow || !pagoRow) return;
+
+    //   kwhRow.innerHTML = '';
+    //   pagoRow.innerHTML = '';
+
+    //   for (let i = 1; i <= n; i++) {
+    //     const k = document.createElement('input');
+    //     k.type = 'number';
+    //     k.className = 'consumo-input';
+    //     k.id = `consumo${i}`;
+    //     kwhRow.appendChild(k);
+
+    //     const p = document.createElement('input');
+    //     p.type = 'number';
+    //     p.className = 'consumo-input';
+    //     p.id = `importe${i}`;
+    //     pagoRow.appendChild(p);
+    //   }
+    // }
+
+    // window.addEventListener('load', generarInputsConsumo);
+
+
+    //valores de preuba, quitar en produccion
+
+    function generarInputsConsumo() {
       const select = document.getElementById('tipoPeriodo');
       const n = (select && select.value === 'mensual') ? 12 : 6;
 
       const kwhRow = document.getElementById('kwhRow');
       const pagoRow = document.getElementById('pagoRow');
-      if(!kwhRow || !pagoRow) return;
+      if (!kwhRow || !pagoRow) return;
 
       kwhRow.innerHTML = '';
       pagoRow.innerHTML = '';
 
-      for(let i=0;i<n;i++){
+      // Valores por defecto (kWh, Pago)
+      const valores = [
+        [690.00, 1695.00],
+        [631.00, 1685.00],
+        [422.00, 489.00],
+        [970.00, 2798.00],
+        [1011.00, 2998.00],
+        [752.00, 2269.00]
+      ];
+
+      for (let i = 1; i <= n; i++) {
         const k = document.createElement('input');
         k.type = 'number';
         k.className = 'consumo-input';
+        k.id = `consumo${i}`;
+        k.value = valores[i - 1] ? valores[i - 1][0] : 0;
         kwhRow.appendChild(k);
 
         const p = document.createElement('input');
         p.type = 'number';
         p.className = 'consumo-input';
+        p.id = `importe${i}`;
+        p.value = valores [i - 1] ? valores[i - 1][1] : 0;
         pagoRow.appendChild(p);
       }
     }
+
     window.addEventListener('load', generarInputsConsumo);
   </script>
 
   <!-- JS: Región tarifaria CFE automática según estado -->
   <script>
-    (function(){
+    (function () {
       const estadoProyecto = document.getElementById('estadoProyecto');
       const regionInput = document.getElementById('regionTarifariaCFE');
 
       const regiones = {
-        "Región Norte": ["Chihuahua","Coahuila","Nuevo León","Durango"],
-        "Región Noreste": ["San Luis Potosí","Tamaulipas"],
-        "Región Noroeste": ["Sonora","Sinaloa"],
+        "Región Norte": ["Chihuahua", "Coahuila", "Nuevo León", "Durango"],
+        "Región Noreste": ["San Luis Potosí", "Tamaulipas"],
+        "Región Noroeste": ["Sonora", "Sinaloa"],
         "Región Baja California": ["Baja California"],
         "Región Baja California Sur": ["Baja California Sur"],
-        "Región Peninsular": ["Yucatán","Campeche","Quintana Roo"],
-        "Región Central": ["Ciudad de México","Estado de México","Morelos","Tlaxcala","Puebla","Hidalgo"],
-        "Región Sur": ["Zacatecas","Michoacán","Guerrero","Oaxaca","Chiapas","Veracruz","Tabasco", "Aguascalientes", "Colima", "Guanajuato", "Jalisco", "Nayarit", "Querétaro"]
+        "Región Peninsular": ["Yucatán", "Campeche", "Quintana Roo"],
+        "Región Central": ["Ciudad de México", "Estado de México", "Morelos", "Tlaxcala", "Puebla", "Hidalgo"],
+        "Región Sur": ["Zacatecas", "Michoacán", "Guerrero", "Oaxaca", "Chiapas", "Veracruz", "Tabasco", "Aguascalientes", "Colima", "Guanajuato", "Jalisco", "Nayarit", "Querétaro"]
       };
 
-      function obtenerRegion(estado){
-        for (const [region, lista] of Object.entries(regiones)){
+      function obtenerRegion(estado) {
+        for (const [region, lista] of Object.entries(regiones)) {
           if (lista.includes(estado)) return region;
         }
         return "";
       }
 
-      function actualizarRegion(){
+      function actualizarRegion() {
         const estadoSel = estadoProyecto ? estadoProyecto.value : "";
-        if (regionInput){
+        if (regionInput) {
           regionInput.value = obtenerRegion(estadoSel);
         }
       }
 
-      if (estadoProyecto){
+      if (estadoProyecto) {
         estadoProyecto.addEventListener('change', actualizarRegion);
         window.addEventListener('load', actualizarRegion);
       }
     })();
   </script>
   <script>
-  (function () {
-    // Cambia la tasa si lo necesitas (16% en MX)
-    const IVA_RATE = 0.16;
+    (function () {
+      // Cambia la tasa si lo necesitas (16% en MX)
+      const IVA_RATE = 0.16;
 
-    // IDs de TODAS las partidas que suman al subtotal
-    const PARTIDAS = [
-      "panel", "inversor", "mantenimiento", "estructura", "materiales",
-      "instalacion", "carpeta", "flete", "interconexion", "uve",
-      "uie", "medidor", "profit", "watts"
-    ];
+      // IDs de TODAS las partidas que suman al subtotal
+      const PARTIDAS = [
+        "panel", "inversor", "mantenimiento", "estructura", "materiales",
+        "instalacion", "carpeta", "flete", "interconexion", "uve",
+        "uie", "medidor", "profit", "watts"
+      ];
 
-    const $subtotal = document.getElementById("subtotal");
-    const $iva      = document.getElementById("iva");
-    const $total    = document.getElementById("total");
+      const $subtotal = document.getElementById("subtotal");
+      const $iva = document.getElementById("iva");
+      const $total = document.getElementById("total");
 
-    // Asegura que Subtotal / IVA / Total no sean editables
-    [$subtotal, $iva, $total].forEach(el => {
-      if (el) {
-        el.readOnly = true;
-        el.style.background = "#f8fafc"; // opcional, para verse "deshabilitado"
-      }
-    });
-
-    const toNumber = (v) => {
-      const n = parseFloat(String(v).replace(/,/g, ""));
-      return isNaN(n) ? 0 : n;
-    };
-
-    function recalc() {
-      let subtotal = 0;
-      PARTIDAS.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) subtotal += toNumber(el.value);
+      // Asegura que Subtotal / IVA / Total no sean editables
+      [$subtotal, $iva, $total].forEach(el => {
+        if (el) {
+          el.readOnly = true;
+          el.style.background = "#f8fafc"; // opcional, para verse "deshabilitado"
+        }
       });
 
-      const iva = subtotal * IVA_RATE;
-      const total = subtotal + iva;
+      const toNumber = (v) => {
+        const n = parseFloat(String(v).replace(/,/g, ""));
+        return isNaN(n) ? 0 : n;
+      };
 
-      if ($subtotal) $subtotal.value = subtotal.toFixed(2);
-      if ($iva)      $iva.value      = iva.toFixed(2);
-      if ($total)    $total.value    = total.toFixed(2);
-    }
+      function recalc() {
+        let subtotal = 0;
+        PARTIDAS.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) subtotal += toNumber(el.value);
+        });
 
-    // Recalcular cuando se cambie cualquier partida
-    PARTIDAS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener("input", recalc);
-    });
+        const iva = subtotal * IVA_RATE;
+        const total = subtotal + iva;
 
-    // Calcular al cargar
-    window.addEventListener("load", recalc);
-  })();
-</script>
+        if ($subtotal) $subtotal.value = subtotal.toFixed(2);
+        if ($iva) $iva.value = iva.toFixed(2);
+        if ($total) $total.value = total.toFixed(2);
+      }
+
+      // Recalcular cuando se cambie cualquier partida
+      PARTIDAS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", recalc);
+      });
+
+      // Calcular al cargar
+      window.addEventListener("load", recalc);
+    })();
+  </script>
 
 </body>
+
 </html>
