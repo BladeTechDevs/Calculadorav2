@@ -47,7 +47,7 @@ async function exportToBasePdf() {
       tipoTarifa: getVal("tipoTarifa"),
       estadoProyecto: getVal("estadoProyecto"),
       municipioProyecto: getVal("municipioProyecto"),
-      zonaCFE: getVal("zonaCFE"),
+      regionTarifariaCFE: getVal("regionTarifariaCFE"),
       roi: getVal("roi", "—"),
       // Métricas (cards)
       consumoAnual: getTxt("consumoAnual", "0 kWh"),
@@ -333,7 +333,8 @@ async function exportToBasePdf() {
         const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
         const textH = lhCompact * lines.length;
         const availableH = H - headerH;
-        let yy = yTop - headerH - (availableH - textH) / 2; // centrado vertical exacto
+        const valuePadTop = 6.5;
+        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop; 
 
         lines.forEach(line => {
           page.drawText(line, {
@@ -392,7 +393,8 @@ async function exportToBasePdf() {
         const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
         const textH = lhCompact * lines.length;
         const availableH = H - headerH;
-        let yy = yTop - headerH - (availableH - textH) / 2;
+const valuePadTop = 6.5;  // <- NUEVO
+let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
 
         lines.forEach(line => {
           page.drawText(line, {
@@ -720,7 +722,7 @@ async function exportToBasePdf() {
     drawCols([
       ["Tipo de proyecto", capitalizeFirst(datos.tipoProyecto)],
       ["Tarifa", toUpper(datos.tipoTarifa)],
-      ["Zona CFE", capitalizeFirst(datos.zonaCFE)]
+      ["Región Tarifaria CFE", capitalizeFirst(datos.regionTarifariaCFE)]
     ], 3)
 
     // Fila 2: Ubicación (3/4) + ROI (1/4)
@@ -732,12 +734,23 @@ async function exportToBasePdf() {
       [3, 1]
     )
 
+    // función para formatear números en MXN con separadores
+    const fmtNumber = n => {
+      const num = parseFloat(String(n).replace(/[^\d.-]/g, "")) || 0
+      return num.toLocaleString("es-MX", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    }
+
+
     // Fila 3 KPI: consumo, gasto, tarifa
     kpiRow([
-      ["Consumo anual", datos.consumoAnual],
-      ["Gasto anual", datos.importeTotal],
+      ["Consumo anual", datos.consumoAnual],                  // ya viene con kWh
+      ["Gasto anual", "$" + fmtNumber(datos.importeTotal)],   // aquí lo formatea
       ["Tarifa promedio", datos.tarifaPromedio]
     ], 3)
+
 
     section("DISEÑO DEL SISTEMA")
     // Orden nuevo: N.º paneles, Potencia instalada, Tipo de inversor
