@@ -2,696 +2,757 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexa Solar - Calculadora Inteligente</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hexa Solar - Calculadora Inteligente</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
+  <!-- 🔧 Split bar (empieza a la mitad y permite pasarla) + consumo responsivo -->
+  <style>
+    /* ---------- Split layout ---------- */
+    .main-container{
+      display:flex;
+      width:100%;
+      min-height:calc(100vh - 64px);
+      overflow:hidden;
+    }
+    .form-panel{
+      flex:0 0 50%;
+      width:50%;
+      min-width:320px;
+      overflow:auto;
+    }
+    .results-panel{
+      flex:1 1 auto;
+      min-width:320px;
+      overflow:auto;
+    }
+    .resizer{
+      flex:0 0 8px;
+      width:8px;
+      background:linear-gradient(90deg,#eef8f3,#d7efe3);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+      cursor:col-resize;
+      align-self:stretch;
+      touch-action:none;
+      position:relative;
+      z-index:10;
+    }
+    .resizer::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:3px;
+      height:44px;
+      border-radius:2px;
+      background:rgba(30,146,75,.7);
+    }
+    .resizer.is-dragging{ background:#cfeadc; }
+    body.is-resizing{ cursor:col-resize; user-select:none; }
+
+    /* ---------- Consumo: diseño anterior pero con inputs idénticos al resto y 100% responsivo ---------- */
+    .consumo-panel{
+      background:#fff;
+      border:1px solid #e2e8f0;
+      border-radius:12px;
+      padding:1rem 1rem 1.2rem;
+    }
+    .consumo-row{ margin-top:.9rem; }
+    .consumo-row-label{
+      font-weight:600;
+      color:#2d3748;
+      font-size:.95rem;
+      margin-bottom:.55rem;
+    }
+
+    /* Grid auto-fit para adaptarse a 6 o 12 valores y al ancho disponible */
+    .consumo-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap:.8rem 1rem;
+    }
+    /* en pantallas medianas bajamos el mínimo para que quepan más columnas */
+    @media (max-width: 1200px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 900px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    }
+    @media (max-width: 640px){
+      .consumo-grid{ grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    }
+
+    /* Mismo look & feel que tus demás inputs (coincide con los inline styles que usas) */
+    .consumo-input{
+      width:100%;
+      background:#fff;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      padding:5px 7px;
+      font-size:.87rem;      /* igual a los inputs del resto del formulario */
+      color:#1a202c;
+      text-align:center;
+    }
+    .consumo-input:focus{
+      outline:none;
+      border-color:#73b248;
+      box-shadow:0 0 0 3px rgba(115,178,72,0.10);
+    }
+  </style>
 </head>
 
 <body>
-    <!-- Barra superior -->
-    <div class="top-bar">
-        <div class="logo">
-            <img src="logo.png" alt="Hexa Solar Logo" class="logo-image"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-            <i class="fas fa-solar-panel" style="display: none;"></i>
-            <span>Hexa Solar Power Solution</span>
+  <!-- Barra superior -->
+  <div class="top-bar">
+    <div class="logo">
+      <img src="logo.png" alt="Hexa Solar Logo" class="logo-image"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+      <i class="fas fa-solar-panel" style="display: none;"></i>
+      <span>Hexa Solar Power Solution</span>
+    </div>
+    <div class="contact-info">
+      <div class="contact-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Cancún | Playa del Carmen | Tulum</span>
+      </div>
+      <div class="contact-item">
+        <i class="fas fa-phone-alt"></i>
+        <span>984 231 2287</span>
+      </div>
+      <div class="contact-item">
+        <i class="fas fa-globe"></i>
+        <a href="https://hexasolar.com.mx" class="contact-link" target="_blank">hexasolar.com.mx</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor principal -->
+  <div class="main-container">
+    <!-- Panel izquierdo - Formulario -->
+    <div class="form-panel">
+      <!-- Datos del Cliente -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-user"></i>
+          <span>Datos del Cliente</span>
         </div>
-        <div class="contact-info">
-            <div class="contact-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Cancún | Playa del Carmen | Tulum</span>
-            </div>
-            <div class="contact-item">
-                <i class="fas fa-phone-alt"></i>
-                <span>984 231 2287</span>
-            </div>
-            <div class="contact-item">
-                <i class="fas fa-globe"></i>
-                <a href="https://hexasolar.com.mx" class="contact-link" target="_blank">hexasolar.com.mx</a>
-            </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombreCliente">Nombre</label>
+            <input type="text" id="nombreCliente" placeholder="Nombre completo"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+          <div class="form-group">
+            <label for="direccionCliente">Dirección</label>
+            <input type="text" id="direccionCliente" placeholder="Calle y número"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="estadoCliente">Estado</label>
+            <select id="estadoCliente"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+              <option value="">Selecciona un estado</option>
+              <option value="Aguascalientes">Aguascalientes</option>
+              <option value="Baja California">Baja California</option>
+              <option value="Baja California Sur">Baja California Sur</option>
+              <option value="Campeche">Campeche</option>
+              <option value="Chiapas">Chiapas</option>
+              <option value="Chihuahua">Chihuahua</option>
+              <option value="Ciudad de México">Ciudad de México</option>
+              <option value="Coahuila">Coahuila</option>
+              <option value="Colima">Colima</option>
+              <option value="Durango">Durango</option>
+              <option value="Estado de México">Estado de México</option>
+              <option value="Guanajuato">Guanajuato</option>
+              <option value="Guerrero">Guerrero</option>
+              <option value="Hidalgo">Hidalgo</option>
+              <option value="Jalisco">Jalisco</option>
+              <option value="Michoacán">Michoacán</option>
+              <option value="Morelos">Morelos</option>
+              <option value="Nayarit">Nayarit</option>
+              <option value="Nuevo León">Nuevo León</option>
+              <option value="Oaxaca">Oaxaca</option>
+              <option value="Puebla">Puebla</option>
+              <option value="Querétaro">Querétaro</option>
+              <option value="Quintana Roo">Quintana Roo</option>
+              <option value="San Luis Potosí">San Luis Potosí</option>
+              <option value="Sinaloa">Sinaloa</option>
+              <option value="Sonora">Sonora</option>
+              <option value="Tabasco">Tabasco</option>
+              <option value="Tamaulipas">Tamaulipas</option>
+              <option value="Tlaxcala">Tlaxcala</option>
+              <option value="Veracruz">Veracruz</option>
+              <option value="Yucatán">Yucatán</option>
+              <option value="Zacatecas">Zacatecas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="municipioCliente">Municipio / Ciudad</label>
+            <input type="text" id="municipioCliente" placeholder="Municipio o Ciudad"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="telefonoCliente">Teléfono</label>
+            <input type="text" id="telefonoCliente" placeholder="Teléfono"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+          <div class="form-group">
+            <label for="correoCliente">Correo</label>
+            <input type="email" id="correoCliente" placeholder="Correo electrónico"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos del Ejecutivo -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-user-tie"></i>
+          <span>Datos del Ejecutivo</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombreEjecutivo">Nombre del Ejecutivo</label>
+            <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+          <div class="form-group">
+            <label for="correoEjecutivo">Correo Electrónico</label>
+            <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos del Proyecto -->
+      <div class="form-section">
+        <div class="section-title">
+          <i class="fas fa-project-diagram"></i>
+          <span>Datos del Proyecto</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoProyecto">Tipo de Proyecto</label>
+            <select id="tipoProyecto"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+              <option value="">Seleccionar tipo</option>
+              <option value="residencial">Residencial</option>
+              <option value="comercial">Comercial</option>
+              <option value="industrial">Industrial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tipoTarifa">Tipo de Tarifa</label>
+            <select id="tipoTarifa"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+              <option value="">Selecciona una tarifa</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="notaProyecto">Nota</label>
+            <input type="text" id="notaProyecto" placeholder="Nota del proyecto"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+          <div class="form-group">
+            <label for="estadoProyecto">Estado</label>
+            <select id="estadoProyecto"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+              <option value="">Selecciona un estado</option>
+              <!-- opciones... (mismas que arriba) -->
+              <option value="Aguascalientes">Aguascalientes</option>
+              <option value="Baja California">Baja California</option>
+              <option value="Baja California Sur">Baja California Sur</option>
+              <option value="Campeche">Campeche</option>
+              <option value="Chiapas">Chiapas</option>
+              <option value="Chihuahua">Chihuahua</option>
+              <option value="Ciudad de México">Ciudad de México</option>
+              <option value="Coahuila">Coahuila</option>
+              <option value="Colima">Colima</option>
+              <option value="Durango">Durango</option>
+              <option value="Estado de México">Estado de México</option>
+              <option value="Guanajuato">Guanajuato</option>
+              <option value="Guerrero">Guerrero</option>
+              <option value="Hidalgo">Hidalgo</option>
+              <option value="Jalisco">Jalisco</option>
+              <option value="Michoacán">Michoacán</option>
+              <option value="Morelos">Morelos</option>
+              <option value="Nayarit">Nayarit</option>
+              <option value="Nuevo León">Nuevo León</option>
+              <option value="Oaxaca">Oaxaca</option>
+              <option value="Puebla">Puebla</option>
+              <option value="Querétaro">Querétaro</option>
+              <option value="Quintana Roo">Quintana Roo</option>
+              <option value="San Luis Potosí">San Luis Potosí</option>
+              <option value="Sinaloa">Sinaloa</option>
+              <option value="Sonora">Sonora</option>
+              <option value="Tabasco">Tabasco</option>
+              <option value="Tamaulipas">Tamaulipas</option>
+              <option value="Tlaxcala">Tlaxcala</option>
+              <option value="Veracruz">Veracruz</option>
+              <option value="Yucatán">Yucatán</option>
+              <option value="Zacatecas">Zacatecas</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="requerimientosProyecto">Requerimientos</label>
+            <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
+        </div>
+
+        <!-- Consumo -->
+        <div class="section-title" style="margin-top:24px;">
+          <i class="fas fa-chart-line"></i>
+          <span>Datos de Consumo Energético</span>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 1rem;">
+          <div class="form-group">
+            <label for="tipoPeriodo">Período de Facturación</label>
+            <select id="tipoPeriodo" onchange="generarInputsConsumo()"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+              <option value="bimestral">Bimestral (6 valores)</option>
+              <option value="mensual">Mensual (12 valores)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Panel consumo responsivo -->
+        <div id="consumoContainer" class="consumo-panel">
+          <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Consumo Histórico (kWh)</label>
+              <div id="kwhRow" class="consumo-grid"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Pagos por Período ($)</label>
+              <div id="pagoRow" class="consumo-grid"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /panel consumo -->
+      </div>
+
+      <!-- Especificaciones del panel -->
+      <div class="form-section">
+        <div class="section-title" style="margin-bottom:1.2rem;">
+          <i class="fas fa-drafting-compass"></i>
+          <span>Diseño y dimensionamiento</span>
+        </div>
+
+        <div class="panel-spec-grid">
+          <div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="potenciaPanel">Potencia Panel</label>
+                <input value="565" type="number" id="potenciaPanel" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="marcaPanel">Marca</label>
+                <input type="text" id="marcaPanel" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="modeloPanel">Modelo</label>
+                <input type="text" id="modeloPanel" placeholder="">
+              </div>
+            </div>
+            <hr class="panel-divider">
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="inversorPanel">Inversor</label>
+                <select id="inversorPanel"
+                  style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                  <option value="">Seleccione</option>
+                  <option value="hibrido">Híbrido</option>
+                  <option value="central">Central</option>
+                </select>
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="potenciaInversor">Potencia</label>
+                <input type="number" id="potenciaInversor" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label>Mantenimiento</label>
+                <div class="panel-checkbox-group">
+                  <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoSi">Sí</label>
+                  <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoNo">No</label>
+                </div>
+              </div>
+            </div>
+            <hr class="panel-divider">
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label>Transformador</label>
+                <div class="panel-checkbox-group">
+                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorSi">Sí</label>
+                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorNo">No</label>
+                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya tiene</label>
+                </div>
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="potenciaTransformador">Potencia del transformador</label>
+                <input type="number" id="potenciaTransformador" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label>¿Compartido?</label>
+                <div class="panel-checkbox-group">
+                  <label class="panel-checkbox-label"><input type="checkbox" id="compartidoSi">Sí</label>
+                  <label class="panel-checkbox-label"><input type="checkbox" id="compartidoNo">No</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="numModulos"># módulos</label>
+                <input type="number" id="numModulos" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="numInversores"># inversor</label>
+                <input type="number" id="numInversores" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="potenciaTotalInstalada">Potencia total instalada</label>
+                <input type="number" id="potenciaTotalInstalada" placeholder="">
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="numEstructura"># de estructura</label>
+                <input type="number" id="numEstructura" placeholder="">
+              </div>
+            </div>
+            <hr class="panel-divider">
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="instalacionElectrica">Instalación eléctrica</label>
+                <select id="instalacionElectrica"
+                  style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                  <option value="">Seleccione</option>
+                  <option value="bif">Bifasica</option>
+                  <option value="monof">Monofasica</option>
+                  <option value="tet">Trifasica</option>
+                </select>
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="numHilos"># de hilos</label>
+                <select id="numHilos"
+                  style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                  <option value="">Seleccione</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
+            </div>
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="voltajeOperacion">Voltaje oper.</label>
+                <select id="voltajeOperacion"
+                  style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+                  <option value="">Seleccione</option>
+                  <option value="220">220</option>
+                  <option value="440">440</option>
+                  <option value="480">480</option>
+                </select>
+              </div>
+            </div>
+            <hr class="panel-divider">
+            <div class="panel-spec-row">
+              <div class="form-group" style="flex:1;">
+                <label for="areaAprox">Área aprox</label>
+                <input type="number" id="areaAprox" placeholder="">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generación y Ahorros -->
+      <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
+        <div class="section-title" style="margin-bottom:1.2rem;">
+          <i class="fas fa-chart-line"></i>
+          <span>Generación y Ahorros</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
+          <div>
+            <div class="form-group" style="margin-bottom:0.7rem;">
+              <label for="generacionAnual" style="font-weight:500;">Generación anual aprox:</label>
+              <input type="number" id="generacionAnual" style="width:100%;" placeholder="">
+            </div>
+            <div class="form-group">
+              <label for="porcentajeGeneracion" style="font-weight:500;">Porcentaje de generación:</label>
+              <input type="number" id="porcentajeGeneracion" style="width:100%;" placeholder="">
+            </div>
+          </div>
+          <div>
+            <div class="form-group" style="margin-bottom:0.7rem;">
+              <label for="inversionMXN" style="font-weight:500;">Inversión (MXN):</label>
+              <input type="number" id="inversionMXN" style="width:100%;" placeholder="">
+            </div>
+            <div class="form-group">
+              <label for="roi" style="font-weight:500;">ROI:</label>
+              <input type="number" id="roi" style="width:100%;" placeholder="">
+            </div>
+          </div>
+        </div>
+        <div
+          style="background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; padding:1.1rem; text-align:center; font-size:1.05rem; color:#64748b;">
+          <span>Gráfico (Impacto de la generación en el consumo)</span>
+        </div>
+      </div>
+
+      <!-- Cotización P.U. -->
+      <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
+        <div class="section-title" style="margin-bottom:1.2rem;">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <span>Cotización P.U.</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
+          <div>
+            <div class="form-group"><label for="panel" style="font-weight:500;">Panel:</label><input type="number" id="panel" style="width:100%;"></div>
+            <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input type="number" id="inversor" style="width:100%;"></div>
+            <div class="form-group"><label for="mantenimiento" style="font-weight:500;">Mantenimiento:</label><input type="number" id="mantenimiento" style="width:100%;"></div>
+            <div class="form-group"><label for="estructura" style="font-weight:500;">Estructura:</label><input type="number" id="estructura" style="width:100%;"></div>
+            <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input type="number" id="materiales" style="width:100%;"></div>
+            <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input type="number" id="instalacion" style="width:100%;"></div>
+            <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta (Pog):</label><input type="number" id="carpeta" style="width:100%;"></div>
+          </div>
+          <div>
+            <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input type="number" id="flete" style="width:100%;"></div>
+            <div class="form-group"><label for="interconexion" style="font-weight:500;">Interconexión:</label><input type="number" id="interconexion" style="width:100%;"></div>
+            <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input type="number" id="uve" style="width:100%;"></div>
+            <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input type="number" id="uie" style="width:100%;"></div>
+            <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input type="number" id="medidor" style="width:100%;"></div>
+          </div>
+          <div>
+            <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number" id="profit" style="width:100%;"></div>
+            <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number" id="watts" style="width:100%;"></div>
+            <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
+            <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number" id="subtotal" style="width:100%;"></div>
+            <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input type="number" id="iva" style="width:100%;"></div>
+            <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input type="number" id="total" style="width:100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de cálculo -->
+      <button class="calculate-btn" onclick="calcularSistemaSolar()">
+        <i class="fas fa-calculator"></i>
+        <span>Calcular Sistema Solar</span>
+      </button>
     </div>
 
-    <!-- Contenedor principal -->
-    <div class="main-container">
-        <!-- Panel izquierdo - Formulario -->
-        <div class="form-panel">
-            <!-- Datos del Cliente -->
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-user"></i>
-                    <span>Datos del Cliente</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombreCliente">Nombre</label>
-                        <input type="text" id="nombreCliente" placeholder="Nombre completo"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                    <div class="form-group">
-                        <label for="direccionCliente">Dirección</label>
-                        <input type="text" id="direccionCliente" placeholder="Calle y número"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="estadoCliente">Estado</label>
-                        <select id="estadoCliente"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                            <option value="">Selecciona un estado</option>
-                            <option value="Aguascalientes">Aguascalientes</option>
-                            <option value="Baja California">Baja California</option>
-                            <option value="Baja California Sur">Baja California Sur</option>
-                            <option value="Campeche">Campeche</option>
-                            <option value="Chiapas">Chiapas</option>
-                            <option value="Chihuahua">Chihuahua</option>
-                            <option value="Ciudad de México">Ciudad de México</option>
-                            <option value="Coahuila">Coahuila</option>
-                            <option value="Colima">Colima</option>
-                            <option value="Durango">Durango</option>
-                            <option value="Estado de México">Estado de México</option>
-                            <option value="Guanajuato">Guanajuato</option>
-                            <option value="Guerrero">Guerrero</option>
-                            <option value="Hidalgo">Hidalgo</option>
-                            <option value="Jalisco">Jalisco</option>
-                            <option value="Michoacán">Michoacán</option>
-                            <option value="Morelos">Morelos</option>
-                            <option value="Nayarit">Nayarit</option>
-                            <option value="Nuevo León">Nuevo León</option>
-                            <option value="Oaxaca">Oaxaca</option>
-                            <option value="Puebla">Puebla</option>
-                            <option value="Querétaro">Querétaro</option>
-                            <option value="Quintana Roo">Quintana Roo</option>
-                            <option value="San Luis Potosí">San Luis Potosí</option>
-                            <option value="Sinaloa">Sinaloa</option>
-                            <option value="Sonora">Sonora</option>
-                            <option value="Tabasco">Tabasco</option>
-                            <option value="Tamaulipas">Tamaulipas</option>
-                            <option value="Tlaxcala">Tlaxcala</option>
-                            <option value="Veracruz">Veracruz</option>
-                            <option value="Yucatán">Yucatán</option>
-                            <option value="Zacatecas">Zacatecas</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="municipioCliente">Municipio / Ciudad</label>
-                        <input type="text" id="municipioCliente" placeholder="Municipio o Ciudad"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="telefonoCliente">Teléfono</label>
-                        <input type="text" id="telefonoCliente" placeholder="Teléfono"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                    <div class="form-group">
-                        <label for="correoCliente">Correo</label>
-                        <input type="email" id="correoCliente" placeholder="Correo electrónico"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-            </div>
+    <!-- 🔸 Barra que permite redimensionar -->
+    <div class="resizer" id="splitter" aria-label="Arrastra para ajustar"></div>
 
-            <!-- Datos del Ejecutivo -->
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-user-tie"></i>
-                    <span>Datos del Ejecutivo</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombreEjecutivo">Nombre del Ejecutivo</label>
-                        <input type="text" id="nombreEjecutivo" placeholder="Nombre del ejecutivo"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                    <div class="form-group">
-                        <label for="correoEjecutivo">Correo Electrónico</label>
-                        <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-            </div>
+    <!-- Panel derecho - Resultados -->
+    <div class="results-panel">
+      <!-- Estado inicial -->
+      <div class="results-placeholder" id="resultsPlaceholder">
+        <img src="logo.png" alt="Hexa Solar Logo" style="height:64px; margin-bottom:12px; opacity:0.5;">
+        <h3>Análisis Solar Inteligente</h3>
+        <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados detallados</p>
+      </div>
 
-            <!-- Datos del Proyecto -->
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="fas fa-project-diagram"></i>
-                    <span>Datos del Proyecto</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tipoProyecto">Tipo de Proyecto</label>
-                        <select id="tipoProyecto"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                            <option value="">Seleccionar tipo</option>
-                            <option value="residencial">Residencial</option>
-                            <option value="comercial">Comercial</option>
-                            <option value="industrial">Industrial</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tipoTarifa">Tipo de Tarifa</label>
-                        <select id="tipoTarifa"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                            <option value="">Selecciona una tarifa</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="notaProyecto">Nota</label>
-                        <input type="text" id="notaProyecto" placeholder="Nota del proyecto"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                    <div class="form-group">
-                        <label for="estadoProyecto">Estado</label>
-                        <select id="estadoProyecto"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                            <option value="">Selecciona un estado</option>
-                            <option value="Aguascalientes">Aguascalientes</option>
-                            <option value="Baja California">Baja California</option>
-                            <option value="Baja California Sur">Baja California Sur</option>
-                            <option value="Campeche">Campeche</option>
-                            <option value="Chiapas">Chiapas</option>
-                            <option value="Chihuahua">Chihuahua</option>
-                            <option value="Ciudad de México">Ciudad de México</option>
-                            <option value="Coahuila">Coahuila</option>
-                            <option value="Colima">Colima</option>
-                            <option value="Durango">Durango</option>
-                            <option value="Estado de México">Estado de México</option>
-                            <option value="Guanajuato">Guanajuato</option>
-                            <option value="Guerrero">Guerrero</option>
-                            <option value="Hidalgo">Hidalgo</option>
-                            <option value="Jalisco">Jalisco</option>
-                            <option value="Michoacán">Michoacán</option>
-                            <option value="Morelos">Morelos</option>
-                            <option value="Nayarit">Nayarit</option>
-                            <option value="Nuevo León">Nuevo León</option>
-                            <option value="Oaxaca">Oaxaca</option>
-                            <option value="Puebla">Puebla</option>
-                            <option value="Querétaro">Querétaro</option>
-                            <option value="Quintana Roo">Quintana Roo</option>
-                            <option value="San Luis Potosí">San Luis Potosí</option>
-                            <option value="Sinaloa">Sinaloa</option>
-                            <option value="Sonora">Sonora</option>
-                            <option value="Tabasco">Tabasco</option>
-                            <option value="Tamaulipas">Tamaulipas</option>
-                            <option value="Tlaxcala">Tlaxcala</option>
-                            <option value="Veracruz">Veracruz</option>
-                            <option value="Yucatán">Yucatán</option>
-                            <option value="Zacatecas">Zacatecas</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="municipioProyecto">Ciudad / Municipio</label>
-                        <input type="text" id="municipioProyecto" placeholder="Ciudad o Municipio"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                    <div class="form-group">
-                        <label for="zonaCFE">Zona CFE</label>
-                        <input type="text" id="zonaCFE" placeholder="Zona CFE"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label for="requerimientosProyecto">Requerimientos</label>
-                        <input type="text" id="requerimientosProyecto" placeholder="Requerimientos del proyecto"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                    </div>
-                </div>
-
-                <!-- Consumo -->
-                <div class="section-title" style="margin-top:24px;">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Datos de Consumo Energético</span>
-                </div>
-
-                <!-- Simplified consumption data input design -->
-                <div class="form-row" style="margin-bottom: 1rem;">
-                    <div class="form-group">
-                        <label for="tipoPeriodo">Período de Facturación</label>
-                        <select id="tipoPeriodo" onchange="generarInputsConsumo()"
-                            style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                            <option value="bimestral">Bimestral (6 valores)</option>
-                            <option value="mensual">Mensual (12 valores)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="consumoContainer"
-                    style="background:#f8fafc; border-radius:12px; padding:1.5rem; margin-bottom:1rem;">
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;"
-                        id="consumoInputsGrid">
-                        <!-- Se llenará dinámicamente -->
-                    </div>
-                </div>
-                <!-- Removed summary section from here, moved to Analysis Completed -->
-            </div>
-
-            <!-- Especificaciones del panel -->
-            <div class="form-section">
-                <div class="section-title" style="margin-bottom:1.2rem;">
-                    <i class="fas fa-drafting-compass"></i>
-                    <span>Diseño y dimensionamiento</span>
-                </div>
-
-                <div class="panel-spec-grid">
-                    <div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="potenciaPanel">Potencia Panel</label>
-                                <input value="565" type="number" id="potenciaPanel" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="marcaPanel">Marca</label>
-                                <input type="text" id="marcaPanel" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="modeloPanel">Modelo</label>
-                                <input type="text" id="modeloPanel" placeholder="">
-                            </div>
-                        </div>
-                        <hr class="panel-divider">
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="inversorPanel">Inversor</label>
-                                <select id="inversorPanel"
-                                    style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                                    <option value="">Seleccione</option>
-                                    <option value="hibrido">Micro</option>
-                                    <option value="central">Central</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="potenciaInversor">Potencia</label>
-                                <input type="number" id="potenciaInversor" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label>Mantenimiento</label>
-                                <div class="panel-checkbox-group">
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="mantenimientoSi">Sí</label>
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="mantenimientoNo">No</label>
-                                </div>
-                            </div>
-                        </div>
-                        <hr class="panel-divider">
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label>Transformador</label>
-                                <div class="panel-checkbox-group">
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="transformadorSi">Sí</label>
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="transformadorNo">No</label>
-                                    <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya
-                                        tiene</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="potenciaTransformador">Potencia del transformador</label>
-                                <input type="number" id="potenciaTransformador" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label>¿Compartido?</label>
-                                <div class="panel-checkbox-group">
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="compartidoSi">Sí</label>
-                                    <label class="panel-checkbox-label"><input type="checkbox"
-                                            id="compartidoNo">No</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="numModulos"># módulos</label>
-                                <input type="number" id="numModulos" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="numInversores"># inversor</label>
-                                <input type="number" id="numInversores" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="potenciaTotalInstalada">Potencia total instalada</label>
-                                <input type="number" id="potenciaTotalInstalada" placeholder="">
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="numEstructura"># de estructura</label>
-                                <input type="number" id="numEstructura" placeholder="">
-                            </div>
-                        </div>
-                        <hr class="panel-divider">
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="instalacionElectrica">Instalación eléctrica</label>
-                                <select id="instalacionElectrica"
-                                    style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                                    <option value="">Seleccione</option>
-                                    <option value="bif">Bifasica</option>
-                                    <option value="monof">Monofasica</option>
-                                    <option value="tet">Trifasica</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="numHilos"># de hilos</label>
-                                <select id="numHilos"
-                                    style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                                    <option value="">Seleccione</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="voltajeOperacion">Voltaje oper.</label>
-                                <select id="voltajeOperacion"
-                                    style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
-                                    <option value="">Seleccione</option>
-                                    <option value="220">220</option>
-                                    <option value="440">440</option>
-                                    <option value="480">480</option>
-                                </select>
-                            </div>
-                        </div>
-                        <hr class="panel-divider">
-                        <div class="panel-spec-row">
-                            <div class="form-group" style="flex:1;">
-                                <label for="areaAprox">Área aprox</label>
-                                <input type="number" id="areaAprox" placeholder="">
-                            </div>
-                        </div>
-                        <!-- Removed CO2 savings and trees fields as they are now in Analysis Completed -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Generación y Ahorros -->
-            <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
-                <div class="section-title" style="margin-bottom:1.2rem;">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Generación y Ahorros</span>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
-                    <div>
-                        <div class="form-group" style="margin-bottom:0.7rem;">
-                            <label for="generacionAnual" style="font-weight:500;">Generación anual aprox:</label>
-                            <input type="number" id="generacionAnual" style="width:100%;" placeholder="">
-                        </div>
-                        <div class="form-group">
-                            <label for="porcentajeGeneracion" style="font-weight:500;">Porcentaje de generación:</label>
-                            <input type="number" id="porcentajeGeneracion" style="width:100%;" placeholder="">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group" style="margin-bottom:0.7rem;">
-                            <label for="inversionMXN" style="font-weight:500;">Inversión (MXN):</label>
-                            <input type="number" id="inversionMXN" style="width:100%;" placeholder="">
-                        </div>
-                        <div class="form-group">
-                            <label for="roi" style="font-weight:500;">ROI:</label>
-                            <input type="number" id="roi" style="width:100%;" placeholder="">
-                        </div>
-                    </div>
-                </div>
-                <!-- <div
-                    style="background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; padding:1.1rem; text-align:center; font-size:1.05rem; color:#64748b;">
-                    <span>Gráfico (Impacto de la generación en el consumo)</span>
-                </div> -->
-            </div>
-
-            <!-- Cotización P.U. -->
-            <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
-                <div class="section-title" style="margin-bottom:1.2rem;">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Cotización P.U.</span>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
-                    <div>
-                        <div class="form-group"><label for="panel" style="font-weight:500;">Panel:</label><input
-                                type="number" id="panel" style="width:100%;"></div>
-                        <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input
-                                type="number" id="inversor" style="width:100%;"></div>
-                        <div class="form-group"><label for="mantenimiento"
-                                style="font-weight:500;">Mantenimiento:</label><input type="number" id="mantenimiento"
-                                style="width:100%;"></div>
-                        <div class="form-group"><label for="estructura"
-                                style="font-weight:500;">Estructura:</label><input type="number" id="estructura"
-                                style="width:100%;"></div>
-                        <div class="form-group"><label for="materiales"
-                                style="font-weight:500;">Materiales:</label><input type="number" id="materiales"
-                                style="width:100%;"></div>
-                        <div class="form-group"><label for="instalacion"
-                                style="font-weight:500;">Instalación:</label><input type="number" id="instalacion"
-                                style="width:100%;"></div>
-                        <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta
-                                (Pog):</label><input type="number" id="carpeta" style="width:100%;"></div>
-                    </div>
-                    <div>
-                        <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input
-                                type="number" id="flete" style="width:100%;"></div>
-                        <div class="form-group"><label for="interconexion"
-                                style="font-weight:500;">Interconexión:</label><input type="number" id="interconexion"
-                                style="width:100%;"></div>
-                        <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input
-                                type="number" id="uve" style="width:100%;"></div>
-                        <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input
-                                type="number" id="uie" style="width:100%;"></div>
-                        <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input
-                                type="number" id="medidor" style="width:100%;"></div>
-                    </div>
-                    <div>
-                        <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input
-                                type="number" id="profit" style="width:100%;"></div>
-                        <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input
-                                type="number" id="watts" style="width:100%;"></div>
-                        <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
-                        <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input
-                                type="number" id="subtotal" style="width:100%;"></div>
-                        <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input
-                                type="number" id="iva" style="width:100%;"></div>
-                        <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input
-                                type="number" id="total" style="width:100%;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Botón de cálculo -->
-            <button class="calculate-btn" onclick="calcularSistemaSolar()">
-                <i class="fas fa-calculator"></i>
-                <span>Calcular Sistema Solar</span>
-            </button>
+      <!-- Contenido de resultados -->
+      <div class="results-content" id="resultsContent">
+        <div class="results-header">
+          <div class="results-title">Análisis Completado</div>
+          <div class="results-subtitle">Sistema Solar Fotovoltaico Optimizado</div>
         </div>
 
-        <!-- Panel derecho - Resultados -->
-        <div class="results-panel">
-            <!-- Estado inicial -->
-            <div class="results-placeholder" id="resultsPlaceholder">
-                <img src="logo.png" alt="Hexa Solar Logo" style="height:64px; margin-bottom:12px; opacity:0.5;">
-                <h3>Análisis Solar Inteligente</h3>
-                <p>Complete los datos del formulario y presione "Calcular Sistema Solar" para ver los resultados
-                    detallados</p>
-            </div>
-
-            <!-- Contenido de resultados -->
-            <div class="results-content" id="resultsContent">
-                <div class="results-header">
-                    <div class="results-title">Análisis Completado</div>
-                    <div class="results-subtitle">Sistema Solar Fotovoltaico Optimizado</div>
-                </div>
-
-                <!-- Grid de métricas principales -->
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-bolt"></i></div>
-                        <div class="metric-value" id="consumoAnual">-</div>
-                        <div class="metric-label">Consumo Anual (kWh)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
-                        <div class="metric-value" id="consumoMensual">-</div>
-                        <div class="metric-label">Consumo Mensual Promedio</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-sun"></i></div>
-                        <div class="metric-value" id="consumoDiario">-</div>
-                        <div class="metric-label">Consumo Diario Promedio</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
-                        <div class="metric-value" id="importeTotal">-</div>
-                        <div class="metric-label">Importe Total Anual</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-coins"></i></div>
-                        <div class="metric-value" id="importePromedio">-</div>
-                        <div class="metric-label">Importe Promedio</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-calculator"></i></div>
-                        <div class="metric-value" id="tarifaPromedio">-</div>
-                        <div class="metric-label">Tarifa Promedio ($/kWh)</div>
-                    </div>
-                    <!-- Added summary metrics from consumption section -->
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-percentage"></i></div>
-                        <div class="metric-value" id="porcentajeAhorro">-</div>
-                        <div class="metric-label">% de Ahorro</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
-                        <div class="metric-value" id="tempMin">-</div>
-                        <div class="metric-label">Temp Min (°C)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-thermometer-full"></i></div>
-                        <div class="metric-value" id="tempMax">-</div>
-                        <div class="metric-label">Temp Max (°C)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-plug"></i></div>
-                        <div class="metric-value" id="potenciaNecesaria">-</div>
-                        <div class="metric-label">Potencia Necesaria (kW)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-solar-panel"></i></div>
-                        <div class="metric-value" id="numeroModulos">-</div>
-                        <div class="metric-label">Módulos Requeridos</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-industry"></i></div>
-                        <div class="metric-value" id="generacionAnual">-</div>
-                        <div class="metric-label">Generación Anual (kWh)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div>
-                        <div class="metric-value" id="potenciaInstalada">-</div>
-                        <div class="metric-label">Potencia Instalada (kW)</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-sun"></i></div>
-                        <div class="metric-value" id="hsp">-</div>
-                        <div class="metric-label">Horas Solares Pico</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-leaf"></i></div>
-                        <div class="metric-value" id="ahorroCO2">-</div>
-                        <div class="metric-label">Ahorro CO₂ (t/año)</div>
-                    </div>
-                    <!-- Added trees metric -->
-                    <div class="metric-card">
-                        <div class="metric-icon"><i class="fas fa-tree"></i></div>
-                        <div class="metric-value" id="arboles">-</div>
-                        <div class="metric-label">Árboles Equivalentes</div>
-                    </div>
-                </div>
-
-                <!-- Solar irradiation chart section -->
-                <div class="chart-section">
-                    <div class="chart-header">
-                        <i class="fas fa-chart-bar"></i> Gráfica de Irradiación Solar
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="irradiacionChart" width="800" height="400"></canvas>
-                    </div>
-                </div>
-
-
-
-                <!-- Detailed tariff analysis table -->
-                <div class="details-table">
-                    <div class="table-header">
-                        <i class="fas fa-table"></i> Análisis Detallado por Período
-                    </div>
-                    <div class="table-content">
-                        <div class="table-row" style="font-weight: 600; background: rgba(16, 185, 129, 0.1);">
-                            <div class="table-cell">Período</div>
-                            <div class="table-cell">Consumo (kWh)</div>
-                            <div class="table-cell">Importe ($)</div>
-                            <div class="table-cell">Tarifa ($/kWh)</div>
-                        </div>
-                        <div id="detalleTableBody">
-                            <!-- Se llena dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chart-section">
-                    <div class="chart-header">
-                        <i class="fas fa-chart-bar"></i> Impacto de la Generación vs Consumo
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="impactoChart" width="800" height="400"></canvas>
-                    </div>
-                </div>
-
-                <!-- Botones de exportar -->
-                <!-- <button class="export-btn" onclick="exportResultsToPdf()">
-                    <i class="fas fa-file-pdf"></i>
-                    <span>Exportar Reporte PDF</span>
-                </button> -->
-
-                <button class="calculate-btn" onclick="exportToBasePdf()">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Generar Cotización</span>
-                </button>
-
-            </div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-bolt"></i></div><div class="metric-value" id="consumoAnual">-</div><div class="metric-label">Consumo Anual (kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calendar-day"></i></div><div class="metric-value" id="consumoMensual">-</div><div class="metric-label">Consumo Mensual Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="consumoDiario">-</div><div class="metric-label">Consumo Diario Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-dollar-sign"></i></div><div class="metric-value" id="importeTotal">-</div><div class="metric-label">Importe Total Anual</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-coins"></i></div><div class="metric-value" id="importePromedio">-</div><div class="metric-label">Importe Promedio</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-calculator"></i></div><div class="metric-value" id="tarifaPromedio">-</div><div class="metric-label">Tarifa Promedio ($/kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-percentage"></i></div><div class="metric-value" id="porcentajeAhorro">-</div><div class="metric-label">% de Ahorro</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-half"></i></div><div class="metric-value" id="tempMin">-</div><div class="metric-label">Temp Min (°C)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-thermometer-full"></i></div><div class="metric-value" id="tempMax">-</div><div class="metric-label">Temp Max (°C)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-plug"></i></div><div class="metric-value" id="potenciaNecesaria">-</div><div class="metric-label">Potencia Necesaria (kW)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-solar-panel"></i></div><div class="metric-value" id="numeroModulos">-</div><div class="metric-label">Módulos Requeridos</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-industry"></i></div><div class="metric-value" id="generacionAnual">-</div><div class="metric-label">Generación Anual (kWh)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div><div class="metric-value" id="potenciaInstalada">-</div><div class="metric-label">Potencia Instalada (kW)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-sun"></i></div><div class="metric-value" id="hsp">-</div><div class="metric-label">Horas Solares Pico</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-leaf"></i></div><div class="metric-value" id="ahorroCO2">-</div><div class="metric-label">Ahorro CO₂ (t/año)</div></div>
+          <div class="metric-card"><div class="metric-icon"><i class="fas fa-tree"></i></div><div class="metric-value" id="arboles">-</div><div class="metric-label">Árboles Equivalentes</div></div>
         </div>
+
+        <div class="chart-section">
+          <div class="chart-header"><i class="fas fa-chart-bar"></i> Gráfica de Irradiación Solar</div>
+          <div class="chart-container"><canvas id="irradiacionChart" width="800" height="400"></canvas></div>
+        </div>
+
+        <div class="details-table">
+          <div class="table-header"><i class="fas fa-table"></i> Análisis Detallado por Período</div>
+          <div class="table-content">
+            <div class="table-row" style="font-weight: 600; background: rgba(16, 185, 129, 0.1);">
+              <div class="table-cell">Período</div>
+              <div class="table-cell">Consumo (kWh)</div>
+              <div class="table-cell">Importe ($)</div>
+              <div class="table-cell">Tarifa ($/kWh)</div>
+            </div>
+            <div id="detalleTableBody"></div>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <div class="chart-header"><i class="fas fa-chart-bar"></i> Impacto de la Generación vs Consumo</div>
+          <div class="chart-container"><canvas id="impactoChart" width="800" height="400"></canvas></div>
+        </div>
+
+        <button class="calculate-btn" onclick="exportToBasePdf()">
+          <i class="fas fa-file-contract"></i>
+          <span>Generar Cotización</span>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Loading overlay -->
-    <div class="loading-overlay" id="loading">
-        <div class="loading-content">
-            <div class="loading-spinner">
-                <i class="fas fa-solar-panel fa-spin"></i>
-            </div>
-            <div class="loading-text">Procesando Datos</div>
-            <div class="loading-subtext">Consultando irradiación solar...</div>
-        </div>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-content">
+      <div class="loading-spinner"><i class="fas fa-solar-panel fa-spin"></i></div>
+      <div class="loading-text">Procesando Datos</div>
+      <div class="loading-subtext">Consultando irradiación solar...</div>
     </div>
+  </div>
 
-    <script src="script.js"></script>
-    <script src="scriptpdf.js"></script>
+  <script src="script.js"></script>
+  <script src="scriptpdf.js"></script>
+
+  <!-- JS de la barra resizable -->
+  <script>
+    (function () {
+      const container = document.querySelector('.main-container');
+      const left = document.querySelector('.form-panel');
+      const resizer = document.getElementById('splitter');
+      if (!container || !left || !resizer) return;
+
+      const MIN_LEFT = 320;   // px
+      const MIN_RIGHT = 320;  // px
+
+      let startX = 0, startW = 0, dragging = false;
+
+      function clampLeftWidth(px){
+        const total = container.getBoundingClientRect().width;
+        const maxByRight = total - MIN_RIGHT;
+        return Math.max(MIN_LEFT, Math.min(maxByRight, px));
+      }
+      function setLeftWidth(px){
+        const w = clampLeftWidth(px);
+        left.style.width = w + 'px';
+        left.style.flex = `0 0 ${w}px`;
+      }
+      function setHalf(){
+        const total = container.getBoundingClientRect().width;
+        setLeftWidth(total / 2);
+      }
+      function onPointerDown(e){
+        dragging = true;
+        startX = (e.touches ? e.touches[0].clientX : e.clientX);
+        startW = left.getBoundingClientRect().width;
+        document.body.classList.add('is-resizing');
+        resizer.classList.add('is-dragging');
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('touchmove', onTouchMove, { passive:false });
+        window.addEventListener('touchend', onPointerUp);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onPointerUp);
+      }
+      function onPointerMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onMouseMove(e){ if(!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onTouchMove(e){ if(!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
+      function onPointerUp(){
+        dragging = false;
+        document.body.classList.remove('is-resizing');
+        resizer.classList.remove('is-dragging');
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onPointerUp);
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onPointerUp);
+      }
+      resizer.addEventListener('pointerdown', onPointerDown);
+      resizer.addEventListener('mousedown', onPointerDown);
+      resizer.addEventListener('touchstart', onPointerDown, { passive:true });
+      window.addEventListener('load', setHalf);
+      window.addEventListener('resize', setHalf);
+      setTimeout(setHalf, 0);
+    })();
+  </script>
+
+  <!-- JS para el panel de Consumo (misma UI, ahora responsivo y mismo tamaño de input) -->
+  <script>
+    function generarInputsConsumo(){
+      const select = document.getElementById('tipoPeriodo');
+      const n = (select && select.value === 'mensual') ? 12 : 6;
+
+      const kwhRow = document.getElementById('kwhRow');
+      const pagoRow = document.getElementById('pagoRow');
+      if(!kwhRow || !pagoRow) return;
+
+      kwhRow.innerHTML = '';
+      pagoRow.innerHTML = '';
+
+      for(let i=0;i<n;i++){
+        const k = document.createElement('input');
+        k.type = 'number';
+        k.className = 'consumo-input';
+        kwhRow.appendChild(k);
+
+        const p = document.createElement('input');
+        p.type = 'number';
+        p.className = 'consumo-input';
+        pagoRow.appendChild(p);
+      }
+    }
+    window.addEventListener('load', generarInputsConsumo);
+  </script>
 </body>
-
 </html>
