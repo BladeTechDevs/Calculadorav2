@@ -599,8 +599,8 @@ for (let i = 0; i < importes.length; i++) {
   const ahorroCO2 = (consumoMensual * 439.963) / 1000 // Convert to tons
 
   // const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1)
-  const tempMin = 18 // Example temperature values
-  const tempMax = 35
+  // const tempMin = 18 // Example temperature values
+  // const tempMax = 35
   const arboles = Math.round(ahorroCO2 * 155) // Approximate trees equivalent
 
   // Update display
@@ -622,8 +622,8 @@ for (let i = 0; i < importes.length; i++) {
   document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`
 
   document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`
-  document.getElementById("tempMin").textContent = `${tempMin}°C`
-  document.getElementById("tempMax").textContent = `${tempMax}°C`
+  // document.getElementById("tempMin").textContent = `${tempMin}°C`
+  // document.getElementById("tempMax").textContent = `${tempMax}°C`
   document.getElementById("arboles").textContent = `${arboles}`
 
   // Fill detailed table
@@ -793,11 +793,10 @@ function crearGraficaIrradiacion(estado) {
 const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic", "Total"];
 
 // Consumos (12 valores). Si trabajas bimestral, duplica o interpola.
-const consumosMensuales = consumos;
-
+// const consumosMensuales = consumos;
+const consumosMensuales = [690,0,631,0,422,0,970,0,1011,0,672];
 // Producción (12 valores). Ejemplo: repartir la generación anual uniformemente:
-const produccionMensual = []
-// = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
+const produccionMensual = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
 
 function diasEnMes(mes, anio) {
 // === Uso con el año actual ===

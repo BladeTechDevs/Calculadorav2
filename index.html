@@ -435,7 +435,7 @@
             </div>
             <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
-                <label>Mantenimiento</label>
+                <label>Monitoreo</label>
                 <div class="panel-checkbox-group">
                   <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoSi">Sí</label>
                   <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoNo">No</label>
@@ -470,31 +470,31 @@
             </div>
           </div>
           <div>
-            <div class="panel-spec-row">
+            <!-- <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="numModulos"># módulos</label>
                 <input type="number" id="numModulos" placeholder="">
               </div>
-            </div>
-            <div class="panel-spec-row">
+            </div> -->
+            <!-- <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="numInversores"># inversor</label>
                 <input type="number" id="numInversores" placeholder="">
               </div>
-            </div>
-            <div class="panel-spec-row">
+            </div> -->
+            <!-- <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="potenciaTotalInstalada">Potencia total instalada</label>
                 <input type="number" id="potenciaTotalInstalada" placeholder="">
               </div>
-            </div>
-            <div class="panel-spec-row">
+            </div> -->
+            <!-- <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="numEstructura"># de estructura</label>
                 <input type="number" id="numEstructura" placeholder="">
               </div>
-            </div>
-            <hr class="panel-divider">
+            </div> -->
+            <!-- <hr class="panel-divider"> -->
             <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="instalacionElectrica">Instalación eléctrica</label>
@@ -613,8 +613,8 @@
           <div>
             <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number"
                 id="profit" style="width:100%;"></div>
-            <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number"
-                id="watts" style="width:100%;"></div>
+            <!-- <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number"
+                id="watts" style="width:100%;"></div> -->
             <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
             <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number"
                 id="subtotal" style="width:100%;"></div>
@@ -625,6 +625,201 @@
           </div>
         </div>
       </div>
+
+      <script>
+        ; (() => {
+          // === Configuración (no modifica tus inputs existentes) ===
+          const IVA_RATE = 0.16
+          const IDS_COSTOS = [
+            ['panel', 'Panel'],
+            ['inversor', 'Inversor'],
+            ['mantenimiento', 'Mantenimiento'],
+            ['estructura', 'Estructura'],
+            ['materiales', 'Materiales'],
+            ['instalacion', 'Instalación'],
+            ['carpeta', 'Carpeta (Pog)'],
+            ['flete', 'Flete'],
+            ['interconexion', 'Interconexión'],
+            ['uve', 'UVIE'],
+            ['uie', 'UIE'],
+            ['medidor', 'Medidor'],
+          ]
+
+          const $ = (id) => document.getElementById(id)
+          const toNumber = (v) => {
+            if (v === null || v === undefined) return 0
+            const s = String(v).replace(/[,$\s]/g, '').replace(',', '.')
+            const n = parseFloat(s)
+            return isNaN(n) ? 0 : n
+          }
+          const fmt = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 })
+
+          // Lee potencia instalada (kW) desde la tarjeta de métricas si existe y la convierte a W
+          const getPotenciaW = () => {
+            const el = $('potenciaInstalada')
+            if (!el) return null
+            const kw = toNumber(el.textContent)
+            console.log(el)
+            return kw > 0 ? kw * 1000 : null
+          }
+
+          //trae el numero de modulos
+          const getNumeroDeModulos = () => {
+            const el = $('numeroModulos')
+            if (!el) return null
+            const num = toNumber(el.textContent)
+            return num > 0 ? num : null
+          }
+
+          // Profit: 0.2 o 20 => porcentaje; >=100 => monto fijo MXN
+          const calcularProfit = (subtotal) => {
+            const raw = $('profit')?.value
+            const p = toNumber(raw)
+            if (!p) return { monto: 0, etiqueta: '—' }
+            if (p <= 1) return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' } // 0.2 => 20%
+            if (p < 100) return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' } // 20 => 20%
+            return { monto: p, etiqueta: fmt(p) + ' (monto)' }
+          }
+
+          // Crea/actualiza la tabla de desglose
+          const renderTabla = () => {
+            // 1) Leer costos
+            const conceptos = []
+            let subtotal = 0
+            IDS_COSTOS.forEach(([id, nombre]) => {
+              const val = toNumber($(id)?.value)
+              conceptos.push({ nombre, val })
+              subtotal += val
+            })
+
+            // 2) Profit / IVA / Total
+            const { monto: profit, etiqueta: etiquetaProfit } = calcularProfit(subtotal)
+            const base = subtotal + profit
+            const iva = base * IVA_RATE
+            const total = base + iva
+
+            // 3) $/W si hay potencia instalada visible
+            const potenciaW = getPotenciaW()
+            const numeroModulos = getNumeroDeModulos()
+            // const pricePerWatt = potenciaW ? total / potenciaW : null
+
+            const pricePerWatt = subtotal / (numeroModulos * (potenciaW / numeroModulos))
+            const pricePerWattconIva = pricePerWatt ? pricePerWatt * (1 + IVA_RATE) : null
+            // 4) Contenedor (debajo de #resultsContent)
+            const results = $('resultsContent')
+            if (!results) return
+            let cont = document.getElementById('cont-desglose-cotizacion-pu')
+            if (!cont) {
+              cont = document.createElement('section')
+              cont.id = 'cont-desglose-cotizacion-pu'
+              cont.style.marginTop = '1.5rem'
+              results.insertAdjacentElement('afterend', cont)
+            }
+
+            // 5) Estilos mínimos inline (no rompe tu CSS)
+            const cardStyle = `
+              background:#fff;border:1px solid #e2e8f0;border-radius:12px;
+              padding:16px;box-shadow:0 4px 10px rgba(17,24,39,.06);overflow:auto
+            `
+            const titleStyle = `font-weight:600;font-size:1rem;margin:0 0 .6rem 0;display:flex;gap:.5rem;align-items:center`
+            const tableStyle = `width:100%;border-collapse:collapse;font-size:.95rem`
+            const thtd = `padding:.6rem .7rem;border-bottom:1px solid #edf2f7;text-align:right`
+            const thLeft = `text-align:left`
+
+            // 6) Construir filas de conceptos (omite los que estén en cero para limpieza)
+            const filasConceptos = conceptos
+              .filter(c => c.val && c.val !== 0)
+              .map(c => `
+                <tr>
+                  <td style="${thtd};${thLeft}">${c.nombre}</td>
+                  <td style="${thtd}">${fmt(c.val)}</td>
+                </tr>
+              `).join('')
+
+            // 7) HTML de la tarjeta/tabla
+            cont.innerHTML = `
+              <div style="${cardStyle}">
+                <h3 style="${titleStyle}">
+                  <i class="fas fa-file-invoice-dollar"></i>
+                  Desglose de Cotización P.U.
+                </h3>
+                <table style="${tableStyle}">
+                  <thead>
+                    <tr>
+                      <th style="${thtd};${thLeft}">Concepto</th>
+                      <th style="${thtd}">Importe</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filasConceptos || `
+                      <tr><td style="${thtd};${thLeft}" colspan="2">Sin datos de cotización aún.</td></tr>
+                    `}
+                    <tr>
+                      <td style="${thtd};${thLeft};font-weight:600">Subtotal</td>
+                      <td style="${thtd};font-weight:600">${fmt(subtotal)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${thtd};${thLeft}">Profit <span style="opacity:.7">(${etiquetaProfit})</span></td>
+                      <td style="${thtd}">${fmt(profit)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${thtd};${thLeft}">Base Imponible</td>
+                      <td style="${thtd}">${fmt(base)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${thtd};${thLeft}">IVA (${(IVA_RATE * 100).toFixed(0)}%)</td>
+                      <td style="${thtd}">${fmt(iva)}</td>
+                    </tr>
+                    <tr>
+                      <td style="${thtd};${thLeft};font-weight:700">TOTAL</td>
+                      <td style="${thtd};font-weight:700">${fmt(total)}</td>
+                    </tr>
+                  ${pricePerWatt !== null ? `
+                    <tr>
+                      <td style="${thtd};${thLeft}">$/Watt (sin IVA)</td>
+                      <td style="${thtd}">${pricePerWatt.toLocaleString('es-MX', { maximumFractionDigits: 2 })}</td>
+                    </tr>
+                    <tr>
+                      <td style="${thtd};${thLeft}">$/Watt (con IVA)</td>
+                      <td style="${thtd}">${(pricePerWatt * (1 + IVA_RATE)).toLocaleString('es-MX', { maximumFractionDigits: 2 })}</td>
+                    </tr>
+                  ` : ``}
+                  </tbody>
+                </table>
+                <div style="margin-top:.6rem;font-size:.85rem;color:#64748b">
+                  * La fila <em>$/Watt</em> aparece cuando la tarjeta <strong>Potencia Instalada (kW)</strong> ya tiene valor.
+                </div>
+              </div>
+            `
+          }
+
+          // Recalcula la tabla cuando cambie cualquier input de la Cotización P.U. o el profit
+          const attach = () => {
+            const ids = IDS_COSTOS.map(([id]) => id).concat(['profit'])
+            ids.forEach(id => {
+              const el = $(id)
+              if (el) el.addEventListener('input', renderTabla)
+            })
+
+            // Reaccionar si luego se llenan métricas (ej. Potencia Instalada)
+            const pot = $('potenciaInstalada')
+            if (pot) {
+              const mo = new MutationObserver(renderTabla)
+              mo.observe(pot, { childList: true, characterData: true, subtree: true })
+            }
+
+            // Pintado inicial
+            renderTabla()
+          }
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attach)
+          } else {
+            attach()
+          }
+        })()
+      </script>
+
 
       <!-- Botón de cálculo -->
       <button class="calculate-btn" onclick="calcularSistemaSolar()">
@@ -688,16 +883,16 @@
             <div class="metric-value" id="porcentajeAhorro">-</div>
             <div class="metric-label">% de Ahorro</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
-            <div class="metric-value" id="tempMin">-</div>
-            <div class="metric-label">Temp Min (°C)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-thermometer-full"></i></div>
-            <div class="metric-value" id="tempMax">-</div>
-            <div class="metric-label">Temp Max (°C)</div>
-          </div>
+          <!-- <div class="metric-card">
+              <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
+              <div class="metric-value" id="tempMin">-</div>
+              <div class="metric-label">Temp Min (°C)</div>
+            </div> -->
+          <!-- <div class="metric-card">
+              <div class="metric-icon"><i class="fas fa-thermometer-full"></i></div>
+              <div class="metric-value" id="tempMax">-</div>
+              <div class="metric-label">Temp Max (°C)</div>
+            </div> -->
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-plug"></i></div>
             <div class="metric-value" id="potenciaNecesaria">-</div>
@@ -708,11 +903,11 @@
             <div class="metric-value" id="numeroModulos">-</div>
             <div class="metric-label">Módulos Requeridos</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-icon"><i class="fas fa-industry"></i></div>
-            <div class="metric-value" id="generacionAnual">-</div>
-            <div class="metric-label">Generación Anual (kWh)</div>
-          </div>
+          <!-- <div class="metric-card">
+              <div class="metric-icon"><i class="fas fa-industry"></i></div>
+              <div class="metric-value" id="generacionAnual">-</div>
+              <div class="metric-label">Generación Anual (kWh)</div>
+            </div> -->
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-expand-arrows-alt"></i></div>
             <div class="metric-value" id="potenciaInstalada">-</div>
@@ -759,8 +954,8 @@
         </div> -->
 
         <div id="impactoWrapper" style="width:100%;max-width:900px">
-  <canvas id="impactoChart" style="width:100%;height:320px;"></canvas>
-</div>
+          <canvas id="impactoChart" style="width:100%;height:320px;"></canvas>
+        </div>
 
         <button class="calculate-btn" onclick="exportToBasePdf()">
           <i class="fas fa-file-contract"></i>
@@ -784,66 +979,66 @@
 
   <!-- JS de la barra resizable -->
   <script>
-    (function () {
-      const container = document.querySelector('.main-container');
-      const left = document.querySelector('.form-panel');
-      const resizer = document.getElementById('splitter');
-      if (!container || !left || !resizer) return;
+      (function () {
+        const container = document.querySelector('.main-container');
+        const left = document.querySelector('.form-panel');
+        const resizer = document.getElementById('splitter');
+        if (!container || !left || !resizer) return;
 
-      const MIN_LEFT = 320;   // px
-      const MIN_RIGHT = 320;  // px
+        const MIN_LEFT = 320;   // px
+        const MIN_RIGHT = 320;  // px
 
-      let startX = 0, startW = 0, dragging = false;
+        let startX = 0, startW = 0, dragging = false;
 
-      function clampLeftWidth(px) {
-        const total = container.getBoundingClientRect().width;
-        const maxByRight = total - MIN_RIGHT;
-        return Math.max(MIN_LEFT, Math.min(maxByRight, px));
-      }
-      function setLeftWidth(px) {
-        const w = clampLeftWidth(px);
-        left.style.width = w + 'px';
-        left.style.flex = `0 0 ${w}px`;
-      }
-      function setHalf() {
-        const total = container.getBoundingClientRect().width;
-        setLeftWidth(total / 2);
-      }
-      function onPointerDown(e) {
-        dragging = true;
-        startX = (e.touches ? e.touches[0].clientX : e.clientX);
-        startW = left.getBoundingClientRect().width;
-        document.body.classList.add('is-resizing');
-        resizer.classList.add('is-dragging');
+        function clampLeftWidth(px) {
+          const total = container.getBoundingClientRect().width;
+          const maxByRight = total - MIN_RIGHT;
+          return Math.max(MIN_LEFT, Math.min(maxByRight, px));
+        }
+        function setLeftWidth(px) {
+          const w = clampLeftWidth(px);
+          left.style.width = w + 'px';
+          left.style.flex = `0 0 ${w}px`;
+        }
+        function setHalf() {
+          const total = container.getBoundingClientRect().width;
+          setLeftWidth(total / 2);
+        }
+        function onPointerDown(e) {
+          dragging = true;
+          startX = (e.touches ? e.touches[0].clientX : e.clientX);
+          startW = left.getBoundingClientRect().width;
+          document.body.classList.add('is-resizing');
+          resizer.classList.add('is-dragging');
 
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-        window.addEventListener('touchend', onPointerUp);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onPointerUp);
-      }
-      function onPointerMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-      function onMouseMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-      function onTouchMove(e) { if (!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
-      function onPointerUp() {
-        dragging = false;
-        document.body.classList.remove('is-resizing');
-        resizer.classList.remove('is-dragging');
-        window.removeEventListener('pointermove', onPointerMove);
-        window.removeEventListener('pointerup', onPointerUp);
-        window.removeEventListener('touchmove', onTouchMove);
-        window.removeEventListener('touchend', onPointerUp);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onPointerUp);
-      }
-      resizer.addEventListener('pointerdown', onPointerDown);
-      resizer.addEventListener('mousedown', onPointerDown);
-      resizer.addEventListener('touchstart', onPointerDown, { passive: true });
-      window.addEventListener('load', setHalf);
-      window.addEventListener('resize', setHalf);
-      setTimeout(setHalf, 0);
-    })();
+          window.addEventListener('pointermove', onPointerMove);
+          window.addEventListener('pointerup', onPointerUp);
+          window.addEventListener('touchmove', onTouchMove, { passive: false });
+          window.addEventListener('touchend', onPointerUp);
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onPointerUp);
+        }
+        function onPointerMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+        function onMouseMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+        function onTouchMove(e) { if (!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
+        function onPointerUp() {
+          dragging = false;
+          document.body.classList.remove('is-resizing');
+          resizer.classList.remove('is-dragging');
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', onPointerUp);
+          window.removeEventListener('touchmove', onTouchMove);
+          window.removeEventListener('touchend', onPointerUp);
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onPointerUp);
+        }
+        resizer.addEventListener('pointerdown', onPointerDown);
+        resizer.addEventListener('mousedown', onPointerDown);
+        resizer.addEventListener('touchstart', onPointerDown, { passive: true });
+        window.addEventListener('load', setHalf);
+        window.addEventListener('resize', setHalf);
+        setTimeout(setHalf, 0);
+      })();
   </script>
 
   <!-- JS para el panel de Consumo -->
@@ -912,7 +1107,7 @@
         p.type = 'number';
         p.className = 'consumo-input';
         p.id = `importe${i}`;
-        p.value = valores [i - 1] ? valores[i - 1][1] : 0;
+        p.value = valores[i - 1] ? valores[i - 1][1] : 0;
         pagoRow.appendChild(p);
       }
     }

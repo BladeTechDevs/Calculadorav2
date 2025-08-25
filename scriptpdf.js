@@ -55,7 +55,7 @@ async function exportToBasePdf() {
       importePromedio: getTxt("importePromedio", "$0"),
       tarifaPromedio: getTxt("tarifaPromedio", "$0"),
       potenciaNecesaria: getTxt("potenciaNecesaria", "0 kW"),
-      numeroModulosCard: getTxt("numeroModulos", "0"),
+      numeroModulosCard: getTxt("numeroModulos"),
       generacionAnual: getTxt("generacionAnual", "0 kWh"),
       potenciaInstalada: getTxt("potenciaInstalada", "0 kW"),
       hsp: getTxt("hsp", "0 h"),
@@ -67,7 +67,7 @@ async function exportToBasePdf() {
       potenciaPanel: getVal("potenciaPanel", "—"),
       areaAprox: getVal("areaAprox", "—"),
       // Form fields para la tabla de cotización
-      numModulosInput: getVal("numModulos", ""), // input del formulario
+      numModulosInput: getVal("numeroModulos"), // input del formulario
       subtotalForm: toNum(getVal("subtotal", "0")),
       ivaForm: toNum(getVal("iva", "0")),
       totalForm: toNum(getVal("total", "0")),
@@ -483,16 +483,21 @@ const drawCols = (pairs, colsOverride = 2) => {
       y -= boxH
     }
 
+
+
     // === Tabla Cotización (estilo verde clarito) ===
     // === Tabla Cotización (estilo igual a tus tablas) ===
 function drawCotizacionMantenimiento() {
   // Helpers (usa datos y totales del formulario/calculados)
   const numModulos = (typeof datos !== "undefined")
-    ? (datos.numModulosInput || datos.numeroModulosCard || "—")
+    ? (datos.numeroModulosCard || datos.numeroModulosCard || "—")
     : "—";
+
+    console.log("numModulos", numModulos);
   const potenciaPanel = (typeof datos !== "undefined")
     ? (datos.potenciaPanel || "—")
     : "—";
+
 
   // Subtotal/IVA/Total desde los campos (o del cálculo fallback)
   const subtotalPU = (typeof _subtotal !== "undefined") ? _subtotal : 0;
@@ -662,7 +667,7 @@ function drawCotizacionMantenimiento() {
       ["Consumo anual", datos.consumoAnual],
       ["Gasto anual", datos.importeTotal],
       ["Tarifa promedio", datos.tarifaPromedio],
-      ["% Ahorro estimado", datos.porcentajeAhorro]
+      // ["% Ahorro estimado", datos.porcentajeAhorro]
     ], 4)
 
     section("DISEÑO DEL SISTEMA")
@@ -768,3 +773,13 @@ function shiftAverageLabelDown(canvas) {
   if (!has) chart.config.plugins = [...(chart.config.plugins || []), plugin]
   chart.update()
 }
+   const getNumeroDeModulos = () => {
+            const el = $('numeroModulos')
+            if (!el) return null
+            const num = toNumber(el.textContent)
+            return num > 0 ? num : null
+          }
+
+          const nummod = getNumeroDeModulos();
+
+          console.log(nummod);
