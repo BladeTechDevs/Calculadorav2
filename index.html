@@ -800,5 +800,60 @@
       }
     })();
   </script>
+  <script>
+  (function () {
+    // Cambia la tasa si lo necesitas (16% en MX)
+    const IVA_RATE = 0.16;
+
+    // IDs de TODAS las partidas que suman al subtotal
+    const PARTIDAS = [
+      "panel", "inversor", "mantenimiento", "estructura", "materiales",
+      "instalacion", "carpeta", "flete", "interconexion", "uve",
+      "uie", "medidor", "profit", "watts"
+    ];
+
+    const $subtotal = document.getElementById("subtotal");
+    const $iva      = document.getElementById("iva");
+    const $total    = document.getElementById("total");
+
+    // Asegura que Subtotal / IVA / Total no sean editables
+    [$subtotal, $iva, $total].forEach(el => {
+      if (el) {
+        el.readOnly = true;
+        el.style.background = "#f8fafc"; // opcional, para verse "deshabilitado"
+      }
+    });
+
+    const toNumber = (v) => {
+      const n = parseFloat(String(v).replace(/,/g, ""));
+      return isNaN(n) ? 0 : n;
+    };
+
+    function recalc() {
+      let subtotal = 0;
+      PARTIDAS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) subtotal += toNumber(el.value);
+      });
+
+      const iva = subtotal * IVA_RATE;
+      const total = subtotal + iva;
+
+      if ($subtotal) $subtotal.value = subtotal.toFixed(2);
+      if ($iva)      $iva.value      = iva.toFixed(2);
+      if ($total)    $total.value    = total.toFixed(2);
+    }
+
+    // Recalcular cuando se cambie cualquier partida
+    PARTIDAS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", recalc);
+    });
+
+    // Calcular al cargar
+    window.addEventListener("load", recalc);
+  })();
+</script>
+
 </body>
 </html>
