@@ -19,6 +19,15 @@ async function exportToBasePdf() {
 
     const getVal = (id, fb = "") => (document.getElementById(id)?.value ?? fb).toString().trim()
     const getTxt = (id, fb = "") => (document.getElementById(id)?.textContent ?? fb).toString().trim()
+    const toNum = (v) => {
+      if (typeof v === "number") return v
+      if (!v) return 0
+      const s = String(v).replace(/[^\d.-]/g, "")
+      const n = parseFloat(s)
+      return isNaN(n) ? 0 : n
+    }
+    const fmtMXN = (n) =>
+      new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(toNum(n))
 
     const datos = {
       // Cliente
@@ -37,7 +46,7 @@ async function exportToBasePdf() {
       estadoProyecto: getVal("estadoProyecto"),
       municipioProyecto: getVal("municipioProyecto"),
       zonaCFE: getVal("zonaCFE"),
-      // Métricas
+      // Métricas (cards)
       consumoAnual: getTxt("consumoAnual", "0 kWh"),
       consumoMensual: getTxt("consumoMensual", "0 kWh"),
       consumoDiario: getTxt("consumoDiario", "0 kWh"),
@@ -45,7 +54,7 @@ async function exportToBasePdf() {
       importePromedio: getTxt("importePromedio", "$0"),
       tarifaPromedio: getTxt("tarifaPromedio", "$0"),
       potenciaNecesaria: getTxt("potenciaNecesaria", "0 kW"),
-      numeroModulos: getTxt("numeroModulos", "0"),
+      numeroModulosCard: getTxt("numeroModulos", "0"),
       generacionAnual: getTxt("generacionAnual", "0 kWh"),
       potenciaInstalada: getTxt("potenciaInstalada", "0 kW"),
       hsp: getTxt("hsp", "0 h"),
@@ -56,7 +65,17 @@ async function exportToBasePdf() {
       arboles: getTxt("arboles", "0"),
       potenciaPanel: getVal("potenciaPanel", "—"),
       areaAprox: getVal("areaAprox", "—"),
+      // Form fields para la tabla de cotización
+      numModulosInput: getVal("numModulos", ""), // input del formulario
+      subtotalForm: toNum(getVal("subtotal", "0")),
+      ivaForm: toNum(getVal("iva", "0")),
+      totalForm: toNum(getVal("total", "0")),
     }
+
+    // Fallback por si los campos de subtotal/iva/total no están llenos todavía
+    const _subtotal = datos.subtotalForm
+    const _iva = datos.ivaForm || _subtotal * 0.16
+    const _total = datos.totalForm || (_subtotal + _iva)
 
     // Detalle por periodo (no se renderiza tabla, se mantiene solo por si lo usas)
     const tipoPeriodo = document.getElementById("tipoPeriodo")?.value || "mensual"
@@ -103,6 +122,10 @@ async function exportToBasePdf() {
     const grayL  = rgb(0.96, 0.96, 0.96)
     const white  = rgb(1, 1, 1)
     const headerSoft = rgb(0xED/255, 0xFA/255, 0xF2/255)
+
+    // >>> Tonos verdes usados en la tabla de cotización
+    const greenD = primeD                  // borde / textos oscuros
+    const greenL = rgb(0.92, 0.98, 0.93)   // encabezado verde clarito
 
     // Escalas
     const fsBase  = 8
@@ -276,36 +299,51 @@ async function exportToBasePdf() {
       y -= H + 6
     }
 
-    // 2 columnas genéricas (para otras secciones)
-    const draw2Cols = (pairs) => {
-      const gap = mm(5)
-      const colW = (contentWidth - gap) / 2
-      const heights = pairs.map(([label, value]) => {
-        const lines = wrapText(String(value ?? "—"), colW - 14, fsBase, font)
-        return 24 + lh * lines.length
-      })
-      const H = Math.max(...heights)
-      ensure(H + 6)
+    // 2 columnas genéricas
+    // 2-3 columnas genéricas (ahora dinámico)
+const drawCols = (pairs, colsOverride = 2) => {
+  const gap = mm(5)
+  const cols = Math.min(colsOverride, pairs.length)
+  const colW = (contentWidth - gap * (cols - 1)) / cols
 
-      const drawCard = (x, label, value) => {
-        const yTop = y
-        page.drawRectangle({ x, y: yTop - H, width: colW, height: H, color: white, borderColor: prime, borderWidth: 0.35, borderRadius: 8 })
-        page.drawRectangle({ x, y: yTop - 18, width: colW, height: 18, color: primeL, borderRadius: 8 })
-        page.drawText(label, { x: x + 8, y: yTop - 14, size: fsBase, font: fontBold, color: primeD })
-        let yy = yTop - 28
-        wrapText(String(value ?? "—"), colW - 14, fsBase, font).forEach(line => {
-          page.drawText(line, { x: x + 8, y: yy, size: fsBase, font, color: ink })
-          yy -= lh
-        })
-      }
+  // Altura dinámica (basada en el valor más alto)
+  const heights = pairs.map(([label, value]) => {
+    const lines = wrapText(String(value ?? "—"), colW - 14, fsBase, font)
+    return 24 + lh * lines.length
+  })
+  const H = Math.max(...heights)
+  ensure(H + 6)
 
-      const [a, b] = pairs
-      if (a) drawCard(left, a[0], a[1])
-      if (b) drawCard(left + colW + gap, b[0], b[1])
-      y -= H + 6
-    }
+  const drawCard = (x, label, value) => {
+    const yTop = y
+    page.drawRectangle({
+      x, y: yTop - H, width: colW, height: H,
+      color: white, borderColor: prime, borderWidth: 0.35, borderRadius: 8
+    })
+    page.drawRectangle({
+      x, y: yTop - 18, width: colW, height: 18,
+      color: primeL, borderRadius: 8
+    })
+    page.drawText(label, {
+      x: x + 8, y: yTop - 14, size: fsBase, font: fontBold, color: primeD
+    })
+    let yy = yTop - 28
+    wrapText(String(value ?? "—"), colW - 14, fsBase, font).forEach(line => {
+      page.drawText(line, { x: x + 8, y: yy, size: fsBase, font, color: ink })
+      yy -= lh
+    })
+  }
 
-    // ========= kpiRow FLEXIBLE: cols a elección =========
+  pairs.slice(0, cols).forEach(([label, value], idx) => {
+    const x = left + idx * (colW + gap)
+    drawCard(x, label, value)
+  })
+
+  y -= H + 6
+}
+
+
+    // ========= kpiRow =========
     const kpiRow = (items, colsOverride) => {
       const gap = mm(5)
       const cols = Math.max(1, colsOverride || items.length)
@@ -335,7 +373,7 @@ async function exportToBasePdf() {
       y -= 1
     }
 
-    // Gráfica centrada
+    // Gráfica centrada (1)
     const drawCanvasImageIfAny = async (canvasId, widthMM, heightMM) => {
       const canvas = document.getElementById(canvasId)
       if (!canvas) return
@@ -353,6 +391,7 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
+    // Gráfica centrada (2)
     const drawCanvasImageIfAny2 = async (canvasId, widthMM, heightMM) => {
       const canvas = document.getElementById(canvasId)
       if (!canvas) return
@@ -369,8 +408,8 @@ async function exportToBasePdf() {
       } catch (e) { console.warn("No se pudo insertar la gráfica:", e) }
     }
 
-    // === Términos y condiciones con FOLIO naranja ===
-    const drawTerms = () => {
+    // === Términos y condiciones ===
+    function drawTerms() {
       const items = [
         "La actual cotización es PRELIMINAR, previa a un levantamiento técnico a detalle (precio sujeto a cambio).",
         "El suministro de equipos es proporcionado por el contratista con entrega en sitio (estructura, inversor, módulos).",
@@ -385,7 +424,7 @@ async function exportToBasePdf() {
       ]
       const fsTiny = 7, lhTiny = 10, pad = 8
       const titleH = 16
-      const folioText = `Folio: SFVI-19325` // ponlo dinámico si gustas
+      const folioText = `Folio: SFVI-19325`
 
       ensure(titleH + 8)
 
@@ -429,6 +468,160 @@ async function exportToBasePdf() {
       y -= boxH
     }
 
+    // === Tabla Cotización (estilo verde clarito) ===
+    // === Tabla Cotización (estilo igual a tus tablas) ===
+function drawCotizacionMantenimiento() {
+  // Helpers (usa datos y totales del formulario/calculados)
+  const numModulos = (typeof datos !== "undefined")
+    ? (datos.numModulosInput || datos.numeroModulosCard || "—")
+    : "—";
+  const potenciaPanel = (typeof datos !== "undefined")
+    ? (datos.potenciaPanel || "—")
+    : "—";
+
+  // Subtotal/IVA/Total desde los campos (o del cálculo fallback)
+  const subtotalPU = (typeof _subtotal !== "undefined") ? _subtotal : 0;
+  const ivaPU      = (typeof _iva      !== "undefined") ? _iva      : subtotalPU * 0.16;
+  const totalPU    = (typeof _total    !== "undefined") ? _total    : subtotalPU + ivaPU;
+
+  const fmt = n => `$${(Number(n) || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  })}`;
+
+  // Alturas básicas
+  const titleH   = 20;
+  const headH    = 20;
+  const rowH     = 22;
+  const gapBelow = 14;
+
+  // --- Título estilo barra completa (verde oscuro + texto blanco)
+  const title = "COTIZACIÓN DE MANTENIMIENTO";
+  ensure(titleH + headH + rowH + 36);
+  page.drawRectangle({
+    x: left, y: y - titleH, width: contentWidth, height: titleH, color: primeD
+  });
+  const tw = widthOf(title, fsBase, fontBold);
+  page.drawText(title, {
+    x: left + (contentWidth - tw) / 2,
+    y: y - 14, size: fsBase, font: fontBold, color: white
+  });
+  y -= titleH + 6;
+
+  // --- Medidas de la tabla
+  const W = contentWidth;
+  const col = {
+    partida: Math.round(W * 0.10),
+    desc:    Math.round(W * 0.48),
+    cant:    Math.round(W * 0.12),
+    pu:      Math.round(W * 0.15),
+    imp:     Math.round(W * 0.15),
+  };
+  const X = {
+    partida: left,
+    desc:    left + col.partida,
+    cant:    left + col.partida + col.desc,
+    pu:      left + col.partida + col.desc + col.cant,
+    imp:     left + col.partida + col.desc + col.cant + col.pu,
+    end:     left + W
+  };
+
+  // --- Encabezado (verde clarito en la banda, bordes verde oscuro)
+  page.drawRectangle({ x: left, y: y - headH, width: W, height: headH, color: primeL, borderColor: primeD, borderWidth: 0.8 });
+  const thY = y - 14;
+  page.drawText("Partida",     { x: X.partida + 6, y: thY, size: fsBase, font: fontBold, color: primeD });
+  page.drawText("Descripción", { x: X.desc    + 6, y: thY, size: fsBase, font: fontBold, color: primeD });
+  page.drawText("Cantidad",    { x: X.cant    + 6, y: thY, size: fsBase, font: fontBold, color: primeD });
+  page.drawText("P.U.",        { x: X.pu      + 6, y: thY, size: fsBase, font: fontBold, color: primeD });
+  page.drawText("Importe",     { x: X.imp     + 6, y: thY, size: fsBase, font: fontBold, color: primeD });
+
+  // Bordes verticales del header
+  page.drawLine({ start:{x:X.partida, y:y-headH}, end:{x:X.partida, y:y-headH-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.desc,    y:y-headH}, end:{x:X.desc,    y:y-headH-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.cant,    y:y-headH}, end:{x:X.cant,    y:y-headH-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.pu,      y:y-headH}, end:{x:X.pu,      y:y-headH-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.imp,     y:y-headH}, end:{x:X.imp,     y:y-headH-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.end,     y:y-headH}, end:{x:X.end,     y:y-headH-rowH}, thickness:0.8, color: primeD });
+
+  y -= headH;
+
+  // --- Fila única (cuerpo blanco con bordes verde oscuro)
+  page.drawRectangle({ x: left, y: y - rowH, width: W, height: rowH, color: white, borderColor: primeD, borderWidth: 0.8 });
+  page.drawLine({ start:{x:X.partida, y:y}, end:{x:X.partida, y:y-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.desc,    y:y}, end:{x:X.desc,    y:y-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.cant,    y:y}, end:{x:X.cant,    y:y-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.pu,      y:y}, end:{x:X.pu,      y:y-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.imp,     y:y}, end:{x:X.imp,     y:y-rowH}, thickness:0.8, color: primeD });
+  page.drawLine({ start:{x:X.end,     y:y}, end:{x:X.end,     y:y-rowH}, thickness:0.8, color: primeD });
+
+  const desc = `Instalación ${numModulos || "—"} MFV de ${potenciaPanel || "—"} W`;
+  const yy = y - 14;
+  page.drawText("1",   { x: X.partida + 6, y: yy, size: fsBase, font, color: ink });
+  page.drawText(desc,  { x: X.desc    + 6, y: yy, size: fsBase, font, color: ink });
+  page.drawText("1",   { x: X.cant    + 6, y: yy, size: fsBase, font, color: ink });
+
+  const puTxt  = fmt(subtotalPU);
+  const impTxt = fmt(subtotalPU);
+  page.drawText(puTxt,  { x: X.pu  + col.pu  - 6 - widthOf(puTxt,  fsBase, font), y: yy, size: fsBase, font, color: ink });
+  page.drawText(impTxt, { x: X.imp + col.imp - 6 - widthOf(impTxt, fsBase, font), y: yy, size: fsBase, font, color: ink });
+
+  y -= rowH + gapBelow;
+
+  // --- Notas a la izquierda + Totales a la derecha (separados)
+  const gapX   = mm(6);
+  const leftW  = Math.round(W * 0.58);
+  const rightW = W - leftW - gapX;
+
+  // Notas (ligero tono verdoso + borde)
+  const notesH = 44;
+  page.drawRectangle({ x: left, y: y - notesH, width: leftW, height: notesH, color: rgb(0.97, 1, 0.97), borderColor: primeD, borderWidth: 0.6 });
+  page.drawText("*Cotización válida por 7 días naturales.", { x: left + 8, y: y - 14, size: fsBase, font, color: ink });
+  page.drawText("*Fecha de inicio de trabajos por definir con cliente.", { x: left + 8, y: y - 28, size: fsBase, font, color: ink });
+
+  // Totales (cuadro con 3 filas; label verde claro, valor blanco; bordes verdes)
+  const rightX = left + leftW + gapX;
+  const rowTH  = 20;
+  const totalBoxH = rowTH * 3;
+
+  // contorno general
+  page.drawRectangle({ x: rightX, y: y - totalBoxH, width: rightW, height: totalBoxH, color: white, borderColor: primeD, borderWidth: 0.8 });
+
+  const labels = ["Sub Total", "IVA", "Total"];
+  const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)];
+
+  for (let i = 0; i < 3; i++) {
+  const yRowTop = y - i * rowTH;
+
+  // celda label (verde clarito)
+  const labelW = Math.round(rightW * 0.55);
+  page.drawRectangle({
+    x: rightX, y: yRowTop - rowTH, width: labelW, height: rowTH,
+    color: primeL, borderColor: primeD, borderWidth: 0.8
+  });
+  page.drawText(labels[i], {
+    x: rightX + 8, y: yRowTop - 14,
+    size: fsBase, font: fontBold, color: primeD
+  });
+
+  // celda valor (blanco o amarillo si es TOTAL)
+  const vx = rightX + labelW;
+  page.drawRectangle({
+    x: vx, y: yRowTop - rowTH, width: rightW - labelW, height: rowTH,
+    color: (i === 2 ? rgb(1, 0.7, 0) : white), // <-- amarillo clarito en TOTAL
+    borderColor: primeD, borderWidth: 0.8
+  });
+
+  const txt = values[i];
+  page.drawText(txt, {
+    x: rightX + rightW - 8 - widthOf(txt, fsBase, fontBold),
+    y: yRowTop - 14, size: fsBase, font: fontBold, color: ink
+  });
+}
+
+
+  y -= Math.max(notesH, totalBoxH) + 10;
+}
+
+
     const dataURLToUint8Array = (dataURL) => {
       const base64 = dataURL.split(",")[1]
       const raw = atob(base64)
@@ -443,11 +636,13 @@ async function exportToBasePdf() {
     // Panel (cliente y ejecutivo)
     await drawInfoPanelWithIcons()
 
-    section("DATOS DEL PROYECTO")
-    draw2Cols([["Tipo de proyecto", datos.tipoProyecto || "—"], ["Tarifa", datos.tipoTarifa || "—"]])
-    draw2Cols([["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`], ["Zona CFE", datos.zonaCFE || "—"]])
+    drawCotizacionMantenimiento(_subtotal, _iva, _total, datos.numModulosInput, datos.potenciaPanel)
 
-    // KPIs en una sola fila (4)
+    section("DATOS DEL PROYECTO")
+    drawCols([["Tipo de proyecto", datos.tipoProyecto || "—"], ["Tarifa", datos.tipoTarifa || "—"]])
+    drawCols([["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`], ["Zona CFE", datos.zonaCFE || "—"]])
+
+    // KPIs
     kpiRow([
       ["Consumo anual", datos.consumoAnual],
       ["Gasto anual", datos.importeTotal],
@@ -456,20 +651,21 @@ async function exportToBasePdf() {
     ], 4)
 
     section("DISEÑO DEL SISTEMA")
-    // Los 3 cuadros ocupan todo el ancho (3 columnas)
     kpiRow([
       ["Potencia necesaria", datos.potenciaNecesaria],
       ["Potencia instalada", datos.potenciaInstalada],
-      ["N.º de módulos", datos.numeroModulos]
+      ["N.º de módulos", datos.numeroModulosCard]
     ], 3)
 
-    draw2Cols([["Potencia por panel", `${datos.potenciaPanel} W`], ["Generación anual", datos.generacionAnual]])
-    draw2Cols([["Área requerida", `${datos.areaAprox} m²`], ["Rango térmico", `${datos.tempMin} — ${datos.tempMax}`]])
+    drawCols([["Potencia por panel", `${datos.potenciaPanel} W`], ["Generación anual", datos.generacionAnual], ["Área requerida", `${datos.areaAprox} m²`]])
 
-    // *** SOLO GRÁFICA (sin tabla) ***
+    newPage()
     section("ANÁLISIS DETALLADO POR PERÍODO")
     await drawCanvasImageIfAny2("impactoChart", 150, 65)
 
+    // Nueva: tabla de cotización (usa los campos del formulario o fallback)
+
+    // Términos
     drawTerms()
     drawFooter()
 
