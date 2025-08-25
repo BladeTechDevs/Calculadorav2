@@ -506,6 +506,7 @@ function generarInputsPago() {
   const consumos = []
   const importes = []
   let kwintsladaConEficiancia = 0;
+
 function calcularSistemaSolar() {
   // console.log("[v0] Starting comprehensive solar system calculation")
 
@@ -616,7 +617,7 @@ for (let i = 0; i < importes.length; i++) {
   document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`
   document.getElementById("potenciaNecesaria").textContent = `${potenciaNecesaria.toFixed(2)} kW`
   document.getElementById("numeroModulos").textContent = `${numeroModulos}`
-  document.getElementById("generacionAnual").textContent = `${generacionAnual} kWh`
+  // document.getElementById("generacionAnual").textContent = `${generacionAnual} kWh`
   document.getElementById("potenciaInstalada").textContent = `${potenciaInstalada.toFixed(2)} kW`
   document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`
   document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`
@@ -624,11 +625,11 @@ for (let i = 0; i < importes.length; i++) {
   document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`
   // document.getElementById("tempMin").textContent = `${tempMin}°C`
   // document.getElementById("tempMax").textContent = `${tempMax}°C`
-  document.getElementById("arboles").textContent = `${arboles}`
-
+  // document.getElementById("arboles").textContent = `${arboles}`
+  console.log(consumos, importes, tarifas, tipoPeriodo)
   // Fill detailed table
   llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo)
-
+  console.log(estado)
   // Create solar irradiation chart
   crearGraficaIrradiacion(estado)
 
