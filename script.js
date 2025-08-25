@@ -1023,7 +1023,7 @@ function crearGraficaImpactoResponsive(opts) {
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   ctx.font = `bold ${Math.max(14, baseFontPx)}px Arial`;
-  ctx.fillText("Impacto de la Generación vs Consumo", W / 2, Math.max(24, padding * 0.45));
+  ctx.fillText("Impacto de la Generación en el Consumo", W / 2, Math.max(24, padding * 0.45));
   ctx.font = `${Math.max(12, baseFontPx - 2)}px Arial`;
   ctx.fillText("(kWh por mes)", W / 2, Math.max(44, padding * 0.65));
 

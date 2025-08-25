@@ -254,6 +254,11 @@
             <input type="email" id="correoEjecutivo" placeholder="ejecutivo@empresa.com"
               style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
           </div>
+          <div class="form-group">
+            <label for="folioCotizacion">Folio de Cotización</label>
+            <input type="text" id="folioCotizacion" placeholder="Folio de cotización"
+              style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
+          </div>
         </div>
       </div>
 
@@ -422,8 +427,8 @@
                 <select id="inversorPanel"
                   style="width:100%; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 7px; font-size:0.87rem; color:#1a202c;">
                   <option value="">Seleccione</option>
-                  <option value="microinversor">Microinversor</option>
-                  <option value="central">Central</option>
+                  <option value="Microinversor">Microinversor</option>
+                  <option value="Central">Central</option>
                 </select>
               </div>
             </div>
@@ -433,68 +438,8 @@
                 <input type="number" id="potenciaInversor" placeholder="">
               </div>
             </div>
-            <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label>Monitoreo</label>
-                <div class="panel-checkbox-group">
-                  <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoSi">Sí</label>
-                  <label class="panel-checkbox-label"><input type="checkbox" id="mantenimientoNo">No</label>
-                </div>
-              </div>
-            </div>
-            <hr class="panel-divider">
-            <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label>Transformador</label>
-                <div class="panel-checkbox-group">
-                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorSi">Sí</label>
-                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorNo">No</label>
-                  <label class="panel-checkbox-label"><input type="checkbox" id="transformadorYa">Ya tiene</label>
-                </div>
-              </div>
-            </div>
-            <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label for="potenciaTransformador">Potencia del transformador</label>
-                <input type="number" id="potenciaTransformador" placeholder="">
-              </div>
-            </div>
-            <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label>¿Compartido?</label>
-                <div class="panel-checkbox-group">
-                  <label class="panel-checkbox-label"><input type="checkbox" id="compartidoSi">Sí</label>
-                  <label class="panel-checkbox-label"><input type="checkbox" id="compartidoNo">No</label>
-                </div>
-              </div>
-            </div>
           </div>
           <div>
-            <!-- <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label for="numModulos"># módulos</label>
-                <input type="number" id="numModulos" placeholder="">
-              </div>
-            </div> -->
-            <!-- <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label for="numInversores"># inversor</label>
-                <input type="number" id="numInversores" placeholder="">
-              </div>
-            </div> -->
-            <!-- <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label for="potenciaTotalInstalada">Potencia total instalada</label>
-                <input type="number" id="potenciaTotalInstalada" placeholder="">
-              </div>
-            </div> -->
-            <!-- <div class="panel-spec-row">
-              <div class="form-group" style="flex:1;">
-                <label for="numEstructura"># de estructura</label>
-                <input type="number" id="numEstructura" placeholder="">
-              </div>
-            </div> -->
-            <!-- <hr class="panel-divider"> -->
             <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="instalacionElectrica">Instalación eléctrica</label>
@@ -537,39 +482,9 @@
             <hr class="panel-divider">
             <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
-                <label for="areaAprox">Área aprox</label>
+                <label for="areaAprox">Área aproximada</label>
                 <input type="number" id="areaAprox" placeholder="">
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generación y Ahorros -->
-      <div class="form-section" style="margin-top:2.2rem; margin-bottom:1.5rem;">
-        <div class="section-title" style="margin-bottom:1.2rem;">
-          <i class="fas fa-chart-line"></i>
-          <span>Generación y Ahorros</span>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem 2.2rem; margin-bottom:1.1rem;">
-          <div>
-            <div class="form-group" style="margin-bottom:0.7rem;">
-              <label for="generacionAnual" style="font-weight:500;">Generación anual aprox:</label>
-              <input type="number" id="generacionAnual" style="width:100%;" placeholder="">
-            </div>
-            <div class="form-group">
-              <label for="porcentajeGeneracion" style="font-weight:500;">Porcentaje de generación:</label>
-              <input type="number" id="porcentajeGeneracion" style="width:100%;" placeholder="">
-            </div>
-          </div>
-          <div>
-            <div class="form-group" style="margin-bottom:0.7rem;">
-              <label for="inversionMXN" style="font-weight:500;">Inversión (MXN):</label>
-              <input type="number" id="inversionMXN" style="width:100%;" placeholder="">
-            </div>
-            <div class="form-group">
-              <label for="roi" style="font-weight:500;">ROI:</label>
-              <input type="number" id="roi" style="width:100%;" placeholder="">
             </div>
           </div>
         </div>
@@ -593,232 +508,81 @@
                 type="number" id="estructura" style="width:100%;"></div>
             <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input
                 type="number" id="materiales" style="width:100%;"></div>
-            <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input
-                type="number" id="instalacion" style="width:100%;"></div>
-            <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta (Pog):</label><input
-                type="number" id="carpeta" style="width:100%;"></div>
           </div>
           <div>
+            <div class="form-group"><label for="instalacion" style="font-weight:500;">Instalación:</label><input
+                type="number" id="instalacion" style="width:100%;"></div>
+            <div class="form-group"><label for="carpeta" style="font-weight:500;">Carpeta de proyecto:</label><input
+                type="number" id="carpeta" style="width:100%;"></div>
             <div class="form-group"><label for="flete" style="font-weight:500;">Flete:</label><input type="number"
                 id="flete" style="width:100%;"></div>
             <div class="form-group"><label for="interconexion" style="font-weight:500;">Interconexión:</label><input
                 type="number" id="interconexion" style="width:100%;"></div>
             <div class="form-group"><label for="uve" style="font-weight:500;">UVIE:</label><input type="number" id="uve"
                 style="width:100%;"></div>
+          </div>
+          <div>
             <div class="form-group"><label for="uie" style="font-weight:500;">UIE:</label><input type="number" id="uie"
                 style="width:100%;"></div>
             <div class="form-group"><label for="medidor" style="font-weight:500;">Medidor:</label><input type="number"
                 id="medidor" style="width:100%;"></div>
-          </div>
-          <div>
-            <div class="form-group"><label for="profit" style="font-weight:500;">Profit:</label><input type="number"
+            <div class="form-group"><label for="profit" style="font-weight:500;">Profit (%):</label><input type="number"
                 id="profit" style="width:100%;"></div>
-            <!-- <div class="form-group"><label for="watts" style="font-weight:500;">$ Watts:</label><input type="number"
-                id="watts" style="width:100%;"></div> -->
             <hr style="margin:1.1rem 0; border:none; border-top:1px solid #e2e8f0;">
-            <div class="form-group"><label for="subtotal" style="font-weight:500;">Subtotal:</label><input type="number"
-                id="subtotal" style="width:100%;"></div>
-            <div class="form-group"><label for="iva" style="font-weight:500;">IVA:</label><input type="number" id="iva"
-                style="width:100%;"></div>
-            <div class="form-group"><label for="total" style="font-weight:500;">Total:</label><input type="number"
+            <div class="form-group"><label for="total" style="font-weight:500;">Total (MXN):</label><input type="text"
                 id="total" style="width:100%;"></div>
           </div>
         </div>
       </div>
 
       <script>
-        ; (() => {
-          // === Configuración (no modifica tus inputs existentes) ===
-          const IVA_RATE = 0.16
-          const IDS_COSTOS = [
-            ['panel', 'Panel'],
-            ['inversor', 'Inversor'],
-            ['mantenimiento', 'Mantenimiento'],
-            ['estructura', 'Estructura'],
-            ['materiales', 'Materiales'],
-            ['instalacion', 'Instalación'],
-            ['carpeta', 'Carpeta (Pog)'],
-            ['flete', 'Flete'],
-            ['interconexion', 'Interconexión'],
-            ['uve', 'UVIE'],
-            ['uie', 'UIE'],
-            ['medidor', 'Medidor'],
-          ]
+        (() => {
+          // Campos que SÍ se suman (profit NO está aquí)
+          const IDS_SUM = [
+            "panel", "inversor", "mantenimiento", "estructura", "materiales",
+            "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor"
+          ];
 
-          const $ = (id) => document.getElementById(id)
-          const toNumber = (v) => {
-            if (v === null || v === undefined) return 0
-            const s = String(v).replace(/[,$\s]/g, '').replace(',', '.')
-            const n = parseFloat(s)
-            return isNaN(n) ? 0 : n
-          }
-          const fmt = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 })
+          const $ = id => document.getElementById(id);
 
-          // Lee potencia instalada (kW) desde la tarjeta de métricas si existe y la convierte a W
-          const getPotenciaW = () => {
-            const el = $('potenciaInstalada')
-            if (!el) return null
-            const kw = toNumber(el.textContent)
-            console.log(el)
-            return kw > 0 ? kw * 1000 : null
+          const toNumber = v => {
+            if (v == null) return 0;
+            const s = String(v).replace(/[^\d.-]/g, "");
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+          };
+
+          const formatOut = (n, out) =>
+            (out?.type === "number")
+              ? Number(n).toFixed(2)
+              : Number(n).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+          function calcularTotal() {
+            let total = 0;
+            IDS_SUM.forEach(id => { total += toNumber($(id)?.value); });
+
+            // NO sumar profit. Solo lo leemos para disparar recálculo si cambia.
+            const out = $("total");
+            if (out) out.value = formatOut(total, out);
           }
 
-          //trae el numero de modulos
-          const getNumeroDeModulos = () => {
-            const el = $('numeroModulos')
-            if (!el) return null
-            const num = toNumber(el.textContent)
-            return num > 0 ? num : null
+          function attach() {
+            // Escucha todos los permitidos…
+            IDS_SUM.forEach(id => { const el = $(id); if (el) el.addEventListener("input", calcularTotal); });
+            // …y también profit para que al cambiarlo NO sume pero sí se recalculen otros efectos si tuvieses.
+            const profit = $("profit");
+            if (profit) profit.addEventListener("input", calcularTotal);
+
+            calcularTotal();
           }
 
-          // Profit: 0.2 o 20 => porcentaje; >=100 => monto fijo MXN
-          const calcularProfit = (subtotal) => {
-            const raw = $('profit')?.value
-            const p = toNumber(raw)
-            if (!p) return { monto: 0, etiqueta: '—' }
-            if (p <= 1) return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' } // 0.2 => 20%
-            if (p < 100) return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' } // 20 => 20%
-            return { monto: p, etiqueta: fmt(p) + ' (monto)' }
-          }
-
-          // Crea/actualiza la tabla de desglose
-          const renderTabla = () => {
-            // 1) Leer costos
-            const conceptos = []
-            let subtotal = 0
-            IDS_COSTOS.forEach(([id, nombre]) => {
-              const val = toNumber($(id)?.value)
-              conceptos.push({ nombre, val })
-              subtotal += val
-            })
-
-            // 2) Profit / IVA / Total
-            const { monto: profit, etiqueta: etiquetaProfit } = calcularProfit(subtotal)
-            const base = subtotal + profit
-            const iva = base * IVA_RATE
-            const total = base + iva
-
-            // 3) $/W si hay potencia instalada visible
-            const potenciaW = getPotenciaW()
-            const numeroModulos = getNumeroDeModulos()
-            // const pricePerWatt = potenciaW ? total / potenciaW : null
-
-            const pricePerWatt = subtotal / (numeroModulos * (potenciaW / numeroModulos))
-            const pricePerWattconIva = pricePerWatt ? pricePerWatt * (1 + IVA_RATE) : null
-            // 4) Contenedor (debajo de #resultsContent)
-            const results = $('resultsContent')
-            if (!results) return
-            let cont = document.getElementById('cont-desglose-cotizacion-pu')
-            if (!cont) {
-              cont = document.createElement('section')
-              cont.id = 'cont-desglose-cotizacion-pu'
-              cont.style.marginTop = '1.5rem'
-              results.insertAdjacentElement('afterend', cont)
-            }
-
-            // 5) Estilos mínimos inline (no rompe tu CSS)
-            const cardStyle = `
-              background:#fff;border:1px solid #e2e8f0;border-radius:12px;
-              padding:16px;box-shadow:0 4px 10px rgba(17,24,39,.06);overflow:auto
-            `
-            const titleStyle = `font-weight:600;font-size:1rem;margin:0 0 .6rem 0;display:flex;gap:.5rem;align-items:center`
-            const tableStyle = `width:100%;border-collapse:collapse;font-size:.95rem`
-            const thtd = `padding:.6rem .7rem;border-bottom:1px solid #edf2f7;text-align:right`
-            const thLeft = `text-align:left`
-
-            // 6) Construir filas de conceptos (omite los que estén en cero para limpieza)
-            const filasConceptos = conceptos
-              .filter(c => c.val && c.val !== 0)
-              .map(c => `
-                <tr>
-                  <td style="${thtd};${thLeft}">${c.nombre}</td>
-                  <td style="${thtd}">${fmt(c.val)}</td>
-                </tr>
-              `).join('')
-
-            // 7) HTML de la tarjeta/tabla
-            cont.innerHTML = `
-              <div style="${cardStyle}">
-                <h3 style="${titleStyle}">
-                  <i class="fas fa-file-invoice-dollar"></i>
-                  Desglose de Cotización P.U.
-                </h3>
-                <table style="${tableStyle}">
-                  <thead>
-                    <tr>
-                      <th style="${thtd};${thLeft}">Concepto</th>
-                      <th style="${thtd}">Importe</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${filasConceptos || `
-                      <tr><td style="${thtd};${thLeft}" colspan="2">Sin datos de cotización aún.</td></tr>
-                    `}
-                    <tr>
-                      <td style="${thtd};${thLeft};font-weight:600">Subtotal</td>
-                      <td style="${thtd};font-weight:600">${fmt(subtotal)}</td>
-                    </tr>
-                    <tr>
-                      <td style="${thtd};${thLeft}">Profit <span style="opacity:.7">(${etiquetaProfit})</span></td>
-                      <td style="${thtd}">${fmt(profit)}</td>
-                    </tr>
-                    <tr>
-                      <td style="${thtd};${thLeft}">Base Imponible</td>
-                      <td style="${thtd}">${fmt(base)}</td>
-                    </tr>
-                    <tr>
-                      <td style="${thtd};${thLeft}">IVA (${(IVA_RATE * 100).toFixed(0)}%)</td>
-                      <td style="${thtd}">${fmt(iva)}</td>
-                    </tr>
-                    <tr>
-                      <td style="${thtd};${thLeft};font-weight:700">TOTAL</td>
-                      <td style="${thtd};font-weight:700">${fmt(total)}</td>
-                    </tr>
-                  ${pricePerWatt !== null ? `
-                    <tr>
-                      <td style="${thtd};${thLeft}">$/Watt (sin IVA)</td>
-                      <td style="${thtd}">${pricePerWatt.toLocaleString('es-MX', { maximumFractionDigits: 2 })}</td>
-                    </tr>
-                    <tr>
-                      <td style="${thtd};${thLeft}">$/Watt (con IVA)</td>
-                      <td style="${thtd}">${(pricePerWatt * (1 + IVA_RATE)).toLocaleString('es-MX', { maximumFractionDigits: 2 })}</td>
-                    </tr>
-                  ` : ``}
-                  </tbody>
-                </table>
-                <div style="margin-top:.6rem;font-size:.85rem;color:#64748b">
-                  * La fila <em>$/Watt</em> aparece cuando la tarjeta <strong>Potencia Instalada (kW)</strong> ya tiene valor.
-                </div>
-              </div>
-            `
-          }
-
-          // Recalcula la tabla cuando cambie cualquier input de la Cotización P.U. o el profit
-          const attach = () => {
-            const ids = IDS_COSTOS.map(([id]) => id).concat(['profit'])
-            ids.forEach(id => {
-              const el = $(id)
-              if (el) el.addEventListener('input', renderTabla)
-            })
-
-            // Reaccionar si luego se llenan métricas (ej. Potencia Instalada)
-            const pot = $('potenciaInstalada')
-            if (pot) {
-              const mo = new MutationObserver(renderTabla)
-              mo.observe(pot, { childList: true, characterData: true, subtree: true })
-            }
-
-            // Pintado inicial
-            renderTabla()
-          }
-
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', attach)
-          } else {
-            attach()
-          }
-        })()
+          document.readyState === "loading"
+            ? document.addEventListener("DOMContentLoaded", attach)
+            : attach();
+        })();
       </script>
+
+
 
 
       <!-- Botón de cálculo -->
@@ -866,7 +630,7 @@
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
             <div class="metric-value" id="importeTotal">-</div>
-            <div class="metric-label">Importe Total Anual</div>
+            <div class="metric-label">Importe de CFE Total Anual</div>
           </div>
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-coins"></i></div>
@@ -928,6 +692,21 @@
             <div class="metric-value" id="arboles">-</div>
             <div class="metric-label">Árboles Equivalentes</div>
           </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-bolt"></i></div>
+            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-label">Generación anual aproximada</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-percentage"></i></div>
+            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-label">Porcentaje de generación</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-arrow-rotate-left"></i></div>
+            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-label">ROI</div>
+          </div>
         </div>
 
         <div class="chart-section">
@@ -979,66 +758,66 @@
 
   <!-- JS de la barra resizable -->
   <script>
-      (function () {
-        const container = document.querySelector('.main-container');
-        const left = document.querySelector('.form-panel');
-        const resizer = document.getElementById('splitter');
-        if (!container || !left || !resizer) return;
+    (function () {
+      const container = document.querySelector('.main-container');
+      const left = document.querySelector('.form-panel');
+      const resizer = document.getElementById('splitter');
+      if (!container || !left || !resizer) return;
 
-        const MIN_LEFT = 320;   // px
-        const MIN_RIGHT = 320;  // px
+      const MIN_LEFT = 320;   // px
+      const MIN_RIGHT = 320;  // px
 
-        let startX = 0, startW = 0, dragging = false;
+      let startX = 0, startW = 0, dragging = false;
 
-        function clampLeftWidth(px) {
-          const total = container.getBoundingClientRect().width;
-          const maxByRight = total - MIN_RIGHT;
-          return Math.max(MIN_LEFT, Math.min(maxByRight, px));
-        }
-        function setLeftWidth(px) {
-          const w = clampLeftWidth(px);
-          left.style.width = w + 'px';
-          left.style.flex = `0 0 ${w}px`;
-        }
-        function setHalf() {
-          const total = container.getBoundingClientRect().width;
-          setLeftWidth(total / 2);
-        }
-        function onPointerDown(e) {
-          dragging = true;
-          startX = (e.touches ? e.touches[0].clientX : e.clientX);
-          startW = left.getBoundingClientRect().width;
-          document.body.classList.add('is-resizing');
-          resizer.classList.add('is-dragging');
+      function clampLeftWidth(px) {
+        const total = container.getBoundingClientRect().width;
+        const maxByRight = total - MIN_RIGHT;
+        return Math.max(MIN_LEFT, Math.min(maxByRight, px));
+      }
+      function setLeftWidth(px) {
+        const w = clampLeftWidth(px);
+        left.style.width = w + 'px';
+        left.style.flex = `0 0 ${w}px`;
+      }
+      function setHalf() {
+        const total = container.getBoundingClientRect().width;
+        setLeftWidth(total / 2);
+      }
+      function onPointerDown(e) {
+        dragging = true;
+        startX = (e.touches ? e.touches[0].clientX : e.clientX);
+        startW = left.getBoundingClientRect().width;
+        document.body.classList.add('is-resizing');
+        resizer.classList.add('is-dragging');
 
-          window.addEventListener('pointermove', onPointerMove);
-          window.addEventListener('pointerup', onPointerUp);
-          window.addEventListener('touchmove', onTouchMove, { passive: false });
-          window.addEventListener('touchend', onPointerUp);
-          window.addEventListener('mousemove', onMouseMove);
-          window.addEventListener('mouseup', onPointerUp);
-        }
-        function onPointerMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-        function onMouseMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
-        function onTouchMove(e) { if (!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
-        function onPointerUp() {
-          dragging = false;
-          document.body.classList.remove('is-resizing');
-          resizer.classList.remove('is-dragging');
-          window.removeEventListener('pointermove', onPointerMove);
-          window.removeEventListener('pointerup', onPointerUp);
-          window.removeEventListener('touchmove', onTouchMove);
-          window.removeEventListener('touchend', onPointerUp);
-          window.removeEventListener('mousemove', onMouseMove);
-          window.removeEventListener('mouseup', onPointerUp);
-        }
-        resizer.addEventListener('pointerdown', onPointerDown);
-        resizer.addEventListener('mousedown', onPointerDown);
-        resizer.addEventListener('touchstart', onPointerDown, { passive: true });
-        window.addEventListener('load', setHalf);
-        window.addEventListener('resize', setHalf);
-        setTimeout(setHalf, 0);
-      })();
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onPointerUp);
+      }
+      function onPointerMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onMouseMove(e) { if (!dragging) return; const dx = e.clientX - startX; setLeftWidth(startW + dx); }
+      function onTouchMove(e) { if (!dragging) return; e.preventDefault(); const dx = e.touches[0].clientX - startX; setLeftWidth(startW + dx); }
+      function onPointerUp() {
+        dragging = false;
+        document.body.classList.remove('is-resizing');
+        resizer.classList.remove('is-dragging');
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onPointerUp);
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onPointerUp);
+      }
+      resizer.addEventListener('pointerdown', onPointerDown);
+      resizer.addEventListener('mousedown', onPointerDown);
+      resizer.addEventListener('touchstart', onPointerDown, { passive: true });
+      window.addEventListener('load', setHalf);
+      window.addEventListener('resize', setHalf);
+      setTimeout(setHalf, 0);
+    })();
   </script>
 
   <!-- JS para el panel de Consumo -->
