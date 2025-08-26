@@ -1661,17 +1661,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function actualizarTarifas() {
     const tipo = tipoProyectoSelect.value;
-    tipoTarifaSelect.innerHTML =
-      '<option value="">Selecciona una tarifa</option>';
+    tipoTarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
     if (tarifasPorProyecto[tipo]) {
-      tarifasPorProyecto[tipo].forEach((tarifa) => {
+      tarifasPorProyecto[tipo].forEach((t) => {
         const option = document.createElement("option");
-        option.value = tarifa;
-        option.textContent = tarifa;
+        option.value = t.value;     // <- string/id
+        option.textContent = t.text; // <- texto visible
         tipoTarifaSelect.appendChild(option);
       });
     }
   }
+
 
   tipoProyectoSelect.addEventListener("change", actualizarTarifas);
   actualizarTarifas();
