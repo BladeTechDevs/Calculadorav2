@@ -997,10 +997,14 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
   const redraw = () => {
     // 1) Ajuste a contenedor + DPR
     const parent = canvas.parentElement || canvas;
-    const cssWidth = parent.clientWidth || 600;
+    const cssWidth = canvas.style.width
+      ? parseInt(getComputedStyle(canvas).width)
+      : (parent.clientWidth || 600);
+
     const cssHeight = canvas.style.height
       ? parseInt(getComputedStyle(canvas).height)
       : 320;
+
 
     const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
     canvas.width = Math.floor(cssWidth * dpr);
@@ -1033,6 +1037,7 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
     });
   };
 
+  canvas.__impactoRedraw = redraw;
   // Primera pintura
   redraw();
 
@@ -1065,12 +1070,10 @@ function crearGraficaImpactoResponsive(opts) {
   const prod = produccionArr.slice(0, L).map((v) => Number(v) || 0);
 
   // Dimensiones (en CSS px, ya transformados con DPR)
-  const W = Math.floor(
-    canvas.clientWidth || parseInt(getComputedStyle(canvas).width)
-  );
-  const H = Math.floor(
-    canvas.clientHeight || parseInt(getComputedStyle(canvas).height)
-  );
+  const cs = getComputedStyle(canvas);
+  const W = Math.max(50, Math.floor(parseFloat(cs.width) || canvas.width || 600));
+  const H = Math.max(50, Math.floor(parseFloat(cs.height) || canvas.height || 320));
+
   const padding = paddingPx;
 
   const chartWidth = Math.max(50, W - 2 * padding);
@@ -1308,6 +1311,8 @@ function niceCeil(x) {
 //       })
 //   }, 800)
 // }
+
+
 
 function exportQuotationToPdf() {
   console.log("[v0] Generating professional SFVI quotation");
@@ -1684,3 +1689,5 @@ function actualizarTotales() {
     "importeTotal"
   ).textContent = `$${totalImporte.toFixed(2)}`;
 }
+
+

@@ -341,7 +341,7 @@ async function exportToBasePdf() {
         const textH = lhCompact * lines.length;
         const availableH = H - headerH;
         const valuePadTop = 6.5;
-        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop; 
+        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
 
         lines.forEach(line => {
           page.drawText(line, {
@@ -400,8 +400,8 @@ async function exportToBasePdf() {
         const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
         const textH = lhCompact * lines.length;
         const availableH = H - headerH;
-const valuePadTop = 6.5;  // <- NUEVO
-let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
+        const valuePadTop = 6.5;  // <- NUEVO
+        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
 
         lines.forEach(line => {
           page.drawText(line, {
@@ -458,74 +458,130 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
       return arr
     }
 
+    // Ensancha temporalmente la gráfica "impactoChart", fuerza un redibujo y devuelve un PNG nítido
+    async function capturarImpactoGrande() {
+      const c = document.getElementById("impactoChart");
+      if (!c) return null;
+
+      // 1) agrandar por CSS y disparar el redibujo (tu ResizeObserver/redraw lo hará)
+      document.body.classList.add("pdf-export");
+      window.dispatchEvent(new Event("resize"));
+
+      // 2) espera un tick para que se repinte
+      await new Promise(r => setTimeout(r, 160));
+
+      // 3) capturar imagen grande directamente del canvas ya redibujado
+      let dataURL = null;
+      try { dataURL = c.toDataURL("image/png", 1); } catch { }
+
+      // 4) restaurar layout
+      document.body.classList.remove("pdf-export");
+      window.dispatchEvent(new Event("resize"));
+      await new Promise(r => setTimeout(r, 60));
+
+      return dataURL;
+    }
+
+    const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+    async function withTempCanvasSize(canvas, wPx, hPx, fn) {
+      const prevW = canvas.style.width;
+      const prevH = canvas.style.height;
+
+      canvas.style.width = wPx + "px";
+      canvas.style.height = hPx + "px";
+
+      // 2 frames para que layout + redraw se asienten
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      if (typeof canvas.__impactoRedraw === "function") {
+        canvas.__impactoRedraw();
+        await delay(30);
+      }
+
+      const out = await fn();
+
+      canvas.style.width = prevW;
+      canvas.style.height = prevH;
+
+      if (typeof canvas.__impactoRedraw === "function") {
+        canvas.__impactoRedraw();
+      }
+      return out;
+    }
+
+
+
+
     // Renderiza la Chart.js en un canvas off-screen a 300 DPI y la inserta nítida en el PDF
+    // Renderiza la gráfica a tamaño físico en mm y la inserta nítida en el PDF
     const drawCanvasImageIfAny2 = async (canvasId, widthMM, heightMM, dpi = 300) => {
       const src = document.getElementById(canvasId);
       if (!src) return;
 
-      // 1) Calcula los pixeles que requiere el PDF para ese tamaño físico a X DPI
       const pxPerMM = dpi / 25.4;
       const outW = Math.max(1, Math.round(widthMM * pxPerMM));
       const outH = Math.max(1, Math.round(heightMM * pxPerMM));
 
-      // 2) Si existe una gráfica Chart.js, re-rendérala en off-screen a esa resolución
       const Chart = window.Chart;
       let dataUrl;
 
+      // ---- Rama Chart.js (tal cual la tenías) ----
       if (Chart && Chart.getChart) {
         const srcChart = Chart.getChart(src);
         if (srcChart) {
-          // Canvas off-screen
           const off = document.createElement("canvas");
-          off.width = outW;
-          off.height = outH;
-
-          // Clona la config y sube el devicePixelRatio para nitidez
-          const cfg = JSON.parse(JSON.stringify(srcChart.config)); // deep clone
+          off.width = outW; off.height = outH;
+          const cfg = JSON.parse(JSON.stringify(srcChart.config));
           cfg.options = cfg.options || {};
           cfg.options.animation = false;
           cfg.options.responsive = false;
           cfg.options.maintainAspectRatio = false;
-          // Fuerza DPR alto para que Chart.js pinte con más pixeles
-          cfg.options.devicePixelRatio = Math.max(2, Math.ceil(dpi / 96)); // ~3 a 300 DPI
-
-          // Render off-screen
+          cfg.options.devicePixelRatio = Math.max(2, Math.ceil(dpi / 96));
           const tmpChart = new Chart(off.getContext("2d"), cfg);
-          // Asegura tamaño exacto
           tmpChart.resize(outW, outH);
           tmpChart.update();
-
           dataUrl = off.toDataURL("image/png");
-
-          // Limpieza
           tmpChart.destroy();
         }
       }
 
-      // 3) Fallback: si no hay Chart.js o no se pudo clonar, al menos rasteriza con escala alta
-      if (!dataUrl) {
-        const scale = Math.max(2, Math.ceil(dpi / 96)); // 3 aprox para 300 DPI
-        const tmp = document.createElement("canvas");
-        tmp.width = src.width * scale;
-        tmp.height = src.height * scale;
-        const ctx = tmp.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.scale(scale, scale);
-        ctx.drawImage(src, 0, 0);
-        dataUrl = tmp.toDataURL("image/png");
+      // ---- NUEVO: rama canvas “manual” (tu gráfica responsive propia) ----
+      // ---- rama canvas “manual” (tu gráfica responsive) ----
+      if (!dataUrl && canvasId === "impactoChart") {
+        // redibuja GRANDE (p.ej. 1100×360) y captura
+        dataUrl = await withTempCanvasSize(src, 1100, 360, async () => {
+          // importante: captura después del redibujo
+          return src.toDataURL("image/png", 1);
+        });
       }
 
-      // 4) Inserta en el PDF al tamaño físico solicitado (mm), ya con muchos más pixeles
-      const pngBytes = dataURLToUint8Array(dataUrl);
-      const png = await pdfDoc.embedPng(pngBytes);
 
+      // ---- Fallback: escalar el canvas actual (por si algo falla) ----
+      if (!dataUrl) {
+        dataUrl = await withTempCanvasSize(src, 1200, 360, async () => {
+          if (typeof src.__impactoRedraw === "function") src.__impactoRedraw();
+          await delay(20);
+          return src.toDataURL("image/png", 1);
+        });
+      }
+
+      // Insertar en PDF
+      const pngBytes = (function dataURLToUint8Array(d) {
+        const b64 = d.split(",")[1]; const raw = atob(b64);
+        const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
+      })(dataUrl);
+
+      const png = await pdfDoc.embedPng(pngBytes);
       const w = mm(widthMM), h = mm(heightMM);
       ensure(h + 6);
       const xCentered = left + (contentWidth - w) / 2;
       page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h });
       y -= h + 10;
     };
+
 
 
 
@@ -603,7 +659,7 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
       const potenciaPanel = datos.potenciaPanel || "—"
 
       // const totalForm = toNumber(document.getElementById("total")?.value)
-      const totalForm = datas.subtotal   || 0
+      const totalForm = datas.subtotal || 0
       const subtotalPU = totalForm
       const ivaPU = datas.iva || subtotalPU * 0.16
       const totalPU = datas.total || (subtotalPU + ivaPU)

@@ -572,3 +572,10 @@ body {
 
 /* Ya no uses .mobile-only para mostrar nada */
 .mobile-only { /* opcionalmente deja vacío o solo estilos visuales */ }
+
+
+/* fuerza tamaño grande SOLO durante la exportación */
+.pdf-export #impactoChart{
+  width:1100px !important;
+  height:360px !important;
+}
