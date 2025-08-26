@@ -378,12 +378,32 @@
 
         <!-- Panel consumo responsivo -->
         <div id="consumoContainer" class="consumo-panel">
+          <!-- Nota -->
+
           <div class="form-row">
             <div class="form-group" style="grid-column: span 2;">
               <label>Consumo Histórico (kWh)</label>
               <div id="kwhRow" class="consumo-grid"></div>
             </div>
           </div>
+          <div style="
+  margin:16px 0; 
+  padding:6px 12px; 
+  border-left:4px solid #16a34a; 
+  background:#ecfdf5; 
+  border-radius:4px; 
+  font-size:0.7rem; 
+  color:#065f46; 
+  line-height:1.4;
+">
+            <i class="fas fa-info-circle" style="margin-right:6px; color:#16a34a;"></i>
+            Nota: Puede llenar <strong>Pagos por período</strong> o <strong>Tarifas promedio</strong>, cualquiera de los
+            dos funciona.
+            <br>
+            <i style="margin-left:20px;">Si ingresa uno, el otro se autocompletará automáticamente.</i>
+          </div>
+
+
           <div class="form-row">
             <div class="form-group" style="grid-column: span 2;">
               <label>Pagos por Período ($)</label>
@@ -654,8 +674,8 @@
               const resultados = JSON.parse(datasistema)
               console.log("Resultados del sistema solar:", resultados)
             }
-            let reoysinIva = base * resultados.consumoAnualDeEnergia;
-            let roiConiva = total * resultados.consumoAnualDeEnergia;
+            let reoysinIva = base / resultados.consumoAnualDeEnergia;
+            let roiConiva = total / resultados.consumoAnualDeEnergia;
             // Guardar resultados en localStorage
             const datosParaGuardar = {
               conceptos,
@@ -987,17 +1007,17 @@
           </div>
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-bolt"></i></div>
-            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-value" id="generacionAnual">-</div>
             <div class="metric-label">Generación anual aproximada</div>
           </div>
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-percentage"></i></div>
-            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-value" id="porcentajeGeneracion">-</div>
             <div class="metric-label">Porcentaje de generación</div>
           </div>
           <div class="metric-card">
             <div class="metric-icon"><i class="fas fa-arrow-rotate-left"></i></div>
-            <div class="metric-value" id="arboles">-</div>
+            <div class="metric-value" id="roi">-</div>
             <div class="metric-label">ROI</div>
           </div>
         </div>

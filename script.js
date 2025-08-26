@@ -664,7 +664,9 @@ function calcularSistemaSolar() {
     return;
   }
   // ====== FIN VALIDACIÓN ======
-
+  const produccionMensual = JSON.parse(localStorage.getItem("produccionMensual")) || 0;
+  console.log(produccionMensual)
+  const cotizacionPU = JSON.parse(localStorage.getItem("cotizacionPU")) || 0;
   const potenciaNecesaria = consumoDiario / (hspPromedio * 0.76);
   const numeroModulos = Math.ceil(
     (consumoDiario * 1000) / (hspPromedio * potenciaPanel * 0.76)
@@ -672,13 +674,27 @@ function calcularSistemaSolar() {
   const generacionAnual =
     numeroModulos * (potenciaPanel / 1000) * hspPromedio * 365;
   const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
-
-  const ahorroCO2 = (consumoMensual * 439.963) / 1000;
+  let suma = 0;
+  for (let i = 0; i < produccionMensual.length; i++) {
+    suma += produccionMensual[i];
+  }
+  const ahorroCO2 = (suma  * 439.963) / 1000000;
+  const arboles = ahorroCO2 * 155;
   const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1);
   kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000;
 
+   let promediodeproduccion = 0; 
+  for (let i = 0; i < produccionMensual.length; i++) {
+     promediodeproduccion += produccionMensual[i];
+  }
+  promediodeproduccion /= produccionMensual.length;
+  
+  console.log(promediodeproduccion)
   generacionAnualAprox = (numeroModulos * potenciaPanel) / 1000 * hspPromedio * 365;
-
+  const diferencia = consumoMensual -  promediodeproduccion;
+  console.log(diferencia, consumoMensual)
+  const porcentaje = (1-(diferencia / consumoMensual)) * 100;
+  console.log(porcentaje)
   // === Mostrar en la interfaz ===
   document.getElementById("resultsPlaceholder").style.display = "none";
   document.getElementById("resultsContent").style.display = "block";
@@ -694,7 +710,12 @@ function calcularSistemaSolar() {
   document.getElementById("potenciaInstalada").textContent = `${potenciaInstalada.toFixed(2)} kW`;
   document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`;
   document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`;
+  document.getElementById("arboles").textContent = `${arboles.toFixed(0)} árboles`;
   document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`;
+  //finales
+    document.getElementById("generacionAnual").textContent = `${generacionAnual.toFixed(2)} KWh`;
+  document.getElementById("porcentajeGeneracion").textContent = `${porcentaje.toFixed(2)}%`;
+  document.getElementById("roi").textContent = `${cotizacionPU.roiConiva.toFixed(1)} años`;
 
   llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo);
   crearGraficaIrradiacion(estado);
@@ -989,7 +1010,7 @@ let produccionMensual = [];
 for (let i = 0; i < 12; i++) {
   produccionMensual[i] = irradiacionMensualRaw[i] * kwinsEfRaw * 31;
 }
-
+localStorage.setItem("produccionMensual", JSON.stringify(produccionMensual));
 console.log("irradiacionMensual:", irradiacionMensualRaw);
 console.log("kwinsEf:", kwinsEfRaw);
 console.log("produccionMensual:", produccionMensual);
