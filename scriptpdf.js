@@ -75,12 +75,19 @@ async function exportToBasePdf() {
       subtotalForm: toNum(getVal("subtotal", "0")),
       ivaForm: toNum(getVal("iva", "0")),
       totalForm: toNum(getVal("total", "0")),
+      subtotalDisplay: getVal("subtotalDisplay", "0"),
+      ivaDisplay: getVal("ivaDisplay", "0"),
+      totalDisplay: getVal("totalDisplay", "0"),
     }
 
+    const datas = JSON.parse(localStorage.getItem("cotizacionPU"));
+    const resultadoSistemaSolar = JSON.parse(localStorage.getItem("resultadosSistemaSolar"));
+
+    console.log(datas)
     // Fallback por si los campos de subtotal/iva/total no están llenos todavía
-    const _subtotal = datos.subtotalForm
-    const _iva = datos.ivaForm || _subtotal * 0.16
-    const _total = datos.totalForm || (_subtotal + _iva)
+    const _subtotal = datas.subtotal || 0;
+    const _iva = datas.iva || _subtotal * 0.16
+    const _total = datas.total || (_subtotal + _iva)
 
     // === 2) Cargar Base.pdf ===
     const baseBytes = await obtenerBasePdfBytes()
@@ -595,10 +602,11 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
       const numModulos = datos.numeroModulosCard || "—"
       const potenciaPanel = datos.potenciaPanel || "—"
 
-      const totalForm = toNumber(document.getElementById("total")?.value)
+      // const totalForm = toNumber(document.getElementById("total")?.value)
+      const totalForm = datas.subtotal   || 0
       const subtotalPU = totalForm
-      const ivaPU = 0
-      const totalPU = 0
+      const ivaPU = datas.iva || subtotalPU * 0.16
+      const totalPU = datas.total || (subtotalPU + ivaPU)
 
       const headH = 20, rowH = 22, gapBelow = 12
       const W = contentWidth
@@ -725,6 +733,9 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
       ["Región Tarifaria CFE", capitalizeFirst(datos.regionTarifariaCFE)]
     ], 3)
 
+    const pulocalstorage = localStorage.getItem("cotizacionPU");
+    //aqui jalar el roy 
+
     // Fila 2: Ubicación (3/4) + ROI (1/4)
     drawColsWeighted(
       [
@@ -763,8 +774,8 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
     // Potencia de panel, Generación anual, Área aproximada
     drawCols([
       ["Potencia por panel", `${datos.potenciaPanel || "—"} W`],
-      ["Generación anual", datos.generacionAnual || "—"],
-      ["Área aproximada", `${datos.areaAprox || "—"} m²`]
+      ["Generación anual", resultadoSistemaSolar.generacionAnualAprox.toFixed(2) || "—"],
+      ["Área aproximada", `${resultadoSistemaSolar.areaAprox || "—"} m²`]
     ], 3)
 
     // Gráfica en la PRIMERA hoja (más chica)

@@ -1,10 +1,24 @@
- document.getElementById("estadoProyecto")
+document
+  .getElementById("estadoProyecto")
   .addEventListener("change", actualizarHSP);
 
 // Variables globales
-let hspData = {}
-let csvData = []
-const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+let hspData = {};
+let csvData = [];
+const meses = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
 const mesesCompletos = [
   "Enero",
   "Febrero",
@@ -18,7 +32,7 @@ const mesesCompletos = [
   "Octubre",
   "Noviembre",
   "Diciembre",
-]
+];
 
 // Tarifas por tipo de proyecto
 const tarifasPorProyecto = {
@@ -29,21 +43,21 @@ const tarifasPorProyecto = {
     { value: "1D", text: "Tarifa 1D" },
     { value: "1E", text: "Tarifa 1E" },
     { value: "1F", text: "Tarifa 1F" },
-    { value: "dac", text: "Tarifa DAC (Doméstica de Alto Consumo)" }
+    { value: "dac", text: "Tarifa DAC (Doméstica de Alto Consumo)" },
   ],
   comercial: [
     { value: "pdbt", text: "PDBT – Pequeña Demanda en Baja Tensión" },
     { value: "gdbt", text: "GDBT – Gran Demanda en Baja Tensión" },
     { value: "apbt", text: "APBT – Alumbrado Público en Baja Tensión" },
-    { value: "rabt", text: "RABT – Riego Agrícola en Baja Tensión" }
+    { value: "rabt", text: "RABT – Riego Agrícola en Baja Tensión" },
   ],
   industrial: [
     { value: "gdmth", text: "GDMTH – Gran Demanda en Media Tensión Horaria" },
     { value: "gdmto", text: "GDMTO – Gran Demanda en Media Tensión Ordinaria" },
     { value: "ramt", text: "RAMT – Riego Agrícola en Media Tensión" },
     { value: "dist", text: "DIST – Demanda Industrial en Subtransmisión" },
-    { value: "dit", text: "DIT – Demanda Industrial en Transmisión" }
-  ]
+    { value: "dit", text: "DIT – Demanda Industrial en Transmisión" },
+  ],
 };
 
 function actualizarTarifasPorProyecto() {
@@ -51,8 +65,8 @@ function actualizarTarifasPorProyecto() {
   const tarifaSelect = document.getElementById("tipoTarifa");
   tarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
   if (tarifasPorProyecto[tipoProyecto]) {
-    tarifasPorProyecto[tipoProyecto].forEach(t => {
-      const option = document.createElement('option');
+    tarifasPorProyecto[tipoProyecto].forEach((t) => {
+      const option = document.createElement("option");
       option.value = t.value;
       option.textContent = t.text;
       tarifaSelect.appendChild(option);
@@ -60,26 +74,39 @@ function actualizarTarifasPorProyecto() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const tipoProyectoSelect = document.getElementById("tipoProyecto");
   if (tipoProyectoSelect) {
-    tipoProyectoSelect.addEventListener('change', actualizarTarifasPorProyecto);
+    tipoProyectoSelect.addEventListener("change", actualizarTarifasPorProyecto);
     actualizarTarifasPorProyecto(); // Inicializa al cargar
   }
 });
 
 // Generar tabla de consumo dinámica
 function generarTablaConsumo() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const tablaBody = document.getElementById("tablaConsumoBody")
-  const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-  const bimestres = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"]
-  tablaBody.innerHTML = ""
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const tablaBody = document.getElementById("tablaConsumoBody");
+  const meses = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
+  const bimestres = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
+  tablaBody.innerHTML = "";
   const totalTarifa = 0,
     totalConsumo = 0,
     totalImporte = 0,
-    count = 0
-  const periodos = tipoPeriodo === "mensual" ? meses : bimestres
+    count = 0;
+  const periodos = tipoPeriodo === "mensual" ? meses : bimestres;
 
   for (let i = 0; i < periodos.length; i++) {
     tablaBody.innerHTML += `
@@ -88,87 +115,102 @@ function generarTablaConsumo() {
                 <td style='padding:6px;'><input type='number' id='tarifa${i}' style='width:80px;'></td>
                 <td style='padding:6px;'><input type='number' id='consumo${i}' style='width:80px;'></td>
                 <td style='padding:6px;'><input type='number' id='importe${i}' style='width:80px;'></td>
-            </tr>`
+            </tr>`;
   }
 
   // Actualizar totales al cambiar inputs
   tablaBody.querySelectorAll("input").forEach((input) => {
-    input.addEventListener("input", actualizarTotalesConsumo)
-  })
-  actualizarTotalesConsumo()
+    input.addEventListener("input", actualizarTotalesConsumo);
+  });
+  actualizarTotalesConsumo();
 }
 
 function actualizarTotalesConsumo() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  let totalConsumo = 0
-  let totalImporte = 0
-  let totalTarifas = 0
-  let contadorTarifas = 0
+  let totalConsumo = 0;
+  let totalImporte = 0;
+  let totalTarifas = 0;
+  let contadorTarifas = 0;
 
   for (let i = 0; i < numPeriodos; i++) {
-    const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
-    const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
-    const tarifa = Number.parseFloat(document.getElementById(`tarifa${i}`)?.value) || 0
+    const consumo =
+      Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0;
+    const importe =
+      Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0;
+    const tarifa =
+      Number.parseFloat(document.getElementById(`tarifa${i}`)?.value) || 0;
 
-    totalConsumo += consumo
-    totalImporte += importe
+    totalConsumo += consumo;
+    totalImporte += importe;
 
     if (tarifa > 0) {
-      totalTarifas += tarifa
-      contadorTarifas++
+      totalTarifas += tarifa;
+      contadorTarifas++;
     }
   }
 
-  const tarifaPromedio = contadorTarifas > 0 ? totalTarifas / contadorTarifas : 0
+  const tarifaPromedio =
+    contadorTarifas > 0 ? totalTarifas / contadorTarifas : 0;
 
   // Update display elements
-  document.getElementById("totalConsumoDisplay").textContent = `${totalConsumo.toFixed(0)} kWh`
-  document.getElementById("totalImporteDisplay").textContent = `$${totalImporte.toFixed(2)}`
-  document.getElementById("tarifaPromedioDisplay").textContent = `$${tarifaPromedio.toFixed(3)}`
+  document.getElementById(
+    "totalConsumoDisplay"
+  ).textContent = `${totalConsumo.toFixed(0)} kWh`;
+  document.getElementById(
+    "totalImporteDisplay"
+  ).textContent = `$${totalImporte.toFixed(2)}`;
+  document.getElementById(
+    "tarifaPromedioDisplay"
+  ).textContent = `$${tarifaPromedio.toFixed(3)}`;
 
   // Update summary fields
-  const consumoMensual = tipoPeriodo === "mensual" ? totalConsumo / 12 : totalConsumo / 6
-  document.getElementById("kwhMesResumen").value = `${consumoMensual.toFixed(0)} kWh`
-  document.getElementById("tarifaPromResumen").value = `$${tarifaPromedio.toFixed(3)}`
+  const consumoMensual =
+    tipoPeriodo === "mensual" ? totalConsumo / 12 : totalConsumo / 6;
+  document.getElementById("kwhMesResumen").value = `${consumoMensual.toFixed(
+    0
+  )} kWh`;
+  document.getElementById(
+    "tarifaPromResumen"
+  ).value = `$${tarifaPromedio.toFixed(3)}`;
 }
 
 // Function to load and parse CSV data
 async function loadCSVData() {
   try {
     const response = await fetch(
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hsp_Hoja1-kr8ml1Lz0SvIbQmWD96PSGcSC2lQAt.csv",
-    )
-    const csvText = await response.text()
-    console.log(csvText)
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hsp_Hoja1-kr8ml1Lz0SvIbQmWD96PSGcSC2lQAt.csv"
+    );
+    const csvText = await response.text();
+    console.log(csvText);
     // Parse CSV
-    const lines = csvText.split("\n")
-    const headers = lines[0].split(",")
+    const lines = csvText.split("\n");
+    const headers = lines[0].split(",");
 
-    csvData = []
+    csvData = [];
 
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {
-        const values = lines[i].split(",")
-        const rowData = {}
+        const values = lines[i].split(",");
+        const rowData = {};
 
         headers.forEach((header, index) => {
-          rowData[header.trim()] = values[index] ? values[index].trim() : ""
-        })
+          rowData[header.trim()] = values[index] ? values[index].trim() : "";
+        });
 
         if (rowData.Estado) {
-          csvData.push(rowData)
+          csvData.push(rowData);
           // Store average HSP value for quick access
-          hspData[rowData.Estado] = Number.parseFloat(rowData.Promedio) || 0
+          hspData[rowData.Estado] = Number.parseFloat(rowData.Promedio) || 0;
         }
       }
     }
-    console.log("CSV data loaded successfully:", csvData)
-  
-    inicializarEstados()
+    console.log("CSV data loaded successfully:", csvData);
+
+    inicializarEstados();
   } catch (error) {
-    console.error("Error loading CSV data:", error)
+    console.error("Error loading CSV data:", error);
     // Fallback to hardcoded data if CSV fails
     hspData = {
       Aguascalientes: 5.91,
@@ -203,35 +245,35 @@ async function loadCSVData() {
       Veracruz: 4.6,
       Yucatán: 5.3,
       Zacatecas: 5.76,
-    }
-    inicializarEstados()
+    };
+    inicializarEstados();
   }
 }
 
 function inicializarEstados() {
-  const estadoSelect = document.getElementById("estadoProyecto")
-  estadoSelect.innerHTML = '<option value="">Seleccionar estado</option>'
+  const estadoSelect = document.getElementById("estadoProyecto");
+  estadoSelect.innerHTML = '<option value="">Seleccionar estado</option>';
 
   Object.keys(hspData)
     .sort()
     .forEach((estado) => {
-      const option = document.createElement("option")
-      option.value = estado
-      option.textContent = estado
-      estadoSelect.appendChild(option)
-    })
+      const option = document.createElement("option");
+      option.value = estado;
+      option.textContent = estado;
+      estadoSelect.appendChild(option);
+    });
 }
 
 function actualizarHSP() {
-  const estadoSeleccionado = document.getElementById("estadoProyecto").value
+  const estadoSeleccionado = document.getElementById("estadoProyecto").value;
 
   if (estadoSeleccionado && hspData[estadoSeleccionado]) {
     // Store HSP value for calculations
-    window.hspValue = hspData[estadoSeleccionado]
-    console.log("[v0] HSP for state:", window.hspValue)
+    window.hspValue = hspData[estadoSeleccionado];
+    console.log("[v0] HSP for state:", window.hspValue);
     // Find detailed data for the selected state
-    const estadoData = csvData.find((row) => row.Estado === estadoSeleccionado)
-    console.log("[v0] Estado seleccionado:", estadoSeleccionado)
+    const estadoData = csvData.find((row) => row.Estado === estadoSeleccionado);
+    console.log("[v0] Estado seleccionado:", estadoSeleccionado);
     if (estadoData) {
       // Display irradiation data in console for now (you can modify this to show in UI)
       console.log(`Datos de irradiación para ${estadoSeleccionado}:`, {
@@ -250,99 +292,99 @@ function actualizarHSP() {
         Mínima: estadoData.Minima,
         Máxima: estadoData.Maxima,
         Promedio: estadoData.Promedio,
-      })
+      });
 
-      mostrarDatosIrradiacion(estadoData)
-      console.log("[v0] Estado data:", estadoData)
+      mostrarDatosIrradiacion(estadoData);
+      console.log("[v0] Estado data:", estadoData);
     }
   }
 }
 
-  // function mostrarDatosIrradiacion(estadoData) {
-  //   // Create or update irradiation data display
-  //   let irradiacionDiv = document.getElementById("irradiacionData")
+// function mostrarDatosIrradiacion(estadoData) {
+//   // Create or update irradiation data display
+//   let irradiacionDiv = document.getElementById("irradiacionData")
 
-  //   if (!irradiacionDiv) {
-  //     irradiacionDiv = document.createElement("div")
-  //     irradiacionDiv.id = "irradiacionData"
-  //     irradiacionDiv.className = "form-section"
+//   if (!irradiacionDiv) {
+//     irradiacionDiv = document.createElement("div")
+//     irradiacionDiv.id = "irradiacionData"
+//     irradiacionDiv.className = "form-section"
 
-  //     // Insert after the Datos del Proyecto section
-  //     const proyectoSection = document.querySelector("#estadoProyecto").closest(".form-section")
-  //     proyectoSection.parentNode.insertBefore(irradiacionDiv, proyectoSection.nextSibling)
-  //   }
+//     // Insert after the Datos del Proyecto section
+//     const proyectoSection = document.querySelector("#estadoProyecto").closest(".form-section")
+//     proyectoSection.parentNode.insertBefore(irradiacionDiv, proyectoSection.nextSibling)
+//   }
 
-  //   irradiacionDiv.innerHTML = `
-  //         <div class="section-title">
-  //             <i class="fas fa-sun"></i>
-  //             <span>Datos de Irradiación Solar - ${estadoData.Estado}</span>
-  //         </div>
-  //         <div class="irradiation-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Enero</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Enero} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Febrero</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Febrero} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Marzo</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Marzo} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Abril</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Abril} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Mayo</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Mayo} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Junio</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Junio} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Julio</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Julio} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Agosto</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Agosto} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Septiembre</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Septiembre} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Octubre</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Octubre} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Noviembre</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Noviembre} kWh/m²</div>
-  //             </div>
-  //             <div class="irradiation-item">
-  //                 <label style="font-size: 0.75rem; color: #4a5568;">Diciembre</label>
-  //                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Diciembre} kWh/m²</div>
-  //             </div>
-  //         </div>
-  //         <div class="form-row">
-  //             <div class="form-group">
-  //                 <label>Irradiación Mínima</label>
-  //                 <input type="text" value="${estadoData.Minima} kWh/m²" readonly style="background: #f7fafc;">
-  //             </div>
-  //             <div class="form-group">
-  //                 <label>Irradiación Máxima</label>
-  //                 <input type="text" value="${estadoData.Maxima} kWh/m²" readonly style="background: #f7fafc;">
-  //             </div>
-  //         </div>
-  //         <div class="form-group">
-  //             <label>Irradiación Promedio Anual</label>
-  //             <input type="text" value="${estadoData.Promedio} kWh/m²" readonly style="background: #e6fffa; font-weight: 600;">
-  //         </div>
-  //     `
-  // }
+//   irradiacionDiv.innerHTML = `
+//         <div class="section-title">
+//             <i class="fas fa-sun"></i>
+//             <span>Datos de Irradiación Solar - ${estadoData.Estado}</span>
+//         </div>
+//         <div class="irradiation-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Enero</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Enero} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Febrero</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Febrero} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Marzo</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Marzo} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Abril</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Abril} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Mayo</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Mayo} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Junio</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Junio} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Julio</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Julio} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Agosto</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Agosto} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Septiembre</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Septiembre} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Octubre</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Octubre} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Noviembre</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Noviembre} kWh/m²</div>
+//             </div>
+//             <div class="irradiation-item">
+//                 <label style="font-size: 0.75rem; color: #4a5568;">Diciembre</label>
+//                 <div style="font-weight: 600; color: #1a202c;">${estadoData.Diciembre} kWh/m²</div>
+//             </div>
+//         </div>
+//         <div class="form-row">
+//             <div class="form-group">
+//                 <label>Irradiación Mínima</label>
+//                 <input type="text" value="${estadoData.Minima} kWh/m²" readonly style="background: #f7fafc;">
+//             </div>
+//             <div class="form-group">
+//                 <label>Irradiación Máxima</label>
+//                 <input type="text" value="${estadoData.Maxima} kWh/m²" readonly style="background: #f7fafc;">
+//             </div>
+//         </div>
+//         <div class="form-group">
+//             <label>Irradiación Promedio Anual</label>
+//             <input type="text" value="${estadoData.Promedio} kWh/m²" readonly style="background: #e6fffa; font-weight: 600;">
+//         </div>
+//     `
+// }
 /**
  * 
 
@@ -421,10 +463,27 @@ function generarInputsConsumo() {
   const periodos =
     tipoPeriodo === "mensual"
       ? [
-          "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-          "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
+          "Enero",
+          "Febrero",
+          "Marzo",
+          "Abril",
+          "Mayo",
+          "Junio",
+          "Julio",
+          "Agosto",
+          "Septiembre",
+          "Octubre",
+          "Noviembre",
+          "Diciembre",
         ]
-      : ["Bimestre 1","Bimestre 2","Bimestre 3","Bimestre 4","Bimestre 5","Bimestre 6"];
+      : [
+          "Bimestre 1",
+          "Bimestre 2",
+          "Bimestre 3",
+          "Bimestre 4",
+          "Bimestre 5",
+          "Bimestre 6",
+        ];
 
   container.innerHTML = "";
 
@@ -469,421 +528,503 @@ function generarInputsConsumo() {
   actualizarTotales();
 }
 
-
 function calcularTarifaAutomatica(index) {
-  const consumo = Number.parseFloat(document.getElementById(`consumo${index}`).value) || 0
-  const importe = Number.parseFloat(document.getElementById(`importe${index}`).value) || 0
-  const tarifaInput = document.getElementById(`tarifa${index}`)
+  const consumo =
+    Number.parseFloat(document.getElementById(`consumo${index}`).value) || 0;
+  const importe =
+    Number.parseFloat(document.getElementById(`importe${index}`).value) || 0;
+  const tarifaInput = document.getElementById(`tarifa${index}`);
 
   if (consumo > 0 && importe > 0) {
-    const tarifa = importe / consumo
-    tarifaInput.value = tarifa.toFixed(3)
+    const tarifa = importe / consumo;
+    tarifaInput.value = tarifa.toFixed(3);
   } else {
-    tarifaInput.value = ""
+    tarifaInput.value = "";
   }
 
   // Update totals
-  actualizarTotalesConsumo()
+  actualizarTotalesConsumo();
 }
 
 function generarInputsPago() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const container = document.getElementById("pagoInputs")
-  const numCampos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const container = document.getElementById("pagoInputs");
+  const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  container.innerHTML = ""
+  container.innerHTML = "";
 
   for (let i = 0; i < numCampos; i++) {
-    const pagoInput = document.createElement("input")
-    pagoInput.type = "number"
-    pagoInput.className = "consumo-input"
-    pagoInput.placeholder = tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`
-    pagoInput.id = `pago${i}`
-    pagoInput.step = "0.01"
-    container.appendChild(pagoInput)
+    const pagoInput = document.createElement("input");
+    pagoInput.type = "number";
+    pagoInput.className = "consumo-input";
+    pagoInput.placeholder =
+      tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`;
+    pagoInput.id = `pago${i}`;
+    pagoInput.step = "0.01";
+    container.appendChild(pagoInput);
   }
 }
-  const consumos = []
-  const importes = []
-  let kwintsladaConEficiancia = 0;
-
+const consumos = [];
+const importes = [];
+let kwintsladaConEficiancia = 0;
+let generacionAnualAprox = 0;
 function calcularSistemaSolar() {
-  // console.log("[v0] Starting comprehensive solar system calculation")
+  // Desactivar el botón
+  document.getElementById("btnCalcular").disabled = true;
+  const selectInversor = document.getElementById("inversorPanel");
 
-  // Get consumption and payment data
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  selectInversor.addEventListener("change", () => {
+    const valor = selectInversor.value;
 
+    if (valor === "Microinversor") {
+      console.log("Seleccionaste un Microinversor");
+    } else if (valor === "Central") {
+      console.log("Seleccionaste un Inversor Central");
+    } else {
+      console.log("No has seleccionado nada");
+    }
+  });
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
+  const consumos = [];
+  const importes = [];
 
   // Collect consumption and payment data
-  for (let i = 1; i < numPeriodos + 1; i++) {
-    const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value || 0)
-    const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value || 0)
-    consumos.push(consumo)
-    importes.push(importe)
+  for (let i = 1; i <= numPeriodos; i++) {
+    const consumo = Number.parseFloat(
+      document.getElementById(`consumo${i}`)?.value || 0
+    );
+    const importe = Number.parseFloat(
+      document.getElementById(`importe${i}`)?.value || 0
+    );
+    consumos.push(consumo);
+    importes.push(importe);
   }
 
-  console.log("[v0] Consumption data:", consumos)
-  console.log("[v0] Payment data:", importes)
-
-  // Calculate energy consumption metrics
-  const consumoTotal = consumos.reduce((sum, val) => sum + val, 0)
+  // === Cálculos ===
+  const consumoTotal = consumos.reduce((sum, val) => sum + val, 0);
   const consumoAnual = consumoTotal;
-  const consumoMensual = consumoAnual / 12
-  const consumoDiario = consumoAnual / 365
+  const consumoMensual = consumoAnual / 12;
+  const consumoDiario = consumoAnual / 365;
 
-  console.log({
-    datos: "consumo totales",
-  consumoTotal: consumoTotal.toFixed(2),
-  consumoAnual: consumoAnual.toFixed(2),
-  consumoMensual: consumoMensual.toFixed(2),
-  consumoDiario: consumoDiario.toFixed(2)
-});
+  let importeTotal = 0;
+  for (let i = 0; i < importes.length; i++) {
+    importeTotal += importes[i];
+  }
+  const importeTotalAnual = importeTotal;
+  const importePromedio = importeTotalAnual / 12;
 
-  // Calculate financial metrics
-  console.log(importes)
-    let importeTotal = 0; // usar let en lugar de const
-for (let i = 0; i < importes.length; i++) {
-  importeTotal += importes[i]; // usar += en lugar de =+
-}
-  // const importeTotal = importes.reduce((sum, val) => sum + val, 0)
-  const importeTotalAnual = importeTotal
-  const importePromedio = importeTotalAnual / 12
-
-  // Calculate tariffs for each period
-  const tarifas = []
-  let sumaTarifas = 0
-
+  const tarifas = [];
+  let sumaTarifas = 0;
   for (let i = 0; i < numPeriodos; i++) {
     if (consumos[i] > 0) {
-      const tarifa = importes[i] / consumos[i]
-      tarifas.push(tarifa)
-      sumaTarifas += tarifa
+      const tarifa = importes[i] / consumos[i];
+      tarifas.push(tarifa);
+      sumaTarifas += tarifa;
     } else {
-      tarifas.push(0)
+      tarifas.push(0);
     }
   }
+  const tarifaPromedio = sumaTarifas / tarifas.filter((t) => t > 0).length;
 
-  const tarifaPromedio = sumaTarifas / tarifas.filter((t) => t > 0).length
+  const estado = document.getElementById("estadoProyecto").value;
+  const hspPromedio = window.hspValue;
+  // const hspArreglo = window.hspData;
+  // console.log("[v0] HSP Promedio:", hspArreglo);
+  const potenciaPanel = Number.parseFloat(
+    document.getElementById("potenciaPanel")?.value
+  );
+  const potenciaNecesaria = consumoDiario / (hspPromedio * 0.76);
+  const numeroModulos = Math.ceil(
+    (consumoDiario * 1000) / (hspPromedio * potenciaPanel * 0.76)
+  );
+  const generacionAnual =
+    numeroModulos * (potenciaPanel / 1000) * hspPromedio * 365;
+  const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
 
-  console.log("[v0] Calculated tariffs:", tarifas)
-  console.log("[v0] Average tariff:", tarifaPromedio)
+  const ahorroCO2 = (consumoMensual * 439.963) / 1000;
+  const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1);
+  kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000;
 
-  // Get solar data
- 
+  generacionAnualAprox = numeroModulos * potenciaPanel / 1000 * hspPromedio * 365;
+  // === Mostrar en la interfaz ===
+  document.getElementById("resultsPlaceholder").style.display = "none";
+  document.getElementById("resultsContent").style.display = "block";
 
-  const estado = document.getElementById("estadoProyecto").value
-  const hspPromedio = window.hspValue
+  document.getElementById("consumoAnual").textContent = `${consumoAnual.toFixed(
+    0
+  )} kWh`;
+  document.getElementById(
+    "consumoMensual"
+  ).textContent = `${consumoMensual.toFixed(0)} kWh`;
+  document.getElementById(
+    "consumoDiario"
+  ).textContent = `${consumoDiario.toFixed(1)} kWh`;
+  document.getElementById(
+    "importeTotal"
+  ).textContent = `$${importeTotalAnual.toFixed(2)}`;
+  document.getElementById(
+    "importePromedio"
+  ).textContent = `$${importePromedio.toFixed(2)}`;
+  document.getElementById(
+    "tarifaPromedio"
+  ).textContent = `$${tarifaPromedio.toFixed(3)}`;
+  document.getElementById(
+    "potenciaNecesaria"
+  ).textContent = `${potenciaNecesaria.toFixed(2)} kW`;
+  document.getElementById("numeroModulos").textContent = `${numeroModulos}`;
+  document.getElementById(
+    "potenciaInstalada"
+  ).textContent = `${potenciaInstalada.toFixed(2)} kW`;
+  document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`;
+  document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(
+    3
+  )} t`;
+  document.getElementById(
+    "porcentajeAhorro"
+  ).textContent = `${porcentajeAhorro}%`;
 
-  // Get panel specifications
-  const potenciaPanel = Number.parseFloat(document.getElementById("potenciaPanel")?.value) // Default 400W
-  console.log("[v0] Panel power:", potenciaPanel)
-  console.log("[v0] Average HSP for state:", hspPromedio)
+  llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo);
+  crearGraficaIrradiacion(estado);
+  let areaAprox = document.getElementById("areaAprox").value; 
 
-  // Calculate solar system requirements
-  const potenciaNecesaria = consumoDiario / ( hspPromedio * 0.76)
-  console.log("[v0] Required power for solar system:", potenciaNecesaria)
-  const numeroModulos = Math.ceil((consumoDiario * 1000) / (hspPromedio * potenciaPanel * 0.76))
-  const generacionAnual = numeroModulos * (potenciaPanel / 1000) * hspPromedio * 365
-  console.log("generacion anual", generacionAnual)
-  const potenciaInstalada = (potenciaPanel * numeroModulos) / 1000
-  kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000
-  console.log("[v0] Solar calculations completed")
-  console.log("[v0] Required power:", potenciaNecesaria)
-  console.log("[v0] Number of modules:", numeroModulos)
-  console.log("[v0] Annual generation:", generacionAnual)
-  console.log("[v0] Installed power:", potenciaInstalada)
-  console.log("mensual:", consumoMensual)
+  let consumoAnualDeEnergia = consumoAnual * tarifaPromedio;
+  // === Guardar en localStorage ===
+  const resultados = {
+    tipoPeriodo,
+    consumos,
+    importes,
+    consumoTotal,
+    consumoAnual,
+    consumoMensual,
+    consumoDiario,
+    importeTotalAnual,
+    importePromedio,
+    tarifas,
+    tarifaPromedio,
+    estado,
+    hspPromedio,
+    potenciaPanel,
+    potenciaNecesaria,
+    numeroModulos,
+    generacionAnual,
+    potenciaInstalada,
+    ahorroCO2,
+    porcentajeAhorro,
+    selectInversor: selectInversor.value,
+    kwintsladaConEficiancia: kwintsladaConEficiancia,
+    generacionAnualAprox: generacionAnualAprox,
+    areaAprox: areaAprox,
+    consumoAnualDeEnergia: consumoAnualDeEnergia
+  };
 
-  // Calculate CO2 savings (0.5 kg CO2 per kWh)
-  const ahorroCO2 = (consumoMensual * 439.963) / 1000 // Convert to tons
-
-  // const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1)
-  // const tempMin = 18 // Example temperature values
-  // const tempMax = 35
-  const arboles = Math.round(ahorroCO2 * 155) // Approximate trees equivalent
-
-  // Update display
-  document.getElementById("resultsPlaceholder").style.display = "none"
-  document.getElementById("resultsContent").style.display = "block"
-
-  // Update all metric cards
-  document.getElementById("consumoAnual").textContent = `${consumoAnual.toFixed(0)} kWh`
-  document.getElementById("consumoMensual").textContent = `${consumoMensual.toFixed(0)} kWh`
-  document.getElementById("consumoDiario").textContent = `${consumoDiario.toFixed(1)} kWh`
-  document.getElementById("importeTotal").textContent = `$${importeTotalAnual.toFixed(2)}`
-  document.getElementById("importePromedio").textContent = `$${importePromedio.toFixed(2)}`
-  document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`
-  document.getElementById("potenciaNecesaria").textContent = `${potenciaNecesaria.toFixed(2)} kW`
-  document.getElementById("numeroModulos").textContent = `${numeroModulos}`
-  // document.getElementById("generacionAnual").textContent = `${generacionAnual} kWh`
-  document.getElementById("potenciaInstalada").textContent = `${potenciaInstalada.toFixed(2)} kW`
-  document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`
-  document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`
-
-  document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`
-  // document.getElementById("tempMin").textContent = `${tempMin}°C`
-  // document.getElementById("tempMax").textContent = `${tempMax}°C`
-  // document.getElementById("arboles").textContent = `${arboles}`
-  console.log(consumos, importes, tarifas, tipoPeriodo)
-  // Fill detailed table
-  llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo)
-  console.log(estado)
-  // Create solar irradiation chart
-  crearGraficaIrradiacion(estado)
-
-  console.log("[v0] All calculations and displays updated successfully")
+  localStorage.setItem("resultadosSistemaSolar", JSON.stringify(resultados));
+  console.log("Guardado en localStorage:", resultados);
 }
 
-
-
 function llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo) {
-  const tbody = document.getElementById("detalleTableBody")
-  tbody.innerHTML = ""
+  const tbody = document.getElementById("detalleTableBody");
+  tbody.innerHTML = "";
 
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
   for (let i = 0; i < numPeriodos; i++) {
-    const row = document.createElement("div")
-    row.className = "table-row"
+    const row = document.createElement("div");
+    row.className = "table-row";
 
-    const periodo = tipoPeriodo === "mensual" ? meses[i] : `Bimestre ${i + 1}`
-    const consumo = consumos[i] || 0
-    const importe = importes[i] || 0
-    const tarifa = tarifas[i] || 0
+    const periodo = tipoPeriodo === "mensual" ? meses[i] : `Bimestre ${i + 1}`;
+    const consumo = consumos[i] || 0;
+    const importe = importes[i] || 0;
+    const tarifa = tarifas[i] || 0;
 
     row.innerHTML = `
             <div class="table-cell">${periodo}</div>
             <div class="table-cell">${consumo.toFixed(0)} kWh</div>
             <div class="table-cell">$${importe.toFixed(2)}</div>
             <div class="table-cell">$${tarifa.toFixed(3)}</div>
-        `
+        `;
 
-    tbody.appendChild(row)
+    tbody.appendChild(row);
   }
 }
 
 function crearGraficaIrradiacion(estado) {
-  const canvas = document.getElementById("irradiacionChart")
-  const ctx = canvas.getContext("2d")
+  const canvas = document.getElementById("irradiacionChart");
+  const ctx = canvas.getContext("2d");
 
   // Find state data in CSV
-  const estadoData = csvData.find((row) => row.Estado === estado)
+  const estadoData = csvData.find((row) => row.Estado === estado);
   if (!estadoData) {
-    console.log("[v0] No data found for state:", estado)
-    return
+    console.log("[v0] No data found for state:", estado);
+    return;
   }
 
   const mesesCSV = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ]
-  const mesesDisplay = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
+  ];
+  const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-  // Extract monthly irradiation data
-  const irradiacionData = []
-
+  // Extract monthly irradiation data (kWh/m²/día)
+  const irradiacionData = [];
   mesesCSV.forEach((mes) => {
-    const valor = Number.parseFloat(estadoData[mes]) || 0
-    irradiacionData.push(valor)
-  })
+    const valor = Number.parseFloat(estadoData[mes]) || 0;
+    irradiacionData.push(valor);
+  });
 
-  console.log("[v0] Monthly data for", estado, ":", irradiacionData)
-  console.log("[v0] Average:", estadoData.Promedio)
+  // Guardar en localStorage
+  localStorage.setItem(
+    "irradiacionAnual",
+    JSON.stringify({ irradiacion: irradiacionData })
+  );
+
+  // === Promedio (usa columna Promedio si existe; si no, lo calculamos) ===
+  const promedioCalc = (() => {
+    const p = Number.parseFloat(estadoData.Promedio);
+    if (Number.isFinite(p)) return p;
+    const nums = irradiacionData.filter(v => Number.isFinite(v));
+    return nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : 0;
+  })();
+
+  // Extender etiquetas y datos con el “Promedio” al final
+  const etiquetasX = [...mesesDisplay, "Prom"];
+  const dataConProm = [...irradiacionData, promedioCalc];
 
   // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Chart dimensions
-  const padding = 60
-  const chartWidth = canvas.width - 2 * padding
-  const chartHeight = canvas.height - 2 * padding
+  const padding = 60;
+  const chartWidth = canvas.width - 2 * padding;
+  const chartHeight = canvas.height - 2 * padding;
 
-  // Find max value for scaling
-  const maxValue = Math.max(...irradiacionData)
-  const minValue = 0 // Start bars from 0
-  const valueRange = maxValue
+  // Escalado (considera también el promedio)
+  const maxValue = Math.max(...dataConProm);
+  const valueRange = maxValue > 0 ? maxValue : 1;
 
   // Draw axes
-  ctx.strokeStyle = "#333"
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.moveTo(padding, padding)
-  ctx.lineTo(padding, canvas.height - padding)
-  ctx.lineTo(canvas.width - padding, canvas.height - padding)
-  ctx.stroke()
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padding, padding);
+  ctx.lineTo(padding, canvas.height - padding);
+  ctx.lineTo(canvas.width - padding, canvas.height - padding);
+  ctx.stroke();
 
-  // Draw grid lines and labels
-  ctx.strokeStyle = "#e0e0e0"
-  ctx.lineWidth = 1
-  ctx.fillStyle = "#666"
-  ctx.font = "12px Arial"
+  // Grid y labels Y
+  ctx.strokeStyle = "#e0e0e0";
+  ctx.lineWidth = 1;
+  ctx.fillStyle = "#666";
+  ctx.font = "12px Arial";
 
-  // Y-axis labels and grid
   for (let i = 0; i <= 5; i++) {
-    const y = padding + (chartHeight * i) / 5
-    const value = maxValue - (valueRange * i) / 5
+    const y = padding + (chartHeight * i) / 5;
+    const value = maxValue - (valueRange * i) / 5;
 
-    ctx.beginPath()
-    ctx.moveTo(padding, y)
-    ctx.lineTo(canvas.width - padding, y)
-    ctx.stroke()
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(canvas.width - padding, y);
+    ctx.stroke();
 
-    ctx.fillText(value.toFixed(1), 10, y + 4)
+    ctx.fillText(value.toFixed(1), 10, y + 4);
   }
 
-  // X-axis labels
-  for (let i = 0; i < 12; i++) {
-    const x = padding + (chartWidth * (i + 0.5)) / 12
-    ctx.fillText(mesesDisplay[i], x - 15, canvas.height - 20)
+  // Labels X (12 meses + Prom)
+  const N = dataConProm.length; // 13
+  for (let i = 0; i < N; i++) {
+    const x = padding + (chartWidth * (i + 0.5)) / N;
+    ctx.fillText(etiquetasX[i], x - 15, canvas.height - 20);
   }
 
-  const barWidth = (chartWidth / 12) * 0.8 // 80% of available width per bar
-  const barSpacing = (chartWidth / 12) * 0.2 // 20% spacing
+  // Barras
+  const barWidth = (chartWidth / N) * 0.8;    // 80%
+  const barSpacing = (chartWidth / N) * 0.2;  // 20%
 
-  for (let i = 0; i < irradiacionData.length; i++) {
-    const x = padding + (chartWidth * i) / 12 + barSpacing / 2
-    const barHeight = (irradiacionData[i] / valueRange) * chartHeight
-    const y = canvas.height - padding - barHeight
+  for (let i = 0; i < N; i++) {
+    const x = padding + (chartWidth * i) / N + barSpacing / 2;
+    const hVal = dataConProm[i];
+    const barHeight = (hVal / valueRange) * chartHeight;
+    const y = canvas.height - padding - barHeight;
 
-    // Draw bar with gradient
-    const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight)
-    gradient.addColorStop(0, "#73b248")
-    gradient.addColorStop(1, "#106e3a")
+    // Promedio con estilo distinto
+    const isProm = (i === N - 1);
 
-    ctx.fillStyle = gradient
-    ctx.fillRect(x, y, barWidth, barHeight)
+    if (isProm) {
+      // color distinto para la barra de Promedio
+      const gradProm = ctx.createLinearGradient(0, y, 0, y + barHeight);
+      gradProm.addColorStop(0, "#4f46e5"); // indigo-600
+      gradProm.addColorStop(1, "#1d4ed8"); // blue-700
+      ctx.fillStyle = gradProm;
+    } else {
+      const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+      gradient.addColorStop(0, "#73b248");
+      gradient.addColorStop(1, "#106e3a");
+      ctx.fillStyle = gradient;
+    }
 
-    // Draw bar border
-    ctx.strokeStyle = "#106e3a"
-    ctx.lineWidth = 1
-    ctx.strokeRect(x, y, barWidth, barHeight)
+    ctx.fillRect(x, y, barWidth, barHeight);
 
-    // Draw value on top of bar
-    ctx.fillStyle = "#333"
-    ctx.font = "10px Arial"
-    ctx.textAlign = "center"
-    ctx.fillText(irradiacionData[i].toFixed(1), x + barWidth / 2, y - 5)
+    ctx.strokeStyle = isProm ? "#1d4ed8" : "#106e3a";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, barWidth, barHeight);
+
+    // Valor encima de la barra
+    ctx.fillStyle = "#333";
+    ctx.font = "10px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(hVal.toFixed(1), x + barWidth / 2, y - 5);
   }
 
-  // Chart title
-  ctx.fillStyle = "#333"
-  ctx.font = "bold 16px Arial"
-  ctx.textAlign = "center"
-  ctx.fillText(`Irradiación Solar - ${estado}`, canvas.width / 2, 30)
-  ctx.fillText("(kWh/m²/día)", canvas.width / 2, 50)
+  // Línea horizontal de promedio (referencia)
+  const yProm = canvas.height - padding - (promedioCalc / valueRange) * chartHeight;
+  ctx.save();
+  ctx.strokeStyle = "rgba(79,70,229,0.9)"; // indigo
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath();
+  ctx.moveTo(padding, yProm);
+  ctx.lineTo(canvas.width - padding, yProm);
+  ctx.stroke();
+  ctx.restore();
 
-  ctx.font = "14px Arial"
-  ctx.fillText(`Promedio anual: ${estadoData.Promedio} kWh/m²/día`, canvas.width / 2, canvas.height + 5)
+  // Título
+  ctx.fillStyle = "#333";
+  ctx.font = "bold 16px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(`Irradiación Solar - ${estado}`, canvas.width / 2, 30);
+  ctx.fillText("(kWh/m²/día)", canvas.width / 2, 50);
 
-  console.log("[v0] Solar irradiation bar chart created successfully")
+  // Pie con promedio
+  ctx.font = "14px Arial";
+  ctx.fillText(
+    `Promedio anual: ${promedioCalc.toFixed(2)} kWh/m²/día`,
+    canvas.width / 2,
+    canvas.height - 10
+  );
+
+  console.log("[v0] Monthly data for", estado, ":", irradiacionData);
+  console.log("[v0] Average:", promedioCalc);
+  console.log("[v0] Solar irradiation bar chart created successfully");
 }
 
 // Etiquetas (12 meses)
-const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic", "Total"];
-
+const mesesDisplay = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+  "Promedio",
+];
+const datosLocalStorage = JSON.parse(
+  localStorage.getItem("resultadosSistemaSolar")
+);
+const datosLocalStorage2 = JSON.parse(
+  localStorage.getItem("irradiacionAnual") || "{}"
+);
 // Consumos (12 valores). Si trabajas bimestral, duplica o interpola.
 // const consumosMensuales = consumos;
-const consumosMensuales = [690,0,631,0,422,0,970,0,1011,0,672];
-// Producción (12 valores). Ejemplo: repartir la generación anual uniformemente:
-const produccionMensual = [339.34, 375.40, 483.17, 524.50, 545.16, 491.43, 538.80, 519.73, 443.75, 407.68, 343.77, 315.49]
-
-function diasEnMes(mes, anio) {
-// === Uso con el año actual ===
-const anioActual = new Date().getFullYear();
-  // mes: 1 = enero, 2 = febrero, ... 12 = diciembre
-  return new Date(anioActual, mes, 0).getDate();
+let consumosMensuales = datosLocalStorage ? datosLocalStorage.consumos : [];
+// Si el arreglo tiene 6 valores, intercalar 0 entre cada valor para formar 12
+if (consumosMensuales.length === 6) {
+  const nuevoArreglo = [];
+  for (let i = 0; i < consumosMensuales.length; i++) {
+    nuevoArreglo.push(consumosMensuales[i]); // valor original
+    nuevoArreglo.push(0); // intercalado
+  }
+  consumosMensuales = nuevoArreglo;
 }
-const irradiacionMensual = [
-  4.27, // Enero
-  5.23, // Febrero
-  6.08, // Marzo
-  6.82, // Abril
-  6.86, // Mayo
-  6.39, // Junio
-  6.78, // Julio
-  6.54, // Agosto
-  5.77, // Septiembre
-  5.13, // Octubre
-  4.47, // Noviembre
-  3.97  // Diciembre
-];
-console.log(calcularProduccion(irradiacionMensual, kwintsladaConEficiancia))
-function calcularProduccion(irradiacionMensual, kWeficiencia) {
-  if (irradiacionMensual.length !== 12) {
-    throw new Error("El arreglo de irradiación debe tener exactamente 12 valores (uno por mes).");
-  }
+console.log("Consumos mensuales:", consumosMensuales);
+// Lee de LS con fallback seguro
+let irradiacionMensualRaw =
+  datosLocalStorage2 && Array.isArray(datosLocalStorage2.irradiacion)
+    ? datosLocalStorage2.irradiacion
+    : [];
 
-  const produccion = [];
+console.log("Irradiación mensual raw:", irradiacionMensualRaw);
 
-  for (let mes = 1; mes <= 12; mes++) {
-    const irradiacion = Number(irradiacionMensual[mes - 1]) || 0;
-    const dias = diasEnMes(mes);
-    const valor = irradiacion * kWeficiencia * dias;
-    produccion.push(valor);
-  }
+let kwinsEfRaw =
+  datosLocalStorage &&
+  typeof datosLocalStorage.kwintsladaConEficiancia !== "undefined"
+    ? datosLocalStorage.kwintsladaConEficiancia
+    : 0;
+console.log("kwinsEfRaw:", kwinsEfRaw);
+let produccionMensual = [];
 
-  return produccion;
+for (let i = 0; i < 12; i++) {
+  produccionMensual[i] = irradiacionMensualRaw[i] * kwinsEfRaw * 31;
 }
 
-
-
-// produccionMensual ya existe como arreglo
-const sum = produccionMensual.reduce((acc, val) => acc + Number(val || 0), 0);
-const avg = sum / (produccionMensual.length || 1);
-produccionMensual.push(avg);
-
-
-
+console.log("irradiacionMensual:", irradiacionMensualRaw);
+console.log("kwinsEf:", kwinsEfRaw);
+console.log("produccionMensual:", produccionMensual);
 
 // Llamada:
 // Llama una vez después de que existan los elementos
 setupImpactoResponsive(mesesDisplay, consumosMensuales, produccionMensual);
 
 function setupImpactoResponsive(labels, consumoArr, produccionArr) {
-
   const canvas = document.getElementById("impactoChart");
   if (!canvas) return;
+
+  // --- utilidades: promedio robusto (ignora null/undefined/NaN) ---
+  const avg = (arr) => {
+    const nums = (arr || []).map(v => Number(v)).filter(v => Number.isFinite(v));
+    return nums.length ? nums.reduce((a,b)=>a+b,0) / nums.length : 0;
+  };
+
+  // --- clonar y extender con "Promedio" ---
+  const consumoAvg = avg(consumoArr);
+  const produccionAvg = avg(produccionArr);
+
+  const labelsExt      = [...labels, "Promedio"];
+  const consumoExt     = [...consumoArr, consumoAvg];
+  const produccionExt  = [...produccionArr, produccionAvg];
 
   const redraw = () => {
     // 1) Ajuste a contenedor + DPR
     const parent = canvas.parentElement || canvas;
-    const cssWidth  = parent.clientWidth || 600;
-    const cssHeight = canvas.style.height ? parseInt(getComputedStyle(canvas).height) : 320;
+    const cssWidth = parent.clientWidth || 600;
+    const cssHeight = canvas.style.height
+      ? parseInt(getComputedStyle(canvas).height)
+      : 320;
 
-    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2)); // limitar DPR para perf
-    canvas.width  = Math.floor(cssWidth * dpr);
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+    canvas.width = Math.floor(cssWidth * dpr);
     canvas.height = Math.floor(cssHeight * dpr);
 
     const ctx = canvas.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // para dibujar en “píxeles CSS”
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // 2) Calcula tamaños relativos
     const W = cssWidth;
     const H = cssHeight;
 
-    const base = Math.max(12, Math.min(16, Math.floor(W / 60))); // fuente base adaptativa
-    const pad  = Math.max(40, Math.min(100, Math.floor(W * 0.08))); // padding relativo
+    const base = Math.max(12, Math.min(16, Math.floor(W / 60)));
+    const pad = Math.max(40, Math.min(100, Math.floor(W * 0.08)));
 
-    // 3) Decide si rotar labels en X cuando hay poco ancho
-    const L = Math.min(labels.length, consumoArr.length, produccionArr.length);
+    // 3) Decide si rotar labels en X (usar largo extendido)
+    const L = Math.min(labelsExt.length, consumoExt.length, produccionExt.length);
     const rotateX = (W < 480 && L > 6) || (W < 360 && L > 4);
 
-    // 4) Dibuja
+    // 4) Dibuja con los arreglos extendidos (incluyen “Promedio” al final)
     crearGraficaImpactoResponsive({
-      canvas, ctx, labels, consumoArr, produccionArr,
-      baseFontPx: base, paddingPx: pad, rotateXLabels: rotateX
+      canvas,
+      ctx,
+      labels: labelsExt,
+      consumoArr: consumoExt,
+      produccionArr: produccionExt,
+      baseFontPx: base,
+      paddingPx: pad,
+      rotateXLabels: rotateX,
     });
   };
 
@@ -899,24 +1040,35 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
   }
 }
 
+
 function crearGraficaImpactoResponsive(opts) {
   const {
-    canvas, ctx, labels, consumoArr, produccionArr,
-    baseFontPx = 14, paddingPx = 80, rotateXLabels = false
+    canvas,
+    ctx,
+    labels,
+    consumoArr,
+    produccionArr,
+    baseFontPx = 14,
+    paddingPx = 80,
+    rotateXLabels = false,
   } = opts;
 
   // Sanitizado
   const L = Math.min(labels.length, consumoArr.length, produccionArr.length);
   const lab = labels.slice(0, L);
-  const consumo = consumoArr.slice(0, L).map(v => Number(v) || 0);
-  const prod    = produccionArr.slice(0, L).map(v => Number(v) || 0);
+  const consumo = consumoArr.slice(0, L).map((v) => Number(v) || 0);
+  const prod = produccionArr.slice(0, L).map((v) => Number(v) || 0);
 
   // Dimensiones (en CSS px, ya transformados con DPR)
-  const W = Math.floor(canvas.clientWidth || parseInt(getComputedStyle(canvas).width));
-  const H = Math.floor(canvas.clientHeight || parseInt(getComputedStyle(canvas).height));
+  const W = Math.floor(
+    canvas.clientWidth || parseInt(getComputedStyle(canvas).width)
+  );
+  const H = Math.floor(
+    canvas.clientHeight || parseInt(getComputedStyle(canvas).height)
+  );
   const padding = paddingPx;
 
-  const chartWidth  = Math.max(50, W - 2 * padding);
+  const chartWidth = Math.max(50, W - 2 * padding);
   const chartHeight = Math.max(50, H - 2 * padding);
 
   // Limpiar
@@ -928,7 +1080,7 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Escala Y
   const maxData = Math.max(...consumo, ...prod, 0);
-  const niceMax  = niceCeil(maxData);  // escalar a “bonito” (e.g. múltiplos)
+  const niceMax = niceCeil(maxData); // escalar a “bonito” (e.g. múltiplos)
   const maxValue = niceMax > 0 ? niceMax : 1;
   const ticks = 5;
 
@@ -977,8 +1129,8 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Barras (dos por grupo)
   const groupWidth = chartWidth / Math.max(1, L);
-  const barWidth   = Math.max(6, Math.min(24, groupWidth * 0.35)); // límites para pantallas chicas
-  const gapBars    = Math.min(8, groupWidth * 0.08);
+  const barWidth = Math.max(6, Math.min(24, groupWidth * 0.35)); // límites para pantallas chicas
+  const gapBars = Math.min(8, groupWidth * 0.08);
 
   for (let i = 0; i < L; i++) {
     const xGroupStart = padding + groupWidth * i;
@@ -986,7 +1138,7 @@ function crearGraficaImpactoResponsive(opts) {
     const xProducc = xConsumo + barWidth + gapBars;
 
     const hC = (consumo[i] / maxValue) * chartHeight;
-    const hP = (prod[i]    / maxValue) * chartHeight;
+    const hP = (prod[i] / maxValue) * chartHeight;
 
     const yC = H - padding - hC;
     const yP = H - padding - hP;
@@ -1015,8 +1167,16 @@ function crearGraficaImpactoResponsive(opts) {
       ctx.fillStyle = "#333";
       ctx.font = font(Math.max(9, baseFontPx - 4));
       ctx.textAlign = "center";
-      ctx.fillText(String(Math.round(consumo[i])), xConsumo + barWidth / 2, Math.max(yC - 8, padding - 8));
-      ctx.fillText(String(Math.round(prod[i])),    xProducc + barWidth / 2, Math.max(yP - 8, padding - 8));
+      ctx.fillText(
+        String(Math.round(consumo[i])),
+        xConsumo + barWidth / 2,
+        Math.max(yC - 8, padding - 8)
+      );
+      ctx.fillText(
+        String(Math.round(prod[i])),
+        xProducc + barWidth / 2,
+        Math.max(yP - 8, padding - 8)
+      );
     }
   }
 
@@ -1024,7 +1184,11 @@ function crearGraficaImpactoResponsive(opts) {
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   ctx.font = `bold ${Math.max(14, baseFontPx)}px Arial`;
-  ctx.fillText("Impacto de la Generación en el Consumo", W / 2, Math.max(24, padding * 0.45));
+  ctx.fillText(
+    "Impacto de la Generación en el Consumo",
+    W / 2,
+    Math.max(24, padding * 0.45)
+  );
   ctx.font = `${Math.max(12, baseFontPx - 2)}px Arial`;
   ctx.fillText("(kWh por mes)", W / 2, Math.max(44, padding * 0.65));
 
@@ -1033,16 +1197,28 @@ function crearGraficaImpactoResponsive(opts) {
   const legendLeft = Math.min(W - padding - 160, W / 2 + 120);
   const drawLegendBox = (x, y, w, h, c1, c2, stroke) => {
     const g = ctx.createLinearGradient(0, y, 0, y + h);
-    g.addColorStop(0, c1); g.addColorStop(1, c2);
-    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = stroke; ctx.strokeRect(x, y, w, h);
+    g.addColorStop(0, c1);
+    g.addColorStop(1, c2);
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = stroke;
+    ctx.strokeRect(x, y, w, h);
   };
 
   ctx.font = `${Math.max(11, baseFontPx - 1)}px Arial`;
-  ctx.textAlign = "left"; ctx.fillStyle = "#333";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#333";
   drawLegendBox(legendLeft, legendTop, 16, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
   ctx.fillText("Consumo", legendLeft + 22, legendTop + 10);
-  drawLegendBox(legendLeft + 90, legendTop, 16, 12, "#73b248", "#106e3a", "#106e3a");
+  drawLegendBox(
+    legendLeft + 90,
+    legendTop,
+    16,
+    12,
+    "#73b248",
+    "#106e3a",
+    "#106e3a"
+  );
   ctx.fillText("Producción", legendLeft + 112, legendTop + 10);
 }
 
@@ -1059,8 +1235,6 @@ function niceCeil(x) {
   else nice = 10;
   return nice * base;
 }
-
-
 
 // function exportResultsToPdf() {
 //   const nombreCliente = document.getElementById("nombreCliente")?.value || "Cliente no especificado"
@@ -1131,49 +1305,64 @@ function niceCeil(x) {
 // }
 
 function exportQuotationToPdf() {
-  console.log("[v0] Generating professional SFVI quotation")
+  console.log("[v0] Generating professional SFVI quotation");
 
   // Get all form data
-  const nombreCliente = document.getElementById("nombreCliente")?.value || ""
-  const direccionCliente = document.getElementById("direccionCliente")?.value || ""
-  const estadoCliente = document.getElementById("estadoCliente")?.value || ""
-  const municipioCliente = document.getElementById("municipioCliente")?.value || ""
+  const nombreCliente = document.getElementById("nombreCliente")?.value || "";
+  const direccionCliente =
+    document.getElementById("direccionCliente")?.value || "";
+  const estadoCliente = document.getElementById("estadoCliente")?.value || "";
+  const municipioCliente =
+    document.getElementById("municipioCliente")?.value || "";
 
-  const nombreEjecutivo = document.getElementById("nombreEjecutivo")?.value || ""
-  const correoEjecutivo = document.getElementById("correoEjecutivo")?.value || ""
+  const nombreEjecutivo =
+    document.getElementById("nombreEjecutivo")?.value || "";
+  const correoEjecutivo =
+    document.getElementById("correoEjecutivo")?.value || "";
 
-  const tipoProyecto = document.getElementById("tipoProyecto")?.value || ""
-  const tipoTarifa = document.getElementById("tipoTarifa")?.value || ""
-  const estadoProyecto = document.getElementById("estadoProyecto")?.value || ""
-  const municipioProyecto = document.getElementById("municipioProyecto")?.value || ""
-  const zonaCFE = document.getElementById("zonaCFE")?.value || ""
-  const notaProyecto = document.getElementById("notaProyecto")?.value || ""
-  const requerimientosProyecto = document.getElementById("requerimientosProyecto")?.value || ""
+  const tipoProyecto = document.getElementById("tipoProyecto")?.value || "";
+  const tipoTarifa = document.getElementById("tipoTarifa")?.value || "";
+  const estadoProyecto = document.getElementById("estadoProyecto")?.value || "";
+  const municipioProyecto =
+    document.getElementById("municipioProyecto")?.value || "";
+  const zonaCFE = document.getElementById("zonaCFE")?.value || "";
+  const notaProyecto = document.getElementById("notaProyecto")?.value || "";
+  const requerimientosProyecto =
+    document.getElementById("requerimientosProyecto")?.value || "";
 
   // Get calculated values
-  const consumoAnual = document.getElementById("consumoAnual")?.textContent || "0 kWh"
-  const consumoDiario = document.getElementById("consumoDiario")?.textContent || "0 kWh"
-  const potenciaNecesaria = document.getElementById("potenciaNecesaria")?.textContent || "0 kW"
-  const numeroModulos = document.getElementById("numeroModulos")?.textContent || "0"
-  const potenciaInstalada = document.getElementById("potenciaInstalada")?.textContent || "0 kW"
-  const generacionAnual = document.getElementById("generacionAnual")?.textContent || "0 kWh"
-  const hsp = document.getElementById("hsp")?.textContent || "0 h"
-  const ahorroCO2 = document.getElementById("ahorroCO2")?.textContent || "0 t"
-  const tarifaPromedio = document.getElementById("tarifaPromedio")?.textContent || "$0"
-  const importeTotal = document.getElementById("importeTotal")?.textContent || "$0"
+  const consumoAnual =
+    document.getElementById("consumoAnual")?.textContent || "0 kWh";
+  const consumoDiario =
+    document.getElementById("consumoDiario")?.textContent || "0 kWh";
+  const potenciaNecesaria =
+    document.getElementById("potenciaNecesaria")?.textContent || "0 kW";
+  const numeroModulos =
+    document.getElementById("numeroModulos")?.textContent || "0";
+  const potenciaInstalada =
+    document.getElementById("potenciaInstalada")?.textContent || "0 kW";
+  const generacionAnual =
+    document.getElementById("generacionAnual")?.textContent || "0 kWh";
+  const hsp = document.getElementById("hsp")?.textContent || "0 h";
+  const ahorroCO2 = document.getElementById("ahorroCO2")?.textContent || "0 t";
+  const tarifaPromedio =
+    document.getElementById("tarifaPromedio")?.textContent || "$0";
+  const importeTotal =
+    document.getElementById("importeTotal")?.textContent || "$0";
 
-  const potenciaPanel = document.getElementById("potenciaPanel")?.value || "565"
-  const areaAproximada = document.getElementById("areaAprox")?.value || "40"
+  const potenciaPanel =
+    document.getElementById("potenciaPanel")?.value || "565";
+  const areaAproximada = document.getElementById("areaAprox")?.value || "40";
 
   // Create quotation document
-  const quotationContent = document.createElement("div")
+  const quotationContent = document.createElement("div");
   quotationContent.style.cssText = `
         font-family: 'Arial', sans-serif;
         background: white;
         color: #333;
         line-height: 1.4;
         font-size: 12px;
-    `
+    `;
 
   quotationContent.innerHTML = `
         <!-- Page 1: Main Quotation -->
@@ -1189,7 +1378,9 @@ function exportQuotationToPdf() {
                     <div style="text-align: right; color: #666; font-size: 11px;">
                         <div style="margin-bottom: 3px;"><strong>Tel:</strong> 984 231 2287</div>
                         <div style="margin-bottom: 3px;"><strong>Web:</strong> https://hexasolar.com.mx</div>
-                        <div><strong>Fecha:</strong> ${new Date().toLocaleDateString("es-MX")}</div>
+                        <div><strong>Fecha:</strong> ${new Date().toLocaleDateString(
+                          "es-MX"
+                        )}</div>
                     </div>
                 </div>
             </div>
@@ -1240,8 +1431,16 @@ function exportQuotationToPdf() {
                     <div><strong>Zona CFE:</strong> ${zonaCFE}</div>
                     <div><strong>HSP:</strong> ${hsp}</div>
                 </div>
-                ${notaProyecto ? `<div style="margin-top: 10px;"><strong>Nota:</strong> ${notaProyecto}</div>` : ""}
-                ${requerimientosProyecto ? `<div style="margin-top: 8px;"><strong>Requerimientos:</strong> ${requerimientosProyecto}</div>` : ""}
+                ${
+                  notaProyecto
+                    ? `<div style="margin-top: 10px;"><strong>Nota:</strong> ${notaProyecto}</div>`
+                    : ""
+                }
+                ${
+                  requerimientosProyecto
+                    ? `<div style="margin-top: 8px;"><strong>Requerimientos:</strong> ${requerimientosProyecto}</div>`
+                    : ""
+                }
             </div>
             
             <!-- Energy Consumption Analysis -->
@@ -1370,12 +1569,14 @@ function exportQuotationToPdf() {
                 </div>
             </div>
         </div>
-    `
+    `;
 
   // Generate PDF
   const opt = {
     margin: [10, 10, 10, 10],
-    filename: `Cotizacion_SFVI_${nombreCliente.replace(/ /g, "_")}_${new Date().toISOString().split("T")[0]}.pdf`,
+    filename: `Cotizacion_SFVI_${nombreCliente.replace(/ /g, "_")}_${
+      new Date().toISOString().split("T")[0]
+    }.pdf`,
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale: 2,
@@ -1389,11 +1590,12 @@ function exportQuotationToPdf() {
       orientation: "portrait",
       compress: true,
     },
-  }
+  };
 
-  document.getElementById("loading").style.display = "flex"
-  document.querySelector(".loading-text").textContent = "Generando Cotización"
-  document.querySelector(".loading-subtext").textContent = "Creando documento profesional..."
+  document.getElementById("loading").style.display = "flex";
+  document.querySelector(".loading-text").textContent = "Generando Cotización";
+  document.querySelector(".loading-subtext").textContent =
+    "Creando documento profesional...";
 
   setTimeout(() => {
     window
@@ -1402,70 +1604,81 @@ function exportQuotationToPdf() {
       .from(quotationContent)
       .save()
       .then(() => {
-        document.getElementById("loading").style.display = "none"
-        console.log("[v0] Professional quotation generated successfully")
+        document.getElementById("loading").style.display = "none";
+        console.log("[v0] Professional quotation generated successfully");
       })
       .catch((err) => {
-        console.error("Error generating quotation PDF:", err)
-        document.getElementById("loading").style.display = "none"
-        alert("Error al generar la cotización. Por favor intente nuevamente.")
-      })
-  }, 1000)
+        console.error("Error generating quotation PDF:", err);
+        document.getElementById("loading").style.display = "none";
+        alert("Error al generar la cotización. Por favor intente nuevamente.");
+      });
+  }, 1000);
 }
 
 // Event listeners and initialization
 document.addEventListener("DOMContentLoaded", () => {
-  loadCSVData() // Load CSV data and initialize states
-  generarInputsConsumo() // Initialize new consumption inputs
-  generarInputsPago()
+  loadCSVData(); // Load CSV data and initialize states
+  generarInputsConsumo(); // Initialize new consumption inputs
+  generarInputsPago();
 
   // Update payment inputs when periods change
   document.getElementById("tipoPeriodo").addEventListener("change", () => {
-    generarInputsConsumo()
-    generarInputsPago()
-  })
+    generarInputsConsumo();
+    generarInputsPago();
+  });
 
-  const tipoProyectoSelect = document.getElementById("tipoProyecto")
-  const tipoTarifaSelect = document.getElementById("tipoTarifa")
+  const tipoProyectoSelect = document.getElementById("tipoProyecto");
+  const tipoTarifaSelect = document.getElementById("tipoTarifa");
 
   function actualizarTarifas() {
-    const tipo = tipoProyectoSelect.value
-    tipoTarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>'
+    const tipo = tipoProyectoSelect.value;
+    tipoTarifaSelect.innerHTML =
+      '<option value="">Selecciona una tarifa</option>';
     if (tarifasPorProyecto[tipo]) {
       tarifasPorProyecto[tipo].forEach((tarifa) => {
-        const option = document.createElement("option")
-        option.value = tarifa
-        option.textContent = tarifa
-        tipoTarifaSelect.appendChild(option)
-      })
+        const option = document.createElement("option");
+        option.value = tarifa;
+        option.textContent = tarifa;
+        tipoTarifaSelect.appendChild(option);
+      });
     }
   }
 
-  tipoProyectoSelect.addEventListener("change", actualizarTarifas)
-  actualizarTarifas()
-})
+  tipoProyectoSelect.addEventListener("change", actualizarTarifas);
+  actualizarTarifas();
+});
 
 function actualizarTotales() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  let totalConsumo = 0
-  let totalImporte = 0
+  let totalConsumo = 0;
+  let totalImporte = 0;
 
   for (let i = 0; i < numPeriodos; i++) {
-    const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
-    const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
+    const consumo =
+      Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0;
+    const importe =
+      Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0;
 
-    totalConsumo += consumo
-    totalImporte += importe
+    totalConsumo += consumo;
+    totalImporte += importe;
   }
 
-  const consumoMensual = tipoPeriodo === "mensual" ? totalConsumo / 12 : totalConsumo / 6
-  const tarifaPromedio = totalConsumo > 0 ? totalImporte / totalConsumo : 0
+  const consumoMensual =
+    tipoPeriodo === "mensual" ? totalConsumo / 12 : totalConsumo / 6;
+  const tarifaPromedio = totalConsumo > 0 ? totalImporte / totalConsumo : 0;
 
-  document.getElementById("consumoAnual").textContent = `${totalConsumo.toFixed(0)} kWh`
-  document.getElementById("consumoMensual").textContent = `${consumoMensual.toFixed(0)} kWh`
-  document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`
-  document.getElementById("importeTotal").textContent = `$${totalImporte.toFixed(2)}`
+  document.getElementById("consumoAnual").textContent = `${totalConsumo.toFixed(
+    0
+  )} kWh`;
+  document.getElementById(
+    "consumoMensual"
+  ).textContent = `${consumoMensual.toFixed(0)} kWh`;
+  document.getElementById(
+    "tarifaPromedio"
+  ).textContent = `$${tarifaPromedio.toFixed(3)}`;
+  document.getElementById(
+    "importeTotal"
+  ).textContent = `$${totalImporte.toFixed(2)}`;
 }
-
