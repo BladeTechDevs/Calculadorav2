@@ -558,6 +558,28 @@ function generarInputsPago() {
   }
 }
 
+function showToast(message, type = "info") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+
+  // Colores según tipo
+  if (type === "error") toast.style.background = "#dc2626"; // rojo
+  if (type === "success") toast.style.background = "#16a34a"; // verde
+  if (type === "warning") toast.style.background = "#67AA47"; // amarillo
+
+  container.appendChild(toast);
+
+  // Quitar después de animación
+  setTimeout(() => {
+    toast.remove();
+  }, 4000); // 4 segundos
+}
+
+
 const consumos = [];
 const importes = [];
 let kwintsladaConEficiancia = 0;
@@ -629,7 +651,7 @@ function calcularSistemaSolar() {
     if (Number.isFinite(fallback)) hspPromedio = fallback;
   }
   if (!Number.isFinite(hspPromedio) || hspPromedio <= 0) {
-    alert("Selecciona el estado para cargar HSP antes de calcular.");
+    showToast("Selecciona el estado para cargar HSP antes de calcular.", "warning");
     document.getElementById("btnCalcular").disabled = false;
     return;
   }
