@@ -916,6 +916,7 @@ function calcularSistemaSolar() {
     document.getElementById("btnCalcular").disabled = false;
     return;
   }
+  //comentario test
   // ====== FIN VALIDACIÓN ======
   const produccionMensual = JSON.parse(localStorage.getItem("produccionMensual")) || 0;
   console.log(produccionMensual)
