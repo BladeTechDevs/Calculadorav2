@@ -655,22 +655,22 @@
               console.log("Resultados del sistema solar:", resultados)
             }
             let reoysinIva = base * resultados.consumoAnualDeEnergia;
-            let roiConiva = total *   resultados.consumoAnualDeEnergia;
-             // Guardar resultados en localStorage
-        const datosParaGuardar = {
-          conceptos,
-          subtotal,
-          profit,
-          base,
-          iva,
-          total,
-          pricePerWatt: pricePerWatt || 0,
-          numeroModulos: numeroModulos,
-          reoysinIva: reoysinIva || 0,
-          roiConiva: roiConiva || 0
-        };
-        localStorage.setItem("cotizacionPU", JSON.stringify(datosParaGuardar));
-        console.log("Cotización P.U. guardada en localStorage:", datosParaGuardar);
+            let roiConiva = total * resultados.consumoAnualDeEnergia;
+            // Guardar resultados en localStorage
+            const datosParaGuardar = {
+              conceptos,
+              subtotal,
+              profit,
+              base,
+              iva,
+              total,
+              pricePerWatt: pricePerWatt || 0,
+              numeroModulos: numeroModulos,
+              reoysinIva: reoysinIva || 0,
+              roiConiva: roiConiva || 0
+            };
+            localStorage.setItem("cotizacionPU", JSON.stringify(datosParaGuardar));
+            console.log("Cotización P.U. guardada en localStorage:", datosParaGuardar);
 
             const cardStyle = `
       background:#fff;border:1px solid #e2e8f0;border-radius:12px;
@@ -767,56 +767,56 @@
           }
         })()
 
-       
+
 
 
       </script>
 
       <script>
-        (() => {
-          // Campos que SÍ se suman (profit NO está aquí)
-          const IDS_SUM = [
-            "panel", "inversor", "mantenimiento", "estructura", "materiales",
-            "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor"
-          ];
+          (() => {
+            // Campos que SÍ se suman (profit NO está aquí)
+            const IDS_SUM = [
+              "panel", "inversor", "mantenimiento", "estructura", "materiales",
+              "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor"
+            ];
 
-          const $ = id => document.getElementById(id);
+            const $ = id => document.getElementById(id);
 
-          const toNumber = v => {
-            if (v == null) return 0;
-            const s = String(v).replace(/[^\d.-]/g, "");
-            const n = parseFloat(s);
-            return isNaN(n) ? 0 : n;
-          };
+            const toNumber = v => {
+              if (v == null) return 0;
+              const s = String(v).replace(/[^\d.-]/g, "");
+              const n = parseFloat(s);
+              return isNaN(n) ? 0 : n;
+            };
 
-          const formatOut = (n, out) =>
-            (out?.type === "number")
-              ? Number(n).toFixed(2)
-              : Number(n).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formatOut = (n, out) =>
+              (out?.type === "number")
+                ? Number(n).toFixed(2)
+                : Number(n).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-          function calcularTotal() {
-            let total = 0;
-            IDS_SUM.forEach(id => { total += toNumber($(id)?.value); });
+            function calcularTotal() {
+              let total = 0;
+              IDS_SUM.forEach(id => { total += toNumber($(id)?.value); });
 
-            // NO sumar profit. Solo lo leemos para disparar recálculo si cambia.
-            const out = $("total");
-            if (out) out.value = formatOut(total, out);
-          }
+              // NO sumar profit. Solo lo leemos para disparar recálculo si cambia.
+              const out = $("total");
+              if (out) out.value = formatOut(total, out);
+            }
 
-          function attach() {
-            // Escucha todos los permitidos…
-            IDS_SUM.forEach(id => { const el = $(id); if (el) el.addEventListener("input", calcularTotal); });
-            // …y también profit para que al cambiarlo NO sume pero sí se recalculen otros efectos si tuvieses.
-            const profit = $("profit");
-            if (profit) profit.addEventListener("input", calcularTotal);
+            function attach() {
+              // Escucha todos los permitidos…
+              IDS_SUM.forEach(id => { const el = $(id); if (el) el.addEventListener("input", calcularTotal); });
+              // …y también profit para que al cambiarlo NO sume pero sí se recalculen otros efectos si tuvieses.
+              const profit = $("profit");
+              if (profit) profit.addEventListener("input", calcularTotal);
 
-            calcularTotal();
-          }
+              calcularTotal();
+            }
 
-          document.readyState === "loading"
-            ? document.addEventListener("DOMContentLoaded", attach)
-            : attach();
-        })();
+            document.readyState === "loading"
+              ? document.addEventListener("DOMContentLoaded", attach)
+              : attach();
+          })();
       </script>
 
 
@@ -832,27 +832,47 @@
         <span>Calcular Sistema Solar</span>
       </button>
 
+      <button class="calculate-btn mobile-only" id="btnCotizarMobile" onclick="exportToBasePdf()">
+        <i class="fas fa-file-contract"></i>
+        <span>Generar Cotización</span>
+      </button>
+
+
     </div>
 
 
     <script>
-      function nuevoCalculo() {
-        // Borrar del localStorage
-        localStorage.removeItem("resultadosSistemaSolar");
-        console.log("Resultados eliminados del localStorage");
+  function nuevoCalculo() {
+    // Borrar del localStorage
+    localStorage.removeItem("resultadosSistemaSolar");
+    console.log("Resultados eliminados del localStorage");
 
-        // Reactivar botón calcular
-        document.getElementById("btnCalcular").disabled = false;
+    // Reactivar botón calcular
+    const btnCalc = document.getElementById("btnCalcular");
+    if (btnCalc) btnCalc.disabled = false;
 
-        // Limpiar resultados en pantalla (opcional)
-        document.getElementById("resultsContent").style.display = "none";
-        document.getElementById("resultsPlaceholder").style.display = "flex";
+    // Limpiar resultados en pantalla
+    const results = document.getElementById("resultsContent");
+    const placeholder = document.getElementById("resultsPlaceholder");
+    if (results) results.style.display = "none";
+    if (placeholder) placeholder.style.display = "flex";
 
-        // También podrías limpiar inputs si quieres:
-        const inputs = document.querySelectorAll("input.consumo-input");
-        inputs.forEach(input => input.value = "");
-      }
-    </script>
+    // Ocultar botón móvil usando la clase (para que respete el CSS)
+    const btnCot = document.getElementById("btnCotizarMobile");
+    if (btnCot) btnCot.classList.remove("show");
+
+    // Limpiar inputs (si aplica)
+    document.querySelectorAll("input.consumo-input").forEach(i => (i.value = ""));
+  }
+
+  // Exportar funciones al global (fuera de la función)
+  window.nuevoCalculo = nuevoCalculo;
+  // Solo expórtala si existe para evitar errores
+  if (typeof validarFormulario === "function") {
+    window.validarFormulario = validarFormulario;
+  }
+</script>
+
 
 
 

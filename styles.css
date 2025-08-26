@@ -539,3 +539,36 @@ body {
   .main-container { padding-top: 40px; }
   .consumo-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+
+
+
+
+/* Siempre oculto por defecto (desktop y mobile) */
+#btnCotizarMobile { display: none; }
+
+/* Tablet + móvil: se mostrará SOLO si JS agrega la clase .show */
+@media (max-width: 1024px) {
+  #btnCotizarMobile.show {
+    display: inline-flex;   /* o block si prefieres */
+    margin-top: 0.8rem;
+  }
+
+  /* Layout de una sola columna y panel derecho oculto */
+  .main-container {
+    display: block;
+    padding-top: 45px;
+  }
+  .form-panel {
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+  .resizer,
+  .results-panel {
+    display: none !important;
+  }
+}
+
+/* Ya no uses .mobile-only para mostrar nada */
+.mobile-only { /* opcionalmente deja vacío o solo estilos visuales */ }

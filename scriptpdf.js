@@ -545,7 +545,7 @@ let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
       ]
       const fsTiny = 7, lhTiny = 10, pad = 8
       const titleH = 16
-      const folioText = `Folio: ${datos.folio || "—"}`
+      const folioText = `Folio: SFVI-${datos.folio || "—"}`
       ensure(titleH + 8)
 
       // Folio naranja
