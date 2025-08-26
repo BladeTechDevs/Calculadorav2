@@ -432,7 +432,7 @@
             <div class="panel-spec-row">
               <div class="form-group" style="flex:1;">
                 <label for="potenciaPanel">Potencia Panel</label>
-                <input value="565" type="number" id="potenciaPanel" placeholder="">
+                <input  type="number" id="potenciaPanel" placeholder="">
               </div>
             </div>
             <div class="panel-spec-row">
@@ -1272,164 +1272,164 @@
       }
     }
 
-    function generarInputsConsumo() {
-      const select = document.getElementById('tipoPeriodo');
-      const n = (select && select.value === 'mensual') ? 12 : 6;
+    // function generarInputsConsumo() {
+    //   const select = document.getElementById('tipoPeriodo');
+    //   const n = (select && select.value === 'mensual') ? 12 : 6;
 
-      const kwhRow = document.getElementById('kwhRow');
-      const pagoRow = document.getElementById('pagoRow');
-      const tarifaRow = document.getElementById('tarifaRow');
-      if (!kwhRow || !pagoRow || !tarifaRow) return;
+    //   const kwhRow = document.getElementById('kwhRow');
+    //   const pagoRow = document.getElementById('pagoRow');
+    //   const tarifaRow = document.getElementById('tarifaRow');
+    //   if (!kwhRow || !pagoRow || !tarifaRow) return;
 
-      // Limpiar contenedores (evita duplicados)
-      kwhRow.innerHTML = '';
-      pagoRow.innerHTML = '';
-      tarifaRow.innerHTML = '';
+    //   // Limpiar contenedores (evita duplicados)
+    //   kwhRow.innerHTML = '';
+    //   pagoRow.innerHTML = '';
+    //   tarifaRow.innerHTML = '';
 
-      // Periodos según tipo
-      const periodosMensuales = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-      const periodosBimestrales = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
-      const periodos = (n === 12) ? periodosMensuales : periodosBimestrales;
+    //   // Periodos según tipo
+    //   const periodosMensuales = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    //   const periodosBimestrales = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
+    //   const periodos = (n === 12) ? periodosMensuales : periodosBimestrales;
 
-      // === DATOS DE PRUEBA ===
-      const samples = {
-        bimestral: {
-          // Tus datos reales de ejemplo
-          consumo: [690, 631, 422, 970, 1011, 752],
-          importe: [1695, 1685, 489, 2798, 2998, 2269],
-          tarifa: [] // vacío: se calcula con importe/consumo
-        },
-        mensual: {
-          // Ejemplo genérico (ajústalo a lo que quieras ver por defecto)
-          consumo: [400, 380, 420, 500, 520, 480, 510, 500, 450, 430, 390, 370],
-          importe: [1200, 1140, 1260, 1500, 1560, 1440, 1530, 1500, 1350, 1290, 1170, 1110],
-          tarifa: [] // vacío: se calcula con importe/consumo
-        }
-      };
+    //   // === DATOS DE PRUEBA ===
+    //   const samples = {
+    //     bimestral: {
+    //       // Tus datos reales de ejemplo
+    //       consumo: [690, 631, 422, 970, 1011, 752],
+    //       importe: [1695, 1685, 489, 2798, 2998, 2269],
+    //       tarifa: [] // vacío: se calcula con importe/consumo
+    //     },
+    //     mensual: {
+    //       // Ejemplo genérico (ajústalo a lo que quieras ver por defecto)
+    //       consumo: [400, 380, 420, 500, 520, 480, 510, 500, 450, 430, 390, 370],
+    //       importe: [1200, 1140, 1260, 1500, 1560, 1440, 1530, 1500, 1350, 1290, 1170, 1110],
+    //       tarifa: [] // vacío: se calcula con importe/consumo
+    //     }
+    //   };
 
-      const datosPrueba = (n === 12) ? samples.mensual : samples.bimestral;
+    //   const datosPrueba = (n === 12) ? samples.mensual : samples.bimestral;
 
-      // Helpers
-      const toNum = (v) => {
-        if (v === null || v === undefined) return NaN;
-        const s = String(v).trim().replace(',', '.');
-        const x = parseFloat(s);
-        return Number.isFinite(x) ? x : NaN;
-      };
-      const hasNum = (v) => !Number.isNaN(toNum(v));
-      const fix2 = (x) => (Math.round((x + Number.EPSILON) * 100) / 100).toFixed(2);
+    //   // Helpers
+    //   const toNum = (v) => {
+    //     if (v === null || v === undefined) return NaN;
+    //     const s = String(v).trim().replace(',', '.');
+    //     const x = parseFloat(s);
+    //     return Number.isFinite(x) ? x : NaN;
+    //   };
+    //   const hasNum = (v) => !Number.isNaN(toNum(v));
+    //   const fix2 = (x) => (Math.round((x + Number.EPSILON) * 100) / 100).toFixed(2);
 
-      const recalcular = (i, source) => {
-        const k = document.getElementById(`consumo${i}`);
-        const p = document.getElementById(`importe${i}`);
-        const t = document.getElementById(`tarifa${i}`);
+    //   const recalcular = (i, source) => {
+    //     const k = document.getElementById(`consumo${i}`);
+    //     const p = document.getElementById(`importe${i}`);
+    //     const t = document.getElementById(`tarifa${i}`);
 
-        const consumo = toNum(k.value);
-        const importe = toNum(p.value);
-        const tarifa = toNum(t.value);
+    //     const consumo = toNum(k.value);
+    //     const importe = toNum(p.value);
+    //     const tarifa = toNum(t.value);
 
-        if (source === 'importe') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(importe)) t.value = fix2(importe / consumo);
-          return;
-        }
-        if (source === 'tarifa') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(tarifa)) p.value = fix2(tarifa * consumo);
-          return;
-        }
-        if (source === 'consumo') {
-          if (hasNum(consumo) && consumo > 0) {
-            if (hasNum(importe) && importe > 0) {
-              t.value = fix2(importe / consumo);
-            } else if ((!hasNum(importe) || importe === 0) && hasNum(tarifa) && tarifa > 0) {
-              p.value = fix2(tarifa * consumo);
-            }
-          }
-          return;
-        }
-      };
+    //     if (source === 'importe') {
+    //       if (hasNum(consumo) && consumo > 0 && hasNum(importe)) t.value = fix2(importe / consumo);
+    //       return;
+    //     }
+    //     if (source === 'tarifa') {
+    //       if (hasNum(consumo) && consumo > 0 && hasNum(tarifa)) p.value = fix2(tarifa * consumo);
+    //       return;
+    //     }
+    //     if (source === 'consumo') {
+    //       if (hasNum(consumo) && consumo > 0) {
+    //         if (hasNum(importe) && importe > 0) {
+    //           t.value = fix2(importe / consumo);
+    //         } else if ((!hasNum(importe) || importe === 0) && hasNum(tarifa) && tarifa > 0) {
+    //           p.value = fix2(tarifa * consumo);
+    //         }
+    //       }
+    //       return;
+    //     }
+    //   };
 
-      // Construcción de inputs
-      for (let i = 1; i <= n; i++) {
-        const periodo = periodos[i - 1] || `Periodo ${i}`;
+    //   // Construcción de inputs
+    //   for (let i = 1; i <= n; i++) {
+    //     const periodo = periodos[i - 1] || `Periodo ${i}`;
 
-        // Etiqueta
-        const label = document.createElement('div');
-        label.textContent = periodo;
-        label.style.fontSize = "12px";
-        label.style.fontWeight = "normal";
-        label.style.color = "#6c757d";
-        label.style.textAlign = "center";
-        label.style.marginBottom = "2px";
+    //     // Etiqueta
+    //     const label = document.createElement('div');
+    //     label.textContent = periodo;
+    //     label.style.fontSize = "12px";
+    //     label.style.fontWeight = "normal";
+    //     label.style.color = "#6c757d";
+    //     label.style.textAlign = "center";
+    //     label.style.marginBottom = "2px";
 
-        // Contenedores
-        const baseCol = () => {
-          const d = document.createElement('div');
-          d.style.display = "flex";
-          d.style.flexDirection = "column";
-          d.style.alignItems = "center";
-          d.style.margin = "0 5px";
-          return d;
-        };
-        const contK = baseCol();
-        const contP = baseCol();
-        const contT = baseCol();
+    //     // Contenedores
+    //     const baseCol = () => {
+    //       const d = document.createElement('div');
+    //       d.style.display = "flex";
+    //       d.style.flexDirection = "column";
+    //       d.style.alignItems = "center";
+    //       d.style.margin = "0 5px";
+    //       return d;
+    //     };
+    //     const contK = baseCol();
+    //     const contP = baseCol();
+    //     const contT = baseCol();
 
-        // Consumo (kWh)
-        const k = document.createElement('input');
-        k.type = 'number'; k.step = 'any'; k.inputMode = 'decimal';
-        k.className = 'consumo-input'; k.id = `consumo${i}`;
-        k.addEventListener('input', () => recalcular(i, 'consumo'));
-        contK.appendChild(label.cloneNode(true));
-        contK.appendChild(k);
+    //     // Consumo (kWh)
+    //     const k = document.createElement('input');
+    //     k.type = 'number'; k.step = 'any'; k.inputMode = 'decimal';
+    //     k.className = 'consumo-input'; k.id = `consumo${i}`;
+    //     k.addEventListener('input', () => recalcular(i, 'consumo'));
+    //     contK.appendChild(label.cloneNode(true));
+    //     contK.appendChild(k);
 
-        // Importe ($)
-        const p = document.createElement('input');
-        p.type = 'number'; p.step = 'any'; p.inputMode = 'decimal';
-        p.className = 'consumo-input'; p.id = `importe${i}`;
-        p.addEventListener('input', () => recalcular(i, 'importe'));
-        contP.appendChild(label.cloneNode(true));
-        contP.appendChild(p);
+    //     // Importe ($)
+    //     const p = document.createElement('input');
+    //     p.type = 'number'; p.step = 'any'; p.inputMode = 'decimal';
+    //     p.className = 'consumo-input'; p.id = `importe${i}`;
+    //     p.addEventListener('input', () => recalcular(i, 'importe'));
+    //     contP.appendChild(label.cloneNode(true));
+    //     contP.appendChild(p);
 
-        // Tarifa ($/kWh)
-        const t = document.createElement('input');
-        t.type = 'number'; t.step = 'any'; t.inputMode = 'decimal';
-        t.className = 'consumo-input'; t.id = `tarifa${i}`;
-        t.addEventListener('input', () => recalcular(i, 'tarifa'));
-        contT.appendChild(label.cloneNode(true));
-        contT.appendChild(t);
+    //     // Tarifa ($/kWh)
+    //     const t = document.createElement('input');
+    //     t.type = 'number'; t.step = 'any'; t.inputMode = 'decimal';
+    //     t.className = 'consumo-input'; t.id = `tarifa${i}`;
+    //     t.addEventListener('input', () => recalcular(i, 'tarifa'));
+    //     contT.appendChild(label.cloneNode(true));
+    //     contT.appendChild(t);
 
-        kwhRow.appendChild(contK);
-        pagoRow.appendChild(contP);
-        tarifaRow.appendChild(contT);
-      }
+    //     kwhRow.appendChild(contK);
+    //     pagoRow.appendChild(contP);
+    //     tarifaRow.appendChild(contT);
+    //   }
 
-      // === Cargar datos de prueba y autocalcular lo faltante ===
-      for (let i = 1; i <= n; i++) {
-        const k = document.getElementById(`consumo${i}`);
-        const p = document.getElementById(`importe${i}`);
-        const t = document.getElementById(`tarifa${i}`);
+    //   // === Cargar datos de prueba y autocalcular lo faltante ===
+    //   for (let i = 1; i <= n; i++) {
+    //     const k = document.getElementById(`consumo${i}`);
+    //     const p = document.getElementById(`importe${i}`);
+    //     const t = document.getElementById(`tarifa${i}`);
 
-        const cVal = datosPrueba.consumo[i - 1];
-        const mVal = datosPrueba.importe[i - 1];
-        const rVal = datosPrueba.tarifa[i - 1];
+    //     const cVal = datosPrueba.consumo[i - 1];
+    //     const mVal = datosPrueba.importe[i - 1];
+    //     const rVal = datosPrueba.tarifa[i - 1];
 
-        if (typeof cVal !== 'undefined') k.value = cVal;
-        if (typeof mVal !== 'undefined') p.value = mVal;
-        if (typeof rVal !== 'undefined') t.value = rVal;
+    //     if (typeof cVal !== 'undefined') k.value = cVal;
+    //     if (typeof mVal !== 'undefined') p.value = mVal;
+    //     if (typeof rVal !== 'undefined') t.value = rVal;
 
-        // Si no hay tarifa pero sí consumo+importe, calcúlala
-        const c = toNum(k.value);
-        const m = toNum(p.value);
-        const r = toNum(t.value);
+    //     // Si no hay tarifa pero sí consumo+importe, calcúlala
+    //     const c = toNum(k.value);
+    //     const m = toNum(p.value);
+    //     const r = toNum(t.value);
 
-        if ((!hasNum(r) || r === 0) && hasNum(c) && c > 0 && hasNum(m) && m > 0) {
-          t.value = fix2(m / c);
-        } else if ((!hasNum(m) || m === 0) && hasNum(c) && c > 0 && hasNum(r) && r > 0) {
-          // Alternativa: si viene tarifa y consumo pero no importe, calcúlalo
-          p.value = fix2(c * r);
-        }
-      }
-    }
+    //     if ((!hasNum(r) || r === 0) && hasNum(c) && c > 0 && hasNum(m) && m > 0) {
+    //       t.value = fix2(m / c);
+    //     } else if ((!hasNum(m) || m === 0) && hasNum(c) && c > 0 && hasNum(r) && r > 0) {
+    //       // Alternativa: si viene tarifa y consumo pero no importe, calcúlalo
+    //       p.value = fix2(c * r);
+    //     }
+    //   }
+    // }
 
     window.addEventListener('load', generarInputsConsumo);
     document.getElementById('tipoPeriodo')?.addEventListener('change', generarInputsConsumo);
