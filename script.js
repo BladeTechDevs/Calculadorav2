@@ -294,7 +294,9 @@ function actualizarHSP() {
         Promedio: estadoData.Promedio,
       });
 
-      mostrarDatosIrradiacion(estadoData);
+      if (typeof mostrarDatosIrradiacion === "function") {
+        mostrarDatosIrradiacion(estadoData);
+      }
       console.log("[v0] Estado data:", estadoData);
     }
   }
@@ -463,27 +465,27 @@ function generarInputsConsumo() {
   const periodos =
     tipoPeriodo === "mensual"
       ? [
-          "Enero",
-          "Febrero",
-          "Marzo",
-          "Abril",
-          "Mayo",
-          "Junio",
-          "Julio",
-          "Agosto",
-          "Septiembre",
-          "Octubre",
-          "Noviembre",
-          "Diciembre",
-        ]
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ]
       : [
-          "Bimestre 1",
-          "Bimestre 2",
-          "Bimestre 3",
-          "Bimestre 4",
-          "Bimestre 5",
-          "Bimestre 6",
-        ];
+        "Bimestre 1",
+        "Bimestre 2",
+        "Bimestre 3",
+        "Bimestre 4",
+        "Bimestre 5",
+        "Bimestre 6",
+      ];
 
   container.innerHTML = "";
 
@@ -529,41 +531,33 @@ function generarInputsConsumo() {
 }
 
 function calcularTarifaAutomatica(index) {
-  const consumo =
-    Number.parseFloat(document.getElementById(`consumo${index}`).value) || 0;
-  const importe =
-    Number.parseFloat(document.getElementById(`importe${index}`).value) || 0;
+  const consumo = Number.parseFloat(document.getElementById(`consumo${index}`)?.value) || 0;
+  const importe = Number.parseFloat(document.getElementById(`importe${index}`)?.value) || 0;
   const tarifaInput = document.getElementById(`tarifa${index}`);
-
-  if (consumo > 0 && importe > 0) {
-    const tarifa = importe / consumo;
-    tarifaInput.value = tarifa.toFixed(3);
-  } else {
-    tarifaInput.value = "";
-  }
-
-  // Update totals
-  actualizarTotalesConsumo();
+  if (!tarifaInput) { actualizarTotalesConsumo?.(); return; }  // ← si no existe, sal con gracia
+  tarifaInput.value = (consumo > 0 && importe > 0) ? (importe / consumo).toFixed(3) : "";
+  actualizarTotalesConsumo?.();
 }
+
 
 function generarInputsPago() {
   const tipoPeriodo = document.getElementById("tipoPeriodo").value;
-  const container = document.getElementById("pagoInputs");
+  const container = document.getElementById("pagoInputs") || document.getElementById("pagoRow");
+  if (!container) return;             // ← evita crashear si no existe
   const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
 
   container.innerHTML = "";
-
   for (let i = 0; i < numCampos; i++) {
     const pagoInput = document.createElement("input");
     pagoInput.type = "number";
     pagoInput.className = "consumo-input";
-    pagoInput.placeholder =
-      tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`;
+    pagoInput.placeholder = tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`;
     pagoInput.id = `pago${i}`;
     pagoInput.step = "0.01";
     container.appendChild(pagoInput);
   }
 }
+
 const consumos = [];
 const importes = [];
 let kwintsladaConEficiancia = 0;
@@ -584,20 +578,17 @@ function calcularSistemaSolar() {
       console.log("No has seleccionado nada");
     }
   });
+
   const tipoPeriodo = document.getElementById("tipoPeriodo").value;
   const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
   const consumos = [];
   const importes = [];
 
-  // Collect consumption and payment data
+  // Collect consumption and payment data (SIN CAMBIOS)
   for (let i = 1; i <= numPeriodos; i++) {
-    const consumo = Number.parseFloat(
-      document.getElementById(`consumo${i}`)?.value || 0
-    );
-    const importe = Number.parseFloat(
-      document.getElementById(`importe${i}`)?.value || 0
-    );
+    const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value || 0);
+    const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value || 0);
     consumos.push(consumo);
     importes.push(importe);
   }
@@ -629,12 +620,29 @@ function calcularSistemaSolar() {
   const tarifaPromedio = sumaTarifas / tarifas.filter((t) => t > 0).length;
 
   const estado = document.getElementById("estadoProyecto").value;
-  const hspPromedio = window.hspValue;
-  // const hspArreglo = window.hspData;
-  // console.log("[v0] HSP Promedio:", hspArreglo);
-  const potenciaPanel = Number.parseFloat(
-    document.getElementById("potenciaPanel")?.value
-  );
+
+  // ====== VALIDACIÓN MÍNIMA (NO CAMBIA LÓGICA) ======
+  // Asegura que hspPromedio exista y sea número antes de usarlo
+  let hspPromedio = Number(window.hspValue);
+  if (!Number.isFinite(hspPromedio)) {
+    const fallback = Number(hspData?.[estado]);
+    if (Number.isFinite(fallback)) hspPromedio = fallback;
+  }
+  if (!Number.isFinite(hspPromedio) || hspPromedio <= 0) {
+    alert("Selecciona el estado para cargar HSP antes de calcular.");
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
+  // Asegura que potenciaPanel sea número válido
+  const potenciaPanel = Number.parseFloat(document.getElementById("potenciaPanel")?.value);
+  if (!Number.isFinite(potenciaPanel) || potenciaPanel <= 0) {
+    alert("Indica una potencia de panel válida antes de calcular.");
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+  // ====== FIN VALIDACIÓN ======
+
   const potenciaNecesaria = consumoDiario / (hspPromedio * 0.76);
   const numeroModulos = Math.ceil(
     (consumoDiario * 1000) / (hspPromedio * potenciaPanel * 0.76)
@@ -647,49 +655,45 @@ function calcularSistemaSolar() {
   const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1);
   kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000;
 
-  generacionAnualAprox = numeroModulos * potenciaPanel / 1000 * hspPromedio * 365;
+  generacionAnualAprox = (numeroModulos * potenciaPanel) / 1000 * hspPromedio * 365;
+
   // === Mostrar en la interfaz ===
   document.getElementById("resultsPlaceholder").style.display = "none";
   document.getElementById("resultsContent").style.display = "block";
 
-  document.getElementById("consumoAnual").textContent = `${consumoAnual.toFixed(
-    0
-  )} kWh`;
-  document.getElementById(
-    "consumoMensual"
-  ).textContent = `${consumoMensual.toFixed(0)} kWh`;
-  document.getElementById(
-    "consumoDiario"
-  ).textContent = `${consumoDiario.toFixed(1)} kWh`;
-  document.getElementById(
-    "importeTotal"
-  ).textContent = `$${importeTotalAnual.toFixed(2)}`;
-  document.getElementById(
-    "importePromedio"
-  ).textContent = `$${importePromedio.toFixed(2)}`;
-  document.getElementById(
-    "tarifaPromedio"
-  ).textContent = `$${tarifaPromedio.toFixed(3)}`;
-  document.getElementById(
-    "potenciaNecesaria"
-  ).textContent = `${potenciaNecesaria.toFixed(2)} kW`;
+  document.getElementById("consumoAnual").textContent = `${consumoAnual.toFixed(0)} kWh`;
+  document.getElementById("consumoMensual").textContent = `${consumoMensual.toFixed(0)} kWh`;
+  document.getElementById("consumoDiario").textContent = `${consumoDiario.toFixed(1)} kWh`;
+  document.getElementById("importeTotal").textContent = `$${importeTotalAnual.toFixed(2)}`;
+  document.getElementById("importePromedio").textContent = `$${importePromedio.toFixed(2)}`;
+  document.getElementById("tarifaPromedio").textContent = `$${tarifaPromedio.toFixed(3)}`;
+  document.getElementById("potenciaNecesaria").textContent = `${potenciaNecesaria.toFixed(2)} kW`;
   document.getElementById("numeroModulos").textContent = `${numeroModulos}`;
-  document.getElementById(
-    "potenciaInstalada"
-  ).textContent = `${potenciaInstalada.toFixed(2)} kW`;
+  document.getElementById("potenciaInstalada").textContent = `${potenciaInstalada.toFixed(2)} kW`;
   document.getElementById("hsp").textContent = `${hspPromedio.toFixed(2)} h`;
-  document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(
-    3
-  )} t`;
-  document.getElementById(
-    "porcentajeAhorro"
-  ).textContent = `${porcentajeAhorro}%`;
+  document.getElementById("ahorroCO2").textContent = `${ahorroCO2.toFixed(3)} t`;
+  document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`;
 
   llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo);
   crearGraficaIrradiacion(estado);
-  let areaAprox = document.getElementById("areaAprox").value; 
+  let areaAprox = document.getElementById("areaAprox").value;
 
   let consumoAnualDeEnergia = consumoAnual * tarifaPromedio;
+
+  // Mostrar/Habilitar el botón "Generar Cotización" en móvil
+  // Mostrar/Habilitar el botón "Generar Cotización" en móvil
+  const btnCot = document.getElementById("btnCotizarMobile");
+  if (btnCot) {
+    btnCot.classList.add("show");      // ← clave para que tu CSS lo muestre
+    btnCot.disabled = false;
+    btnCot.removeAttribute("hidden");  // por si acaso
+
+    // opcional: baja el scroll hasta el botón para que el usuario lo vea
+    btnCot.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+
+
   // === Guardar en localStorage ===
   const resultados = {
     tipoPeriodo,
@@ -722,6 +726,7 @@ function calcularSistemaSolar() {
   localStorage.setItem("resultadosSistemaSolar", JSON.stringify(resultados));
   console.log("Guardado en localStorage:", resultados);
 }
+
 
 function llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo) {
   const tbody = document.getElementById("detalleTableBody");
@@ -761,10 +766,10 @@ function crearGraficaIrradiacion(estado) {
   }
 
   const mesesCSV = [
-    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre",
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
   ];
-  const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const mesesDisplay = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
   // Extract monthly irradiation data (kWh/m²/día)
   const irradiacionData = [];
@@ -784,7 +789,7 @@ function crearGraficaIrradiacion(estado) {
     const p = Number.parseFloat(estadoData.Promedio);
     if (Number.isFinite(p)) return p;
     const nums = irradiacionData.filter(v => Number.isFinite(v));
-    return nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : 0;
+    return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
   })();
 
   // Extender etiquetas y datos con el “Promedio” al final
@@ -953,7 +958,7 @@ console.log("Irradiación mensual raw:", irradiacionMensualRaw);
 
 let kwinsEfRaw =
   datosLocalStorage &&
-  typeof datosLocalStorage.kwintsladaConEficiancia !== "undefined"
+    typeof datosLocalStorage.kwintsladaConEficiancia !== "undefined"
     ? datosLocalStorage.kwintsladaConEficiancia
     : 0;
 console.log("kwinsEfRaw:", kwinsEfRaw);
@@ -978,16 +983,16 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
   // --- utilidades: promedio robusto (ignora null/undefined/NaN) ---
   const avg = (arr) => {
     const nums = (arr || []).map(v => Number(v)).filter(v => Number.isFinite(v));
-    return nums.length ? nums.reduce((a,b)=>a+b,0) / nums.length : 0;
+    return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
   };
 
   // --- clonar y extender con "Promedio" ---
   const consumoAvg = avg(consumoArr);
   const produccionAvg = avg(produccionArr);
 
-  const labelsExt      = [...labels, "Promedio"];
-  const consumoExt     = [...consumoArr, consumoAvg];
-  const produccionExt  = [...produccionArr, produccionAvg];
+  const labelsExt = [...labels, "Promedio"];
+  const consumoExt = [...consumoArr, consumoAvg];
+  const produccionExt = [...produccionArr, produccionAvg];
 
   const redraw = () => {
     // 1) Ajuste a contenedor + DPR
@@ -1379,8 +1384,8 @@ function exportQuotationToPdf() {
                         <div style="margin-bottom: 3px;"><strong>Tel:</strong> 984 231 2287</div>
                         <div style="margin-bottom: 3px;"><strong>Web:</strong> https://hexasolar.com.mx</div>
                         <div><strong>Fecha:</strong> ${new Date().toLocaleDateString(
-                          "es-MX"
-                        )}</div>
+    "es-MX"
+  )}</div>
                     </div>
                 </div>
             </div>
@@ -1431,16 +1436,14 @@ function exportQuotationToPdf() {
                     <div><strong>Zona CFE:</strong> ${zonaCFE}</div>
                     <div><strong>HSP:</strong> ${hsp}</div>
                 </div>
-                ${
-                  notaProyecto
-                    ? `<div style="margin-top: 10px;"><strong>Nota:</strong> ${notaProyecto}</div>`
-                    : ""
-                }
-                ${
-                  requerimientosProyecto
-                    ? `<div style="margin-top: 8px;"><strong>Requerimientos:</strong> ${requerimientosProyecto}</div>`
-                    : ""
-                }
+                ${notaProyecto
+      ? `<div style="margin-top: 10px;"><strong>Nota:</strong> ${notaProyecto}</div>`
+      : ""
+    }
+                ${requerimientosProyecto
+      ? `<div style="margin-top: 8px;"><strong>Requerimientos:</strong> ${requerimientosProyecto}</div>`
+      : ""
+    }
             </div>
             
             <!-- Energy Consumption Analysis -->
@@ -1574,9 +1577,8 @@ function exportQuotationToPdf() {
   // Generate PDF
   const opt = {
     margin: [10, 10, 10, 10],
-    filename: `Cotizacion_SFVI_${nombreCliente.replace(/ /g, "_")}_${
-      new Date().toISOString().split("T")[0]
-    }.pdf`,
+    filename: `Cotizacion_SFVI_${nombreCliente.replace(/ /g, "_")}_${new Date().toISOString().split("T")[0]
+      }.pdf`,
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale: 2,

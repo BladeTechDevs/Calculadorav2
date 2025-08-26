@@ -842,36 +842,45 @@
 
 
     <script>
-  function nuevoCalculo() {
-    // Borrar del localStorage
-    localStorage.removeItem("resultadosSistemaSolar");
-    console.log("Resultados eliminados del localStorage");
+      function nuevoCalculo() {
+        // Borrar del localStorage
+        localStorage.removeItem("resultadosSistemaSolar");
+        console.log("Resultados eliminados del localStorage");
 
-    // Reactivar botón calcular
-    const btnCalc = document.getElementById("btnCalcular");
-    if (btnCalc) btnCalc.disabled = false;
+        // Reactivar botón calcular
+        const btnCalc = document.getElementById("btnCalcular");
+        if (btnCalc) btnCalc.disabled = false;
 
-    // Limpiar resultados en pantalla
-    const results = document.getElementById("resultsContent");
-    const placeholder = document.getElementById("resultsPlaceholder");
-    if (results) results.style.display = "none";
-    if (placeholder) placeholder.style.display = "flex";
+        // Asegurar que el botón de cotización móvil se vea y esté habilitado
+        const btnCot = document.getElementById("btnCotizarMobile");
+        if (btnCot) {
+          btnCot.classList.add("show");       // ← asegúrate que tenga la clase
+          btnCot.disabled = false;
+          btnCot.removeAttribute("hidden");
+        }
 
-    // Ocultar botón móvil usando la clase (para que respete el CSS)
-    const btnCot = document.getElementById("btnCotizarMobile");
-    if (btnCot) btnCot.classList.remove("show");
 
-    // Limpiar inputs (si aplica)
-    document.querySelectorAll("input.consumo-input").forEach(i => (i.value = ""));
-  }
+        // Limpiar resultados en pantalla
+        const results = document.getElementById("resultsContent");
+        const placeholder = document.getElementById("resultsPlaceholder");
+        if (results) results.style.display = "none";
+        if (placeholder) placeholder.style.display = "flex";
 
-  // Exportar funciones al global (fuera de la función)
-  window.nuevoCalculo = nuevoCalculo;
-  // Solo expórtala si existe para evitar errores
-  if (typeof validarFormulario === "function") {
-    window.validarFormulario = validarFormulario;
-  }
-</script>
+        // Ocultar botón móvil usando la clase (para que respete el CSS)
+
+
+
+        // Limpiar inputs (si aplica)
+        document.querySelectorAll("input.consumo-input").forEach(i => (i.value = ""));
+      }
+
+      // Exportar funciones al global (fuera de la función)
+      window.nuevoCalculo = nuevoCalculo;
+      // Solo expórtala si existe para evitar errores
+      if (typeof validarFormulario === "function") {
+        window.validarFormulario = validarFormulario;
+      }
+    </script>
 
 
 
