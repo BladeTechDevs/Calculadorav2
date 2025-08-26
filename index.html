@@ -1686,20 +1686,6 @@
 
       // 🔹 Validación especial: Microinversor → requiere inversor lleno (pero puede ser "0")
       const inversorTipo = document.getElementById("inversorPanel").value;
-      const inversorVal = document.getElementById("inversor").value;
-      if (inversorTipo === "Microinversor" && (!inversorVal || inversorVal.trim() === "")) {
-        valido = false;
-        document.getElementById("inversor").style.borderColor = "red";
-
-        Toastify({
-          text: "Si el inversor es Microinversor, debes ingresar el costo del Inversor (aunque sea 0)",
-          duration: 4000,
-          gravity: "top",
-          position: "right",
-          backgroundColor: "linear-gradient(to right, #f97316, #ea580c)",
-          stopOnFocus: true
-        }).showToast();
-      }
 
       return valido;
     }

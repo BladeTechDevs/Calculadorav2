@@ -82,6 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+
+
 // Generar tabla de consumo dinámica
 function generarTablaConsumo() {
   const tipoPeriodo = document.getElementById("tipoPeriodo").value;
@@ -587,6 +589,257 @@ let generacionAnualAprox = 0;
 function calcularSistemaSolar() {
   // Desactivar el botón
   document.getElementById("btnCalcular").disabled = true;
+
+  function validarCliente() {
+    const nombre = document.getElementById("nombreCliente")?.value.trim();
+    const direccion = document.getElementById("direccionCliente")?.value.trim();
+    const estado = document.getElementById("estadoCliente")?.value;
+    const municipio = document.getElementById("municipioCliente")?.value.trim();
+    const telefono = document.getElementById("telefonoCliente")?.value.trim();
+    const correo = document.getElementById("correoCliente")?.value.trim();
+
+    // Nombre
+    if (!nombre) {
+      showToast("Falta llenar el nombre del cliente.", "warning");
+      return false;
+    }
+    // Dirección
+    if (!direccion) {
+      showToast("Falta llenar la dirección del cliente.", "warning");
+      return false;
+    }
+    // Estado
+    if (!estado) {
+      showToast("Selecciona un estado para el cliente.", "warning");
+      return false;
+    }
+    // Municipio
+    if (!municipio) {
+      showToast("Falta llenar el municipio del cliente.", "warning");
+      return false;
+    }
+    // Teléfono (10 dígitos)
+    const soloNumeros = telefono.replace(/\D/g, "");
+    if (!soloNumeros || soloNumeros.length !== 10) {
+      showToast("El teléfono debe tener 10 dígitos.", "warning");
+      return false;
+    }
+    // Correo (formato válido)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!correo || !emailRegex.test(correo)) {
+      showToast("El correo electrónico no es válido.", "warning");
+      return false;
+    }
+
+    return true; // ✅ todos los campos son válidos
+  }
+
+  if (!validarCliente()) {
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
+  function validarEjecutivo() {
+    const nombre = document.getElementById("nombreEjecutivo")?.value.trim();
+    const correo = document.getElementById("correoEjecutivo")?.value.trim();
+    const folio = document.getElementById("folioCotizacion")?.value.trim();
+
+    // Nombre
+    if (!nombre) {
+      showToast("Falta llenar el nombre del ejecutivo.", "warning");
+      return false;
+    }
+
+    // Correo (formato válido)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!correo || !emailRegex.test(correo)) {
+      showToast("El correo del ejecutivo no es válido.", "warning");
+      return false;
+    }
+
+    // Folio
+    if (!folio) {
+      showToast("Falta ingresar el folio de la cotización.", "warning");
+      return false;
+    }
+
+    return true; // ✅ todos los campos son válidos
+  }
+
+  if (!validarEjecutivo()) {
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
+
+  function validarProyecto() {
+    const tipoProyecto = document.getElementById("tipoProyecto")?.value;
+    const tipoTarifa = document.getElementById("tipoTarifa")?.value;
+    const notaProyecto = document.getElementById("notaProyecto")?.value.trim();
+    const estadoProyecto = document.getElementById("estadoProyecto")?.value;
+    const municipioProyecto = document.getElementById("municipioProyecto")?.value.trim();
+    const requerimientosProyecto = document.getElementById("requerimientosProyecto")?.value.trim();
+    const tipoPeriodo = document.getElementById("tipoPeriodo")?.value;
+
+    // Tipo de Proyecto
+    if (!tipoProyecto) {
+      showToast("Selecciona el tipo de proyecto.", "warning");
+      return false;
+    }
+
+    // Tipo de Tarifa
+    if (!tipoTarifa) {
+      showToast("Selecciona el tipo de tarifa.", "warning");
+      return false;
+    }
+
+    // Nota (puede ser opcional, si la quieres obligatoria descomenta)
+    // if (!notaProyecto) {
+    //   showToast("Falta agregar una nota del proyecto.", "warning");
+    //   return false;
+    // }
+
+    // Estado
+    if (!estadoProyecto) {
+      showToast("Selecciona el estado del proyecto.", "warning");
+      return false;
+    }
+
+    // Municipio / Ciudad
+    if (!municipioProyecto) {
+      showToast("Falta llenar el municipio o ciudad del proyecto.", "warning");
+      return false;
+    }
+
+    // Requerimientos (puede ser opcional, si lo quieres obligatorio descomenta)
+    // if (!requerimientosProyecto) {
+    //   showToast("Falta llenar los requerimientos del proyecto.", "warning");
+    //   return false;
+    // }
+
+    // Período de Facturación
+    if (!tipoPeriodo) {
+      showToast("Selecciona el período de facturación.", "warning");
+      return false;
+    }
+
+    return true; // ✅ todos los campos válidos
+  }
+
+  if (!validarProyecto()) {
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
+  function validarDisenio() {
+    const potenciaPanel = document.getElementById("potenciaPanel")?.value.trim();
+    const marcaPanel = document.getElementById("marcaPanel")?.value.trim();
+    const modeloPanel = document.getElementById("modeloPanel")?.value.trim();
+    const inversorPanel = document.getElementById("inversorPanel")?.value;
+    const potenciaInversor = document.getElementById("potenciaInversor")?.value.trim();
+    const instalacionElectrica = document.getElementById("instalacionElectrica")?.value;
+    const numHilos = document.getElementById("numHilos")?.value;
+    const voltajeOperacion = document.getElementById("voltajeOperacion")?.value;
+    const areaAprox = document.getElementById("areaAprox")?.value.trim();
+
+    // Potencia panel
+    if (!potenciaPanel || Number(potenciaPanel) <= 0) {
+      showToast("Indica la potencia del panel.", "warning");
+      return false;
+    }
+
+    // Marca panel
+    if (!marcaPanel) {
+      showToast("Falta llenar la marca del panel.", "warning");
+      return false;
+    }
+
+    // Modelo panel
+    if (!modeloPanel) {
+      showToast("Falta llenar el modelo del panel.", "warning");
+      return false;
+    }
+
+    // Tipo de inversor
+    if (!inversorPanel) {
+      showToast("Selecciona el tipo de inversor.", "warning");
+      return false;
+    }
+
+    // Potencia del inversor
+    if (!potenciaInversor || Number(potenciaInversor) <= 0) {
+      showToast("Indica la potencia del inversor.", "warning");
+      return false;
+    }
+
+    // Instalación eléctrica
+    if (!instalacionElectrica) {
+      showToast("Selecciona el tipo de instalación eléctrica.", "warning");
+      return false;
+    }
+
+    // Número de hilos
+    if (!numHilos) {
+      showToast("Selecciona el número de hilos.", "warning");
+      return false;
+    }
+
+    // Voltaje de operación
+    if (!voltajeOperacion) {
+      showToast("Selecciona el voltaje de operación.", "warning");
+      return false;
+    }
+
+    // Área aproximada
+    if (!areaAprox || Number(areaAprox) <= 0) {
+      showToast("Indica el área aproximada disponible.", "warning");
+      return false;
+    }
+
+    return true; // ✅ todo correcto
+  }
+
+  if (!validarDisenio()) {
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
+
+  function validarCotizacionPU() {
+    // Campos que SÍ validamos (sin incluir profit)
+    const campos = [
+      "panel",
+      "inversor",
+      "mantenimiento",
+      "estructura",
+      "materiales",
+      "instalacion",
+      "carpeta",
+      "flete",
+      "interconexion",
+      "uve",
+      "uie",
+      "medidor"
+    ];
+
+    for (const id of campos) {
+      const input = document.getElementById(id);
+      if (input) {
+        if (input.value.trim() === "") {
+          input.value = 0; // Coloca 0
+          showToast(`El campo "${id}" estaba vacío, se colocó 0.`, "warning");
+        }
+      }
+    }
+
+    return true; // ✅ continúa siempre porque ya corrige
+  }
+
+  if (!validarCotizacionPU()) {
+    document.getElementById("btnCalcular").disabled = false;
+    return;
+  }
+
   const selectInversor = document.getElementById("inversorPanel");
 
   selectInversor.addEventListener("change", () => {
@@ -678,22 +931,22 @@ function calcularSistemaSolar() {
   for (let i = 0; i < produccionMensual.length; i++) {
     suma += produccionMensual[i];
   }
-  const ahorroCO2 = (suma  * 439.963) / 1000000;
+  const ahorroCO2 = (suma * 439.963) / 1000000;
   const arboles = ahorroCO2 * 155;
   const porcentajeAhorro = ((generacionAnual / consumoAnual) * 100).toFixed(1);
   kwintsladaConEficiancia = (potenciaPanel * numeroModulos * 0.76) / 1000;
 
-   let promediodeproduccion = 0; 
+  let promediodeproduccion = 0;
   for (let i = 0; i < produccionMensual.length; i++) {
-     promediodeproduccion += produccionMensual[i];
+    promediodeproduccion += produccionMensual[i];
   }
   promediodeproduccion /= produccionMensual.length;
-  
+
   console.log(promediodeproduccion)
   generacionAnualAprox = (numeroModulos * potenciaPanel) / 1000 * hspPromedio * 365;
-  const diferencia = consumoMensual -  promediodeproduccion;
+  const diferencia = consumoMensual - promediodeproduccion;
   console.log(diferencia, consumoMensual)
-  const porcentaje = (1-(diferencia / consumoMensual)) * 100;
+  const porcentaje = (1 - (diferencia / consumoMensual)) * 100;
   console.log(porcentaje)
   // === Mostrar en la interfaz ===
   document.getElementById("resultsPlaceholder").style.display = "none";
@@ -713,7 +966,7 @@ function calcularSistemaSolar() {
   document.getElementById("arboles").textContent = `${arboles.toFixed(0)} árboles`;
   document.getElementById("porcentajeAhorro").textContent = `${porcentajeAhorro}%`;
   //finales
-    document.getElementById("generacionAnual").textContent = `${generacionAnual.toFixed(2)} KWh`;
+  document.getElementById("generacionAnual").textContent = `${generacionAnual.toFixed(2)} KWh`;
   document.getElementById("porcentajeGeneracion").textContent = `${porcentaje.toFixed(2)}%`;
   document.getElementById("roi").textContent = `${cotizacionPU.roiConiva.toFixed(1)} años`;
 
@@ -1732,5 +1985,8 @@ function actualizarTotales() {
     "importeTotal"
   ).textContent = `$${totalImporte.toFixed(2)}`;
 }
+
+
+
 
 
