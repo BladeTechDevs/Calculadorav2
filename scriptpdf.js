@@ -41,7 +41,7 @@ async function exportToBasePdf() {
       // Ejecutivo
       nombreEjecutivo: getVal("nombreEjecutivo"),
       correoEjecutivo: getVal("correoEjecutivo"),
-      whatsappEjecutivo: "7774457253",
+      whatsappEjecutivo: "+52 56 4794 2143",
       // Proyecto
       tipoProyecto: getVal("tipoProyecto"),
       tipoTarifa: getVal("tipoTarifa"),
