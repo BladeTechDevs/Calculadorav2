@@ -969,7 +969,7 @@ function calcularSistemaSolar() {
   //finales
   document.getElementById("generacionAnual").textContent = `${generacionAnual.toFixed(2)} KWh`;
   document.getElementById("porcentajeGeneracion").textContent = `${porcentaje.toFixed(2)}%`;
-  document.getElementById("roi").textContent = `${cotizacionPU.roiConiva.toFixed(1)} años`;
+  // document.getElementById("roi").textContent = `${cotizacionPU.roiConiva.toFixed(1)} años`;
 
   llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo);
   crearGraficaIrradiacion(estado);
