@@ -796,7 +796,7 @@ async function exportToBasePdf() {
     drawColsWeighted(
       [
         ["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
-        ["ROI", datos.roi || "—"]
+        ["ROI", datas.roiConiva.toFixed(2) || "—"]
       ],
       [3, 1]
     )
