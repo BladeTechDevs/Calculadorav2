@@ -822,16 +822,16 @@
 
 
 
+      <button class="calculate-btn" id="btnNuevoCalculo" onclick="nuevoCalculo()">
+        <i class="fas fa-redo"></i>
+        <span>Nuevo Cálculo</span>
+      </button>
       <!-- Botón de cálculo -->
       <button class="calculate-btn" id="btnCalcular" onclick="if(validarFormulario()) calcularSistemaSolar()">
         <i class="fas fa-calculator"></i>
         <span>Calcular Sistema Solar</span>
       </button>
 
-      <button class="calculate-btn" id="btnNuevoCalculo" onclick="nuevoCalculo()">
-        <i class="fas fa-redo"></i>
-        <span>Nuevo Cálculo</span>
-      </button>
     </div>
 
 
@@ -846,7 +846,7 @@
 
         // Limpiar resultados en pantalla (opcional)
         document.getElementById("resultsContent").style.display = "none";
-        document.getElementById("resultsPlaceholder").style.display = "block";
+        document.getElementById("resultsPlaceholder").style.display = "flex";
 
         // También podrías limpiar inputs si quieres:
         const inputs = document.querySelectorAll("input.consumo-input");
