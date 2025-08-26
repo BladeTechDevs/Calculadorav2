@@ -919,15 +919,15 @@ function crearGraficaIrradiacion(estado) {
   ctx.fillStyle = "#333";
   ctx.font = "bold 16px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(`Irradiación Solar - ${estado}`, canvas.width / 2, 30);
-  ctx.fillText("(kWh/m²/día)", canvas.width / 2, 50);
+  ctx.fillText(`Irradiación Solar - ${estado}`, canvas.width / 2, 20);
+  ctx.fillText("(kWh/m²/día)", canvas.width / 2, 40);
 
   // Pie con promedio
-  ctx.font = "14px Arial";
+  ctx.font = "11px Arial";
   ctx.fillText(
     `Promedio anual: ${promedioCalc.toFixed(2)} kWh/m²/día`,
     canvas.width / 2,
-    canvas.height - 10
+    canvas.height - 2
   );
 
   console.log("[v0] Monthly data for", estado, ":", irradiacionData);

@@ -412,11 +412,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 350px;
+  min-height: 420px;
 }
 #irradiacionChart {
   max-width: 100%;
-  height: auto;
+  height: 380px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
@@ -637,4 +637,10 @@ body {
   .logo {
     gap: 0.25rem;
   }
+}
+
+
+.table-cell {
+  text-align: center;
+  color: #2d3748;
 }
