@@ -1377,3 +1377,28 @@ function niceCeil(x) {
   else nice = 10;
   return nice * base;
 }
+
+// Render inicial de inputs (bimestral por defecto) y persistencia de la elección
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('tipoPeriodo');
+  if (!select) return;
+
+  // Leer último valor guardado o usar 'bimestral' por defecto
+  const saved = localStorage.getItem('tipoPeriodo') || 'bimestral';
+  select.value = saved;
+
+  // Pintar inputs de inicio
+  generarInputsConsumo();
+
+  // Guardar y regenerar al cambiar
+  select.addEventListener('change', () => {
+    localStorage.setItem('tipoPeriodo', select.value);
+    generarInputsConsumo();
+  });
+});
+
+  // Borra todo el localStorage cada vez que se recarga la página
+  window.addEventListener("load", () => {
+    localStorage.clear();
+    console.log("LocalStorage limpiado al recargar la página");
+  });
