@@ -36,8 +36,6 @@ async function exportToBasePdf() {
       // Cliente
       nombreCliente: getVal("nombreCliente"),
       direccionCliente: getVal("direccionCliente"),
-      estadoCliente: getVal("estadoCliente"),
-      municipioCliente: getVal("municipioCliente"),
       telefonoCliente: getVal("telefonoCliente"),
       correoCliente: getVal("correoCliente"),
       // Ejecutivo
@@ -261,7 +259,7 @@ async function exportToBasePdf() {
         {
           icon: "direccion.svg",
           label: "Ubicación",
-          value: `${datos.direccionCliente || "—"}, ${datos.municipioCliente || "—"}, ${datos.estadoCliente || "—"}`,
+          value: `${datos.direccionCliente || "—"}`,
         },
         { icon: "telefono.svg", label: "Teléfono", value: datos.telefonoCliente || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoCliente || "—" },
@@ -1033,7 +1031,7 @@ async function exportToBasePdf() {
     drawColsWeighted(
       [
         ["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
-        ["ROI", datas.roiConiva.toFixed(2) || "—"],
+  ["ROI", (datas && typeof datas.roiConiva === "number") ? datas.roiConiva.toFixed(2) : "—"],
       ],
       [3, 1],
     )

@@ -1,3 +1,5 @@
+// Asegura que calcularSistemaSolar esté disponible globalmente
+window.calcularSistemaSolar = calcularSistemaSolar;
 document.getElementById("estadoProyecto").addEventListener("change", actualizarHSP)
 
 // Variables globales
@@ -18,6 +20,35 @@ const mesesCompletos = [
   "Noviembre",
   "Diciembre",
 ]
+  // Formateo internacional en inputs de Cotización P.U.
+  const cotizacionInputs = [
+    "panel", "inversor", "mantenimiento", "estructura", "materiales",
+    "instalacion", "carpeta", "flete", "interconexion", "uve",
+    "uie", "medidor", "total"
+  ];
+
+  function formatNumberIntl(value) {
+    if (value === "" || isNaN(value)) return "";
+    const num = parseFloat(value.replace(/,/g, ""));
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  cotizacionInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      // Solo limpiar y formatear al perder el foco
+      input.addEventListener("blur", function(e) {
+        if (input.value !== "") {
+          let raw = input.value.replace(/,/g, "");
+          if (!isNaN(raw) && /^\d+(\.\d+)?$/.test(raw)) {
+            input.value = formatNumberIntl(raw);
+          } else {
+            input.value = input.value;
+          }
+        }
+      });
+    }
+  });
 
 // Tarifas por tipo de proyecto
 const tarifasPorProyecto = {
@@ -433,16 +464,6 @@ function calcularSistemaSolar() {
       showToast("Falta llenar la dirección del cliente.", "warning")
       return false
     }
-    // Estado
-    if (!estado) {
-      showToast("Selecciona un estado para el cliente.", "warning")
-      return false
-    }
-    // Municipio
-    if (!municipio) {
-      showToast("Falta llenar el municipio del cliente.", "warning")
-      return false
-    }
     // Teléfono (10 dígitos)
     const soloNumeros = telefono.replace(/\D/g, "")
     if (!soloNumeros || soloNumeros.length !== 10) {
@@ -636,8 +657,10 @@ function nuevoCalculo() {
   if (results) results.style.display = "none"
   if (placeholder) placeholder.style.display = "flex"
 
-  // Limpiar inputs
-  document.querySelectorAll("input.consumo-input").forEach((i) => (i.value = ""))
+  // Limpiar todos los inputs
+  document.querySelectorAll("input").forEach((i) => { i.value = "" })
+  // Limpiar todos los selects
+  document.querySelectorAll("select").forEach((s) => { s.selectedIndex = 0 })
 
   console.log("Nuevo cálculo iniciado - datos limpiados")
 }
