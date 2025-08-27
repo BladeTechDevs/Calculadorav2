@@ -15,7 +15,9 @@ async function exportToBasePdf() {
   try {
     // === 1) Recolección de datos ===
     const calcularSistemaSolar = window.calcularSistemaSolar
-    try { calcularSistemaSolar && calcularSistemaSolar() } catch (e) { }
+    try {
+      calcularSistemaSolar && calcularSistemaSolar()
+    } catch (e) {}
 
     const $ = (id) => document.getElementById(id)
     const getVal = (id, fb = "") => ($(id)?.value ?? fb).toString().trim()
@@ -24,7 +26,7 @@ async function exportToBasePdf() {
       if (typeof v === "number") return v
       if (!v) return 0
       const s = String(v).replace(/[^\d.-]/g, "")
-      const n = parseFloat(s)
+      const n = Number.parseFloat(s)
       return isNaN(n) ? 0 : n
     }
     const fmtMXN = (n) =>
@@ -80,14 +82,14 @@ async function exportToBasePdf() {
       totalDisplay: getVal("totalDisplay", "0"),
     }
 
-    const datas = JSON.parse(localStorage.getItem("cotizacionPU"));
-    const resultadoSistemaSolar = JSON.parse(localStorage.getItem("resultadosSistemaSolar"));
+    const datas = JSON.parse(localStorage.getItem("cotizacionPU"))
+    const resultadoSistemaSolar = JSON.parse(localStorage.getItem("resultadosSistemaSolar"))
 
     console.log(datas)
     // Fallback por si los campos de subtotal/iva/total no están llenos todavía
-    const _subtotal = datas.subtotal || 0;
+    const _subtotal = datas.subtotal || 0
     const _iva = datas.iva || _subtotal * 0.16
-    const _total = datas.total || (_subtotal + _iva)
+    const _total = datas.total || _subtotal + _iva
 
     // === 2) Cargar Base.pdf ===
     const baseBytes = await obtenerBasePdfBytes()
@@ -98,8 +100,8 @@ async function exportToBasePdf() {
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
     // === 3) Layout y paleta ===
-    const mm = v => v * 2.834645669
-    const firstTop = mm(48)              // margen superior un poco menor para subir el título
+    const mm = (v) => v * 2.834645669
+    const firstTop = mm(48) // margen superior un poco menor para subir el título
     const nextTop = mm(25)
     const bottom = mm(18)
     const left = mm(20)
@@ -114,11 +116,11 @@ async function exportToBasePdf() {
     // Colores
     const ink = rgb(0.12, 0.12, 0.12)
     const mute = rgb(0.45, 0.45, 0.45)
-    const prime = rgb(0x1E / 255, 0x92 / 255, 0x4B / 255) // #1E924B
-    const primeD = rgb(0x15 / 255, 0x72 / 255, 0x3A / 255)
+    const prime = rgb(0x1e / 255, 0x92 / 255, 0x4b / 255) // #1E924B
+    const primeD = rgb(0x15 / 255, 0x72 / 255, 0x3a / 255)
     const primeL = rgb(0.93, 0.98, 0.95)
     const white = rgb(1, 1, 1)
-    const headerSoft = rgb(0xED / 255, 0xFA / 255, 0xF2 / 255)
+    const headerSoft = rgb(0xed / 255, 0xfa / 255, 0xf2 / 255)
 
     // Escalas
     const fsBase = 8
@@ -127,7 +129,9 @@ async function exportToBasePdf() {
     const fsKPI = 13
     const lh = 12
 
-    const ensure = h => { if (y - h < bottom) newPage() }
+    const ensure = (h) => {
+      if (y - h < bottom) newPage()
+    }
 
     const newPage = () => {
       drawFooter()
@@ -135,7 +139,8 @@ async function exportToBasePdf() {
       if (pageIndex < pdfDoc.getPageCount()) page = pdfDoc.getPage(pageIndex)
       else page = pdfDoc.addPage([PW, PH])
       const size = page.getSize()
-      PW = size.width; PH = size.height
+      PW = size.width
+      PH = size.height
       contentWidth = PW - left - right
       y = PH - nextTop
     }
@@ -147,7 +152,7 @@ async function exportToBasePdf() {
         y: bottom - 9,
         size: fsSmall,
         font,
-        color: mute
+        color: mute,
       })
     }
 
@@ -159,7 +164,10 @@ async function exportToBasePdf() {
       for (const w of words) {
         const tryLine = line ? line + " " + w : w
         if (widthOf(tryLine, size, f) <= maxW) line = tryLine
-        else { if (line) lines.push(line); line = w }
+        else {
+          if (line) lines.push(line)
+          line = w
+        }
       }
       if (line) lines.push(line)
       return lines.length ? lines : [""]
@@ -167,13 +175,19 @@ async function exportToBasePdf() {
 
     // Chip de sección (verde)
     const section = (txt) => {
-      const padY = 2, padX = 8
+      const padY = 2,
+        padX = 8
       const w = widthOf(txt, fsTitle, fontBold) + padX * 2
       const h = fsTitle + padY * 1.2
       ensure(h + 8)
       page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
       page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: fontBold, color: white })
-      page.drawLine({ start: { x: left, y: y - h - 5 }, end: { x: left + contentWidth, y: y - h - 5 }, thickness: 0.5, color: primeL })
+      page.drawLine({
+        start: { x: left, y: y - h - 5 },
+        end: { x: left + contentWidth, y: y - h - 5 },
+        thickness: 0.5,
+        color: primeL,
+      })
       y -= h + 8
     }
     // Título superior negro, más arriba y compacto
@@ -185,7 +199,7 @@ async function exportToBasePdf() {
         x: left + contentWidth - widthOf(txt, fsTitle, fontBold),
         y: y - h + padY,
         size: fsTitle,
-        font: fontBold
+        font: fontBold,
       })
       y -= h + 4
     }
@@ -197,9 +211,14 @@ async function exportToBasePdf() {
       const svgBlob = new Blob([svgText], { type: "image/svg+xml" })
       const svgUrl = URL.createObjectURL(svgBlob)
       const img = new Image()
-      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = svgUrl })
+      await new Promise((res, rej) => {
+        img.onload = res
+        img.onerror = rej
+        img.src = svgUrl
+      })
       const canvas = document.createElement("canvas")
-      canvas.width = wPx; canvas.height = hPx
+      canvas.width = wPx
+      canvas.height = hPx
       const ctx = canvas.getContext("2d")
       ctx.drawImage(img, 0, 0, wPx, hPx)
       const dataUrl = canvas.toDataURL("image/png")
@@ -220,7 +239,8 @@ async function exportToBasePdf() {
     }
 
     async function drawInfoPanelWithIcons() {
-      const padX = 14, padY = 12
+      const padX = 14,
+        padY = 12
       const titleH = 18
       const radius = 10
       const midGap = mm(6)
@@ -238,7 +258,11 @@ async function exportToBasePdf() {
 
       const leftRows = [
         { icon: "nombreCliente.svg", label: "Cliente", value: datos.nombreCliente || "—" },
-        { icon: "direccion.svg", label: "Ubicación", value: `${datos.direccionCliente || "—"}, ${datos.municipioCliente || "—"}, ${datos.estadoCliente || "—"}` },
+        {
+          icon: "direccion.svg",
+          label: "Ubicación",
+          value: `${datos.direccionCliente || "—"}, ${datos.municipioCliente || "—"}, ${datos.estadoCliente || "—"}`,
+        },
         { icon: "telefono.svg", label: "Teléfono", value: datos.telefonoCliente || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoCliente || "—" },
       ]
@@ -250,7 +274,7 @@ async function exportToBasePdf() {
 
       const measureRowsHeight = (rows, colW) => {
         let total = 0
-        rows.forEach(r => {
+        rows.forEach((r) => {
           const iconW = mm(iconMM) + iconPad
           const lbl = r.label + ": "
           const lblW = widthOf(lbl, fsBase, fontBold)
@@ -266,9 +290,25 @@ async function exportToBasePdf() {
       ensure(H + 6)
 
       // contenedor
-      page.drawRectangle({ x: left, y: y - H, width: contentWidth, height: H, color: white, borderColor: prime, borderWidth: 1, borderRadius: radius })
+      page.drawRectangle({
+        x: left,
+        y: y - H,
+        width: contentWidth,
+        height: H,
+        color: white,
+        borderColor: prime,
+        borderWidth: 1,
+        borderRadius: radius,
+      })
       // encabezado
-      page.drawRectangle({ x: left, y: y - titleH, width: contentWidth, height: titleH, color: headerSoft, borderRadius: radius })
+      page.drawRectangle({
+        x: left,
+        y: y - titleH,
+        width: contentWidth,
+        height: titleH,
+        color: headerSoft,
+        borderRadius: radius,
+      })
       const title = "Información de los involucrados"
       page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: primeD })
 
@@ -277,14 +317,16 @@ async function exportToBasePdf() {
       page.drawLine({
         start: { x: sepX, y: y - titleH - 6 },
         end: { x: sepX, y: y - H + padY },
-        thickness: 0.5, color: primeL
+        thickness: 0.5,
+        color: primeL,
       })
 
       const drawColumn = async (rows, baseX, colWUse) => {
         let yy = y - titleH - 14
         for (const r of rows) {
           const icon = await getIconEmbedded(r.icon, iconMM)
-          const iconW = mm(iconMM), iconH = mm(iconMM)
+          const iconW = mm(iconMM),
+            iconH = mm(iconMM)
           page.drawImage(icon, { x: baseX, y: yy - iconH + 7, width: iconW, height: iconH })
           const lbl = r.label + ": "
           const lblW = widthOf(lbl, fsBase, fontBold)
@@ -309,115 +351,145 @@ async function exportToBasePdf() {
     // 2-3 columnas compactas (ancho igual)
     // 2-3 columnas compactas (ancho igual) — valor centrado vertical y alineado a la izquierda
     const drawCols = (pairs, colsOverride = 2) => {
-      const gap = mm(5);
-      const cols = Math.min(colsOverride, pairs.length);
-      const colW = (contentWidth - gap * (cols - 1)) / cols;
+      const gap = mm(5)
+      const cols = Math.min(colsOverride, pairs.length)
+      const colW = (contentWidth - gap * (cols - 1)) / cols
 
-      const headerH = 14, bodyPad = 6, lhCompact = 10, radius = 6;
+      const headerH = 14,
+        bodyPad = 6,
+        lhCompact = 10,
+        radius = 6
 
       const heights = pairs.map(([label, value]) => {
-        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
-        return headerH + bodyPad * 2 + lhCompact * lines.length;
-      });
-      const H = Math.max(...heights);
-      ensure(H + 4);
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font)
+        return headerH + bodyPad * 2 + lhCompact * lines.length
+      })
+      const H = Math.max(...heights)
+      ensure(H + 4)
 
       const drawCard = (x, label, value) => {
-        const yTop = y;
+        const yTop = y
 
         // contenedor + header
-        page.drawRectangle({ x, y: yTop - H, width: colW, height: H, color: white, borderColor: prime, borderWidth: 0.35, borderRadius: radius });
-        page.drawRectangle({ x, y: yTop - headerH, width: colW, height: headerH, color: primeL, borderRadius: radius });
+        page.drawRectangle({
+          x,
+          y: yTop - H,
+          width: colW,
+          height: H,
+          color: white,
+          borderColor: prime,
+          borderWidth: 0.35,
+          borderRadius: radius,
+        })
+        page.drawRectangle({ x, y: yTop - headerH, width: colW, height: headerH, color: primeL, borderRadius: radius })
 
         // etiqueta en header
         page.drawText(label, {
           x: x + bodyPad,
           y: yTop - headerH + (headerH - fsBase) / 2,
-          size: fsBase, font: fontBold, color: primeD
-        });
+          size: fsBase,
+          font: fontBold,
+          color: primeD,
+        })
 
         // valor en medio vertical
-        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
-        const textH = lhCompact * lines.length;
-        const availableH = H - headerH;
-        const valuePadTop = 6.5;
-        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font)
+        const textH = lhCompact * lines.length
+        const availableH = H - headerH
+        const valuePadTop = 6.5
+        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop
 
-        lines.forEach(line => {
+        lines.forEach((line) => {
           page.drawText(line, {
-            x: x + bodyPad,        // pegado a la izquierda
+            x: x + bodyPad, // pegado a la izquierda
             y: yy,
-            size: fsBase, font, color: ink
-          });
-          yy -= lhCompact;
-        });
-      };
+            size: fsBase,
+            font,
+            color: ink,
+          })
+          yy -= lhCompact
+        })
+      }
 
       pairs.slice(0, cols).forEach(([label, value], idx) => {
-        const x = left + idx * (colW + gap);
-        drawCard(x, label, value);
-      });
+        const x = left + idx * (colW + gap)
+        drawCard(x, label, value)
+      })
 
-      y -= H + 4;
-    };
-
+      y -= H + 4
+    }
 
     // Columnas compactas con pesos (p. ej. 3/4 – 1/4)
     // Columnas compactas con pesos — valor centrado vertical y alineado a la izquierda
     const drawColsWeighted = (pairs, weights) => {
-      const gap = mm(5);
-      const totalW = weights.reduce((a, b) => a + b, 0);
-      const cols = Math.min(pairs.length, weights.length);
-      const widths = weights.slice(0, cols).map(w => (contentWidth - gap * (cols - 1)) * (w / totalW));
+      const gap = mm(5)
+      const totalW = weights.reduce((a, b) => a + b, 0)
+      const cols = Math.min(pairs.length, weights.length)
+      const widths = weights.slice(0, cols).map((w) => (contentWidth - gap * (cols - 1)) * (w / totalW))
 
-      const headerH = 14, bodyPad = 6, lhCompact = 10, radius = 6;
+      const headerH = 14,
+        bodyPad = 6,
+        lhCompact = 10,
+        radius = 6
 
       const heights = pairs.slice(0, cols).map(([label, value], i) => {
-        const colW = widths[i];
-        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
-        return headerH + bodyPad * 2 + lhCompact * lines.length;
-      });
-      const H = Math.max(...heights);
-      ensure(H + 4);
+        const colW = widths[i]
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font)
+        return headerH + bodyPad * 2 + lhCompact * lines.length
+      })
+      const H = Math.max(...heights)
+      ensure(H + 4)
 
-      let x = left;
+      let x = left
       pairs.slice(0, cols).forEach(([label, value], i) => {
-        const colW = widths[i];
-        const yTop = y;
+        const colW = widths[i]
+        const yTop = y
 
         // contenedor + header
-        page.drawRectangle({ x, y: yTop - H, width: colW, height: H, color: white, borderColor: prime, borderWidth: 0.35, borderRadius: radius });
-        page.drawRectangle({ x, y: yTop - headerH, width: colW, height: headerH, color: primeL, borderRadius: radius });
+        page.drawRectangle({
+          x,
+          y: yTop - H,
+          width: colW,
+          height: H,
+          color: white,
+          borderColor: prime,
+          borderWidth: 0.35,
+          borderRadius: radius,
+        })
+        page.drawRectangle({ x, y: yTop - headerH, width: colW, height: headerH, color: primeL, borderRadius: radius })
 
         // etiqueta
         page.drawText(label, {
           x: x + bodyPad,
           y: yTop - headerH + (headerH - fsBase) / 2,
-          size: fsBase, font: fontBold, color: primeD
-        });
+          size: fsBase,
+          font: fontBold,
+          color: primeD,
+        })
 
         // valor centrado vertical
-        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
-        const textH = lhCompact * lines.length;
-        const availableH = H - headerH;
-        const valuePadTop = 6.5;  // <- NUEVO
-        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font)
+        const textH = lhCompact * lines.length
+        const availableH = H - headerH
+        const valuePadTop = 6.5 // <- NUEVO
+        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop
 
-        lines.forEach(line => {
+        lines.forEach((line) => {
           page.drawText(line, {
-            x: x + bodyPad,        // pegado a la izquierda
+            x: x + bodyPad, // pegado a la izquierda
             y: yy,
-            size: fsBase, font, color: ink
-          });
-          yy -= lhCompact;
-        });
+            size: fsBase,
+            font,
+            color: ink,
+          })
+          yy -= lhCompact
+        })
 
-        x += colW + gap;
-      });
+        x += colW + gap
+      })
 
-      y -= H + 4;
-    };
-
+      y -= H + 4
+    }
 
     // ========= kpiRow (compacto) =========
     const kpiRow = (items, colsOverride) => {
@@ -428,7 +500,16 @@ async function exportToBasePdf() {
       ensure(H + 6)
       items.slice(0, cols).forEach(([label, value], idx) => {
         const x = left + idx * (colW + gap)
-        page.drawRectangle({ x, y: y - H, width: colW, height: H, color: white, borderColor: primeD, borderWidth: 0.5, borderRadius: 10 })
+        page.drawRectangle({
+          x,
+          y: y - H,
+          width: colW,
+          height: H,
+          color: white,
+          borderColor: primeD,
+          borderWidth: 0.5,
+          borderRadius: 10,
+        })
         const v = String(value ?? "—")
         const vWidth = widthOf(v, fsKPI, fontBold)
         page.drawText(v, { x: x + (colW - vWidth) / 2, y: y - 20, size: fsKPI, font: fontBold, color: ink })
@@ -445,7 +526,10 @@ async function exportToBasePdf() {
       ensure(H)
       page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: mute })
       y -= lh
-      lines.forEach(line => { page.drawText(line, { x: left, y, size: fsBase, font, color: ink }); y -= lh })
+      lines.forEach((line) => {
+        page.drawText(line, { x: left, y, size: fsBase, font, color: ink })
+        y -= lh
+      })
       y -= 1
     }
 
@@ -460,89 +544,89 @@ async function exportToBasePdf() {
 
     // Ensancha temporalmente la gráfica "impactoChart", fuerza un redibujo y devuelve un PNG nítido
     async function capturarImpactoGrande() {
-      const c = document.getElementById("impactoChart");
-      if (!c) return null;
+      const c = document.getElementById("impactoChart")
+      if (!c) return null
 
       // 1) agrandar por CSS y disparar el redibujo (tu ResizeObserver/redraw lo hará)
-      document.body.classList.add("pdf-export");
-      window.dispatchEvent(new Event("resize"));
+      document.body.classList.add("pdf-export")
+      window.dispatchEvent(new Event("resize"))
 
       // 2) espera un tick para que se repinte
-      await new Promise(r => setTimeout(r, 160));
+      await new Promise((r) => setTimeout(r, 160))
 
       // 3) capturar imagen grande directamente del canvas ya redibujado
-      let dataURL = null;
-      try { dataURL = c.toDataURL("image/png", 1); } catch { }
+      let dataURL = null
+      try {
+        dataURL = c.toDataURL("image/png", 1)
+      } catch {}
 
       // 4) restaurar layout
-      document.body.classList.remove("pdf-export");
-      window.dispatchEvent(new Event("resize"));
-      await new Promise(r => setTimeout(r, 60));
+      document.body.classList.remove("pdf-export")
+      window.dispatchEvent(new Event("resize"))
+      await new Promise((r) => setTimeout(r, 60))
 
-      return dataURL;
+      return dataURL
     }
 
-    const delay = (ms) => new Promise(r => setTimeout(r, ms));
+    const delay = (ms) => new Promise((r) => setTimeout(r, ms))
 
     async function withTempCanvasSize(canvas, wPx, hPx, fn) {
-      const prevW = canvas.style.width;
-      const prevH = canvas.style.height;
+      const prevW = canvas.style.width
+      const prevH = canvas.style.height
 
-      canvas.style.width = wPx + "px";
-      canvas.style.height = hPx + "px";
+      canvas.style.width = wPx + "px"
+      canvas.style.height = hPx + "px"
 
       // 2 frames para que layout + redraw se asienten
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
 
       if (typeof canvas.__impactoRedraw === "function") {
-        canvas.__impactoRedraw();
-        await delay(30);
+        canvas.__impactoRedraw()
+        await delay(30)
       }
 
-      const out = await fn();
+      const out = await fn()
 
-      canvas.style.width = prevW;
-      canvas.style.height = prevH;
+      canvas.style.width = prevW
+      canvas.style.height = prevH
 
       if (typeof canvas.__impactoRedraw === "function") {
-        canvas.__impactoRedraw();
+        canvas.__impactoRedraw()
       }
-      return out;
+      return out
     }
-
-
-
 
     // Renderiza la Chart.js en un canvas off-screen a 300 DPI y la inserta nítida en el PDF
     // Renderiza la gráfica a tamaño físico en mm y la inserta nítida en el PDF
     const drawCanvasImageIfAny2 = async (canvasId, widthMM, heightMM, dpi = 300) => {
-      const src = document.getElementById(canvasId);
-      if (!src) return;
+      const src = document.getElementById(canvasId)
+      if (!src) return
 
-      const pxPerMM = dpi / 25.4;
-      const outW = Math.max(1, Math.round(widthMM * pxPerMM));
-      const outH = Math.max(1, Math.round(heightMM * pxPerMM));
+      const pxPerMM = dpi / 25.4
+      const outW = Math.max(1, Math.round(widthMM * pxPerMM))
+      const outH = Math.max(1, Math.round(heightMM * pxPerMM))
 
-      const Chart = window.Chart;
-      let dataUrl;
+      const Chart = window.Chart
+      let dataUrl
 
       // ---- Rama Chart.js (tal cual la tenías) ----
       if (Chart && Chart.getChart) {
-        const srcChart = Chart.getChart(src);
+        const srcChart = Chart.getChart(src)
         if (srcChart) {
-          const off = document.createElement("canvas");
-          off.width = outW; off.height = outH;
-          const cfg = JSON.parse(JSON.stringify(srcChart.config));
-          cfg.options = cfg.options || {};
-          cfg.options.animation = false;
-          cfg.options.responsive = false;
-          cfg.options.maintainAspectRatio = false;
-          cfg.options.devicePixelRatio = Math.max(2, Math.ceil(dpi / 96));
-          const tmpChart = new Chart(off.getContext("2d"), cfg);
-          tmpChart.resize(outW, outH);
-          tmpChart.update();
-          dataUrl = off.toDataURL("image/png");
-          tmpChart.destroy();
+          const off = document.createElement("canvas")
+          off.width = outW
+          off.height = outH
+          const cfg = JSON.parse(JSON.stringify(srcChart.config))
+          cfg.options = cfg.options || {}
+          cfg.options.animation = false
+          cfg.options.responsive = false
+          cfg.options.maintainAspectRatio = false
+          cfg.options.devicePixelRatio = Math.max(2, Math.ceil(dpi / 96))
+          const tmpChart = new Chart(off.getContext("2d"), cfg)
+          tmpChart.resize(outW, outH)
+          tmpChart.update()
+          dataUrl = off.toDataURL("image/png")
+          tmpChart.destroy()
         }
       }
 
@@ -552,38 +636,36 @@ async function exportToBasePdf() {
         // redibuja GRANDE (p.ej. 1100×360) y captura
         dataUrl = await withTempCanvasSize(src, 1100, 360, async () => {
           // importante: captura después del redibujo
-          return src.toDataURL("image/png", 1);
-        });
+          return src.toDataURL("image/png", 1)
+        })
       }
-
 
       // ---- Fallback: escalar el canvas actual (por si algo falla) ----
       if (!dataUrl) {
         dataUrl = await withTempCanvasSize(src, 1200, 360, async () => {
-          if (typeof src.__impactoRedraw === "function") src.__impactoRedraw();
-          await delay(20);
-          return src.toDataURL("image/png", 1);
-        });
+          if (typeof src.__impactoRedraw === "function") src.__impactoRedraw()
+          await delay(20)
+          return src.toDataURL("image/png", 1)
+        })
       }
 
       // Insertar en PDF
       const pngBytes = (function dataURLToUint8Array(d) {
-        const b64 = d.split(",")[1]; const raw = atob(b64);
-        const arr = new Uint8Array(raw.length);
-        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-        return arr;
-      })(dataUrl);
+        const b64 = d.split(",")[1]
+        const raw = atob(b64)
+        const arr = new Uint8Array(raw.length)
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i)
+        return arr
+      })(dataUrl)
 
-      const png = await pdfDoc.embedPng(pngBytes);
-      const w = mm(widthMM), h = mm(heightMM);
-      ensure(h + 6);
-      const xCentered = left + (contentWidth - w) / 2;
-      page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h });
-      y -= h + 10;
-    };
-
-
-
+      const png = await pdfDoc.embedPng(pngBytes)
+      const w = mm(widthMM),
+        h = mm(heightMM)
+      ensure(h + 6)
+      const xCentered = left + (contentWidth - w) / 2
+      page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h })
+      y -= h + 10
+    }
 
     // === Términos y condiciones ===
     function drawTerms() {
@@ -597,9 +679,11 @@ async function exportToBasePdf() {
         "Precios sujetos a cambios sin previo aviso por posibles incrementos de aranceles (hasta 25%).",
         "La presente considera estructura simple de aluminio, sin refuerzos ni seguros por siniestros o eventualidades naturales (p. ej., huracanes).",
         "Para generar la orden se requiere el 70% del pago de la cotización.",
-        "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo."
+        "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo.",
       ]
-      const fsTiny = 7, lhTiny = 10, pad = 8
+      const fsTiny = 7,
+        lhTiny = 10,
+        pad = 8
       const titleH = 16
       const folioText = `Folio: SFVI-${datos.folio || "—"}`
       ensure(titleH + 8)
@@ -631,12 +715,18 @@ async function exportToBasePdf() {
       const boxH = pad + totalLines * lhTiny + pad
       ensure(boxH)
       page.drawRectangle({
-        x: left, y: y - boxH, width: contentWidth, height: boxH,
-        color: rgb(0.94, 0.98, 0.96), borderColor: prime, borderWidth: 0.4, borderRadius: 6
+        x: left,
+        y: y - boxH,
+        width: contentWidth,
+        height: boxH,
+        color: rgb(0.94, 0.98, 0.96),
+        borderColor: prime,
+        borderWidth: 0.4,
+        borderRadius: 6,
       })
       let yy = y - pad - fsTiny
-      wrapped.forEach(lines => {
-        lines.forEach(line => {
+      wrapped.forEach((lines) => {
+        lines.forEach((line) => {
           page.drawText(line, { x: left + pad, y: yy, size: fsTiny, font, color: ink })
           yy -= lhTiny
         })
@@ -649,10 +739,11 @@ async function exportToBasePdf() {
       const toNumber = (v) => {
         if (v == null) return 0
         const s = String(v).replace(/[^\d.-]/g, "")
-        const n = parseFloat(s)
+        const n = Number.parseFloat(s)
         return isNaN(n) ? 0 : n
       }
-      const fmt = n => `$${(Number(n) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      const fmt = (n) =>
+        `$${(Number(n) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
       const centerX = (x0, wCol, txt, size = fsBase, fnt = font) => x0 + (wCol - widthOf(txt, size, fnt)) / 2
 
       const numModulos = datos.numeroModulosCard || "—"
@@ -662,12 +753,14 @@ async function exportToBasePdf() {
       const totalForm = datas.subtotal || 0
       const subtotalPU = totalForm
       const ivaPU = datas.iva || subtotalPU * 0.16
-      const totalPU = datas.total || (subtotalPU + ivaPU)
+      const totalPU = datas.total || subtotalPU + ivaPU
 
-      const headH = 20, rowH = 22, gapBelow = 12
+      const headH = 20,
+        rowH = 22,
+        gapBelow = 12
       const W = contentWidth
       const col = {
-        partida: Math.round(W * 0.10),
+        partida: Math.round(W * 0.1),
         desc: Math.round(W * 0.48),
         cant: Math.round(W * 0.12),
         pu: Math.round(W * 0.15),
@@ -679,31 +772,112 @@ async function exportToBasePdf() {
         cant: left + col.partida + col.desc,
         pu: left + col.partida + col.desc + col.cant,
         imp: left + col.partida + col.desc + col.cant + col.pu,
-        end: left + W
+        end: left + W,
       }
 
       // Header
-      page.drawRectangle({ x: left, y: y - headH, width: W, height: headH, color: primeL, borderColor: primeD, borderWidth: 0.8 })
+      page.drawRectangle({
+        x: left,
+        y: y - headH,
+        width: W,
+        height: headH,
+        color: primeL,
+        borderColor: primeD,
+        borderWidth: 0.8,
+      })
       const thY = y - 14
-      page.drawText("Partida", { x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Descripción", { x: centerX(X.desc, col.desc, "Descripción", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Cantidad", { x: centerX(X.cant, col.cant, "Cantidad", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("P.U.", { x: centerX(X.pu, col.pu, "P.U.", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Importe", { x: centerX(X.imp, col.imp, "Importe", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
+      page.drawText("Partida", {
+        x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold),
+        y: thY,
+        size: fsBase,
+        font: fontBold,
+        color: primeD,
+      })
+      page.drawText("Descripción", {
+        x: centerX(X.desc, col.desc, "Descripción", fsBase, fontBold),
+        y: thY,
+        size: fsBase,
+        font: fontBold,
+        color: primeD,
+      })
+      page.drawText("Cantidad", {
+        x: centerX(X.cant, col.cant, "Cantidad", fsBase, fontBold),
+        y: thY,
+        size: fsBase,
+        font: fontBold,
+        color: primeD,
+      })
+      page.drawText("P.U.", {
+        x: centerX(X.pu, col.pu, "P.U.", fsBase, fontBold),
+        y: thY,
+        size: fsBase,
+        font: fontBold,
+        color: primeD,
+      })
+      page.drawText("Importe", {
+        x: centerX(X.imp, col.imp, "Importe", fsBase, fontBold),
+        y: thY,
+        size: fsBase,
+        font: fontBold,
+        color: primeD,
+      })
 
       // Líneas
-      page.drawLine({ start: { x: X.partida, y: y - headH }, end: { x: X.partida, y: y - headH - rowH }, thickness: 0.8, color: primeD })
-      page.drawLine({ start: { x: X.desc, y: y - headH }, end: { x: X.desc, y: y - headH - rowH }, thickness: 0.8, color: primeD })
-      page.drawLine({ start: { x: X.cant, y: y - headH }, end: { x: X.cant, y: y - headH - rowH }, thickness: 0.8, color: primeD })
-      page.drawLine({ start: { x: X.pu, y: y - headH }, end: { x: X.pu, y: y - headH - rowH }, thickness: 0.8, color: primeD })
-      page.drawLine({ start: { x: X.imp, y: y - headH }, end: { x: X.imp, y: y - headH - rowH }, thickness: 0.8, color: primeD })
-      page.drawLine({ start: { x: X.end, y: y - headH }, end: { x: X.end, y: y - headH - rowH }, thickness: 0.8, color: primeD })
+      page.drawLine({
+        start: { x: X.partida, y: y - headH },
+        end: { x: X.partida, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
+      page.drawLine({
+        start: { x: X.desc, y: y - headH },
+        end: { x: X.desc, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
+      page.drawLine({
+        start: { x: X.cant, y: y - headH },
+        end: { x: X.cant, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
+      page.drawLine({
+        start: { x: X.pu, y: y - headH },
+        end: { x: X.pu, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
+      page.drawLine({
+        start: { x: X.imp, y: y - headH },
+        end: { x: X.imp, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
+      page.drawLine({
+        start: { x: X.end, y: y - headH },
+        end: { x: X.end, y: y - headH - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
 
       y -= headH
 
       // Fila
-      page.drawRectangle({ x: left, y: y - rowH, width: W, height: rowH, color: white, borderColor: primeD, borderWidth: 0.8 })
-      page.drawLine({ start: { x: X.partida, y: y }, end: { x: X.partida, y: y - rowH }, thickness: 0.8, color: primeD })
+      page.drawRectangle({
+        x: left,
+        y: y - rowH,
+        width: W,
+        height: rowH,
+        color: white,
+        borderColor: primeD,
+        borderWidth: 0.8,
+      })
+      page.drawLine({
+        start: { x: X.partida, y: y },
+        end: { x: X.partida, y: y - rowH },
+        thickness: 0.8,
+        color: primeD,
+      })
       page.drawLine({ start: { x: X.desc, y: y }, end: { x: X.desc, y: y - rowH }, thickness: 0.8, color: primeD })
       page.drawLine({ start: { x: X.cant, y: y }, end: { x: X.cant, y: y - rowH }, thickness: 0.8, color: primeD })
       page.drawLine({ start: { x: X.pu, y: y }, end: { x: X.pu, y: y - rowH }, thickness: 0.8, color: primeD })
@@ -712,7 +886,13 @@ async function exportToBasePdf() {
 
       const desc = `Instalación ${numModulos || "—"} MFV de ${potenciaPanel || "—"} W`
       const yy = y - 14
-      page.drawText("1", { x: centerX(X.partida, col.partida, "1", fsBase, font), y: yy, size: fsBase, font, color: ink })
+      page.drawText("1", {
+        x: centerX(X.partida, col.partida, "1", fsBase, font),
+        y: yy,
+        size: fsBase,
+        font,
+        color: ink,
+      })
       page.drawText(desc, { x: centerX(X.desc, col.desc, desc, fsBase, font), y: yy, size: fsBase, font, color: ink })
       page.drawText("1", { x: centerX(X.cant, col.cant, "1", fsBase, font), y: yy, size: fsBase, font, color: ink })
 
@@ -729,15 +909,43 @@ async function exportToBasePdf() {
       const rightW = W - leftW - gapX
 
       const notesH = 30
-      page.drawRectangle({ x: left, y: y - notesH, width: leftW, height: notesH, color: rgb(0.97, 1, 0.97), borderColor: primeD, borderWidth: 0.6 })
-      page.drawText("*Cotización válida por 7 días naturales.", { x: left + 8, y: y - 12, size: fsBase, font, color: ink })
-      page.drawText("*Fecha de inicio de trabajos por definir con cliente.", { x: left + 8, y: y - 24, size: fsBase, font, color: ink })
+      page.drawRectangle({
+        x: left,
+        y: y - notesH,
+        width: leftW,
+        height: notesH,
+        color: rgb(0.97, 1, 0.97),
+        borderColor: primeD,
+        borderWidth: 0.6,
+      })
+      page.drawText("*Cotización válida por 7 días naturales.", {
+        x: left + 8,
+        y: y - 12,
+        size: fsBase,
+        font,
+        color: ink,
+      })
+      page.drawText("*Fecha de inicio de trabajos por definir con cliente.", {
+        x: left + 8,
+        y: y - 24,
+        size: fsBase,
+        font,
+        color: ink,
+      })
 
       const rightX = left + leftW + gapX
       const rowTH = 20
       const totalBoxH = rowTH * 3
 
-      page.drawRectangle({ x: rightX, y: y - totalBoxH, width: rightW, height: totalBoxH, color: white, borderColor: primeD, borderWidth: 0.8 })
+      page.drawRectangle({
+        x: rightX,
+        y: y - totalBoxH,
+        width: rightW,
+        height: totalBoxH,
+        color: white,
+        borderColor: primeD,
+        borderWidth: 0.8,
+      })
 
       const labels = ["Sub Total", "IVA", "Total"]
       const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
@@ -750,16 +958,44 @@ async function exportToBasePdf() {
         const isTotal = i === 2
 
         // Label
-        page.drawRectangle({ x: rightX, y: yRowTop - rowTH, width: labelW, height: rowTH, color: isTotal ? rgb(1, 0.7, 0) : primeL, borderColor: primeD, borderWidth: 0.8 })
+        page.drawRectangle({
+          x: rightX,
+          y: yRowTop - rowTH,
+          width: labelW,
+          height: rowTH,
+          color: isTotal ? rgb(1, 0.7, 0) : primeL,
+          borderColor: primeD,
+          borderWidth: 0.8,
+        })
         const lfSize = isTotal ? fsBase + 1 : fsBase
-        page.drawText(labels[i], { x: centerText(rightX, labelW, labels[i], lfSize, fontBold), y: yRowTop - 14, size: lfSize, font: fontBold, color: isTotal ? ink : primeD })
+        page.drawText(labels[i], {
+          x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
+          y: yRowTop - 14,
+          size: lfSize,
+          font: fontBold,
+          color: isTotal ? ink : primeD,
+        })
 
         // Valor
         const vx = rightX + labelW
-        page.drawRectangle({ x: vx, y: yRowTop - rowTH, width: rightW - labelW, height: rowTH, color: isTotal ? rgb(1, 0.7, 0) : white, borderColor: primeD, borderWidth: 0.8 })
+        page.drawRectangle({
+          x: vx,
+          y: yRowTop - rowTH,
+          width: rightW - labelW,
+          height: rowTH,
+          color: isTotal ? rgb(1, 0.7, 0) : white,
+          borderColor: primeD,
+          borderWidth: 0.8,
+        })
         const vSize = isTotal ? fsBase + 1 : fsBase
         const txt = values[i]
-        page.drawText(txt, { x: centerText(vx, rightW - labelW, txt, vSize, fontBold), y: yRowTop - 14, size: vSize, font: fontBold, color: ink })
+        page.drawText(txt, {
+          x: centerText(vx, rightW - labelW, txt, vSize, fontBold),
+          y: yRowTop - 14,
+          size: vSize,
+          font: fontBold,
+          color: ink,
+        })
       }
 
       y -= Math.max(notesH, totalBoxH) + 10
@@ -776,67 +1012,75 @@ async function exportToBasePdf() {
     // Fila 1: 3 columnas iguales
 
     // Helpers de formato
-    const capitalizeFirst = (str) =>
-      str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—"
+    const capitalizeFirst = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—")
 
-    const toUpper = (str) =>
-      str ? str.toUpperCase() : "—"
+    const toUpper = (str) => (str ? str.toUpperCase() : "—")
 
     // Uso en drawCols
-    drawCols([
-      ["Tipo de proyecto", capitalizeFirst(datos.tipoProyecto)],
-      ["Tarifa", toUpper(datos.tipoTarifa)],
-      ["Región Tarifaria CFE", capitalizeFirst(datos.regionTarifariaCFE)]
-    ], 3)
+    drawCols(
+      [
+        ["Tipo de proyecto", capitalizeFirst(datos.tipoProyecto)],
+        ["Tarifa", toUpper(datos.tipoTarifa)],
+        ["Región Tarifaria CFE", capitalizeFirst(datos.regionTarifariaCFE)],
+      ],
+      3,
+    )
 
-    const pulocalstorage = localStorage.getItem("cotizacionPU");
-    //aqui jalar el roy 
+    const pulocalstorage = localStorage.getItem("cotizacionPU")
+    //aqui jalar el roy
 
     // Fila 2: Ubicación (3/4) + ROI (1/4)
     drawColsWeighted(
       [
         ["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
-        ["ROI", datas.roiConiva.toFixed(2) || "—"]
+        ["ROI", datas.roiConiva || "—"],
       ],
-      [3, 1]
+      [3, 1],
     )
 
     // función para formatear números en MXN con separadores
-    const fmtNumber = n => {
-      const num = parseFloat(String(n).replace(/[^\d.-]/g, "")) || 0
+    const fmtNumber = (n) => {
+      const num = Number.parseFloat(String(n).replace(/[^\d.-]/g, "")) || 0
       return num.toLocaleString("es-MX", {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       })
     }
 
-
     // Fila 3 KPI: consumo, gasto, tarifa
-    kpiRow([
-      ["Consumo anual", datos.consumoAnual],                  // ya viene con kWh
-      ["Gasto anual", "$" + fmtNumber(datos.importeTotal)],   // aquí lo formatea
-      ["Tarifa promedio", datos.tarifaPromedio]
-    ], 3)
-
+    kpiRow(
+      [
+        ["Consumo anual", datos.consumoAnual], // ya viene con kWh
+        ["Gasto anual", "$" + fmtNumber(datos.importeTotal)], // aquí lo formatea
+        ["Tarifa promedio", datos.tarifaPromedio],
+      ],
+      3,
+    )
 
     section("DISEÑO DEL SISTEMA")
     // Orden nuevo: N.º paneles, Potencia instalada, Tipo de inversor
-    kpiRow([
-      ["N.º de módulos", datos.numeroModulosCard || "—"],
-      ["Potencia instalada", datos.potenciaInstalada || "—"],
-      ["Tipo de inversor", datos.inversorPanel || "—"]
-    ], 3)
+    kpiRow(
+      [
+        ["N.º de módulos", datos.numeroModulosCard || "—"],
+        ["Potencia instalada", datos.potenciaInstalada || "—"],
+        ["Tipo de inversor", datos.inversorPanel || "—"],
+      ],
+      3,
+    )
 
     // Potencia de panel, Generación anual, Área aproximada
-    drawCols([
-      ["Potencia por panel", `${datos.potenciaPanel || "—"} W`],
-      ["Generación anual", resultadoSistemaSolar.generacionAnualAprox.toFixed(2) || "—"],
-      ["Área aproximada", `${resultadoSistemaSolar.areaAprox || "—"} m²`]
-    ], 3)
+    drawCols(
+      [
+        ["Potencia por panel", `${datos.potenciaPanel || "—"} W`],
+        ["Generación anual", resultadoSistemaSolar.generacionAnualAprox || "—"],
+        ["Área aproximada", `${resultadoSistemaSolar.areaAprox || "—"} m²`],
+      ],
+      3,
+    )
 
     // Gráfica en la PRIMERA hoja (más chica)
     await drawCanvasImageIfAny2("impactoChart", 145, 75)
-    newPage();
+    newPage()
 
     // Tabla de cotización
     section("COTIZACIÓN")
@@ -875,7 +1119,7 @@ async function obtenerBasePdfBytes() {
       if (!resp.ok) throw new Error("HTTP " + resp.status)
       basePdfBytes = await resp.arrayBuffer()
       return basePdfBytes
-    } catch (_) { }
+    } catch (_) {}
   }
   return new Promise((resolve, reject) => {
     const input = document.createElement("input")
@@ -885,7 +1129,10 @@ async function obtenerBasePdfBytes() {
       const file = input.files?.[0]
       if (!file) return reject(new Error("No se seleccionó archivo"))
       const reader = new FileReader()
-      reader.onload = () => { basePdfBytes = reader.result; resolve(basePdfBytes) }
+      reader.onload = () => {
+        basePdfBytes = reader.result
+        resolve(basePdfBytes)
+      }
       reader.onerror = () => reject(reader.error)
       reader.readAsArrayBuffer(file)
     }
@@ -910,7 +1157,7 @@ function shiftAverageLabelDown(canvas) {
 
   const data = chart.data?.datasets?.[0]?.data || []
   const avg = data.length ? data.reduce((a, b) => a + (Number(b) || 0), 0) / data.length : null
-  const text = avg != null ? `Promedio anual: ${avg.toFixed(3)} kWh/m²/día` : ""
+  const text = avg != null ? `Promedio anual: ${avg} kWh/m²/día` : ""
 
   const plugin = {
     id: "avgLabelPDF",
@@ -924,9 +1171,9 @@ function shiftAverageLabelDown(canvas) {
       ctx.textAlign = "center"
       ctx.fillText(text, (chartArea.left + chartArea.right) / 2, chartArea.bottom + 16)
       ctx.restore()
-    }
+    },
   }
-  const has = (chart.config.plugins || []).some(p => p.id === "avgLabelPDF")
+  const has = (chart.config.plugins || []).some((p) => p.id === "avgLabelPDF")
   if (!has) chart.config.plugins = [...(chart.config.plugins || []), plugin]
   chart.update()
 }

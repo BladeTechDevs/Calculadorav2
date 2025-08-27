@@ -846,13 +846,23 @@
         <i class="fas fa-redo"></i>
         <span>Nuevo Cálculo</span>
       </button>
-      <!-- Botón de cálculo -->
-      <button class="calculate-btn" id="btnCalcular" onclick="if(validarFormulario()) calcularSistemaSolar()">
+      <!-- Botón de cálculofffffff -->
+      <button class="calculate-btn" id="btnCalcular" onclick="if(validarFormulario()) calcularSistemaSolar()" style="display:flex;" aria-live="polite">
         <i class="fas fa-calculator"></i>
         <span>Calcular Sistema Solar</span>
       </button>
+    <script>
+      // Asegura que el botón Calcular esté siempre visible y habilitado en mobile/tablet al cargar
+      document.addEventListener('DOMContentLoaded', function() {
+        var btnCalc = document.getElementById('btnCalcular');
+        if (btnCalc) {
+          btnCalc.style.display = 'flex';
+          btnCalc.disabled = false;
+        }
+      });
+    </script>
 
-      <button class="calculate-btn mobile-only" id="btnCotizarMobile" onclick="exportToBasePdf()">
+      <button class="calculate-btn-c mobile-only" id="btnCotizarMobile" onclick="exportToBasePdf()">
         <i class="fas fa-file-contract"></i>
         <span>Generar Cotización</span>
       </button>
@@ -874,12 +884,12 @@
         const btnCalc = document.getElementById("btnCalcular");
         if (btnCalc) btnCalc.disabled = false;
 
-        // Asegurar que el botón de cotización móvil se vea y esté habilitado
+        // Ocultar el botón de cotización móvil en mobile/tablet
         const btnCot = document.getElementById("btnCotizarMobile");
         if (btnCot) {
-          btnCot.classList.add("show");       // ← asegúrate que tenga la clase
-          btnCot.disabled = false;
-          btnCot.removeAttribute("hidden");
+          btnCot.classList.remove("show");
+          btnCot.disabled = true;
+          btnCot.setAttribute("hidden", "true");
         }
 
 
@@ -894,7 +904,20 @@
 
 
         // Limpiar inputs (si aplica)
-        document.querySelectorAll("input.consumo-input").forEach(i => (i.value = ""));
+        // Limpiar TODOS los inputs
+        document.querySelectorAll("input").forEach(i => {
+          if (i.type === "checkbox" || i.type === "radio") {
+            i.checked = false;
+          } else {
+            i.value = "";
+          }
+        });
+        // Limpiar todos los selects
+        document.querySelectorAll("select").forEach(s => {
+          s.selectedIndex = 0;
+        });
+  // Hacer scroll al inicio para evitar que el header tape el formulario en mobile
+  window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       // Exportar funciones al global (fuera de la función)
