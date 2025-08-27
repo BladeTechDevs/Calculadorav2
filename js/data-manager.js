@@ -130,9 +130,9 @@ class DataManager {
     const consumoData = this.data.consumo
     const proyectoData = this.data.proyecto
 
-    if (!consumoData.consumoTotal || !proyectoData.potenciaPanel) {
+    /*if (!consumoData.consumoTotal || !proyectoData.potenciaPanel) {
       throw new Error("Faltan datos necesarios para el cálculo")
-    }
+    }*/
 
     // Obtener HSP del estado
     const estado = proyectoData.estadoProyecto

@@ -180,12 +180,7 @@ async function exportToBasePdf() {
       ensure(h + 8)
       page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
       page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: fontBold, color: white })
-      page.drawLine({
-        start: { x: left, y: y - h - 5 },
-        end: { x: left + contentWidth, y: y - h - 5 },
-        thickness: 0.5,
-        color: primeL,
-      })
+  // Línea verde tenue eliminada
       y -= h + 8
     }
     // Título superior negro, más arriba y compacto
@@ -1001,49 +996,78 @@ async function exportToBasePdf() {
 
     // === 4) Composición ===
     // Título top: COTIZACIÓN PRELIMINAR – FOLIO {folio}
-    sectionTopTitle(`COTIZACIÓN PRELIMINAR - FOLIO ${datos.folio || "—"}`)
-    y -= mm(8)
+    sectionTopTitle(`COTIZACIÓN PRELIMINAR`)
+    sectionTopTitle(`FOLIO:  SFVI-${datos.folio || "—"}`)
+    y -= mm(4)
     // Panel (involucrados)
     await drawInfoPanelWithIcons()
 
-    // DATOS DEL PROYECTO (formato boceto)
+  // Espacio extra entre panel de involucrados y DATOS DEL PROYECTO
+  y -= mm(5) // Puedes ajustar el valor si quieres más o menos espacio
+  // DATOS DEL PROYECTO (formato boceto)
     // Helper para capitalizar
     function capitalizeFirst(str) {
       return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—";
     }
     section("DATOS DEL PROYECTO")
+    y -= mm(4) // Espacio extra entre el título y los datos del proyecto
+    // Datos del proyecto a la izquierda
     const datosProyecto = [
       ["Ubicación:", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
       ["Clasificación:", capitalizeFirst(datos.tipoProyecto)],
       ["Tarifa:", datos.tipoTarifa || "—"],
       ["Región CFE:", capitalizeFirst(datos.regionTarifariaCFE)],
     ];
-    let espacioImagenY = y;
-    datosProyecto.forEach(([label, value]) => {
-      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
-      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
-      y -= lh;
-    });
-    y -= mm(8); // Espacio para imagen
-    // Aquí puedes agregar la imagen del proyecto
-    // page.drawImage(...)
-    y = espacioImagenY - mm(30); // deja espacio para imagen
-
-    // Consumo anual, gasto anual, tarifa prom
+    // KPIs a la derecha
     const datosKPI = [
-      ["Consumo Anual:", datos.consumoAnual],
-      ["Gasto Anual:", "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal)],
-      ["Tarifa Prom:", datos.tarifaPromedio],
+      { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
+      { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
+      { label: "Tarifa Prom", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
     ];
-    datosKPI.forEach(([label, value]) => {
-      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
-      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
-      y -= lh;
+
+    // Layout horizontal: datos del proyecto a la izquierda, KPIs a la derecha
+    const datosX = left;
+    const datosY = y;
+    const kpiX = left + mm(80); // Ajusta el valor para mover los KPIs a la derecha
+    const kpiY = y;
+    // Dibuja datos del proyecto
+    let tempY = datosY;
+    datosProyecto.forEach(([label, value]) => {
+  const labelW = widthOf(label, fsBase, fontBold);
+  const gap = mm(4); // Espacio pequeño entre título y valor
+  page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
+  page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
+  tempY -= lh;
     });
-    y -= mm(8);
+
+    // Dibuja KPIs con imagen
+    let kpiW = mm(22), kpiGap = mm(4), kpiImgH = mm(12);
+    // Mueve los KPIs más a la derecha y alinea verticalmente con los datos
+    const kpiXStart = left + mm(100); // Más a la derecha
+    // Altura alineada con la primera línea de datos de la izquierda
+    let kpiYStart = datosY;
+    for (let i = 0; i < datosKPI.length; i++) {
+      const kpi = datosKPI[i];
+      const baseX = kpiXStart + i * (kpiW + kpiGap);
+      // Imagen en medio
+      let imgY = kpiYStart - mm(2) - kpiImgH/2;
+      let imgX = baseX + kpiW/2 - mm(6);
+      try {
+        const imgBytes = await fetch(`img/${kpi.img}`).then(r => r.arrayBuffer());
+        const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
+        page.drawImage(imgEmbed, { x: imgX, y: imgY, width: mm(12), height: kpiImgH });
+      } catch {}
+      // Valor arriba, centrado respecto a la imagen
+      page.drawText(kpi.value, { x: baseX + kpiW/2 - widthOf(kpi.value, fsBase, fontBold)/2, y: imgY + kpiImgH + mm(2), size: fsBase, font: fontBold, color: ink });
+      // Nombre abajo, centrado respecto a la imagen
+      page.drawText(kpi.label, { x: baseX + kpiW/2 - widthOf(kpi.label, fsSmall, font)/2, y: imgY - mm(6), size: fsSmall, font, color: mute });
+    }
+    // Ajusta y para el siguiente bloque
+    y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
 
     // TU SISTEMA SOLAR (formato boceto)
     section("TU SISTEMA SOLAR")
+    y -= mm(4)
     let espacioPanelY = y;
     const datosPaneles = [
       ["Paneles solares:", datos.numeroModulosCard || "—"],
