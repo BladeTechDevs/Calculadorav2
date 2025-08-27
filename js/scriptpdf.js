@@ -14,14 +14,14 @@ async function exportToBasePdf() {
 
   try {
     // === 1) Recolección de datos ===
-    const calcularSistemaSolar = window.calcularSistemaSolar
-    try {
-      calcularSistemaSolar && calcularSistemaSolar()
-    } catch (e) {}
+    // const calcularSistemaSolar = window.calcularSistemaSolar
+    // try {
+    //   calcularSistemaSolar && calcularSistemaSolar()
+    // } catch (e) {}
 
     const $ = (id) => document.getElementById(id)
     const getVal = (id, fb = "") => ($(id)?.value ?? fb).toString().trim()
-    const getTxt = (id, fb = "") => ($(id)?.textContent ?? fb).toString().trim()
+  const getTxt = (id, fb = "") => ($(id)?.textContent ?? fb).toString().trim()
     const toNum = (v) => {
       if (typeof v === "number") return v
       if (!v) return 0
@@ -30,7 +30,7 @@ async function exportToBasePdf() {
       return isNaN(n) ? 0 : n
     }
     const fmtMXN = (n) =>
-      new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(toNum(n))
+  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(toNum(n))
 
     const datos = {
       // Cliente
@@ -128,11 +128,11 @@ async function exportToBasePdf() {
     const lh = 12
 
     const ensure = (h) => {
-      if (y - h < bottom) newPage()
+  if (y - h < bottom) newPage()
     }
 
     const newPage = () => {
-      drawFooter()
+  drawFooter()
       pageIndex++
       if (pageIndex < pdfDoc.getPageCount()) page = pdfDoc.getPage(pageIndex)
       else page = pdfDoc.addPage([PW, PH])
@@ -1006,75 +1006,60 @@ async function exportToBasePdf() {
     // Panel (involucrados)
     await drawInfoPanelWithIcons()
 
-    section("DATOS DEL PROYECTO")
-    // Fila 1: 3 columnas iguales
-
-    // Helpers de formato
-    const capitalizeFirst = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—")
-
-    const toUpper = (str) => (str ? str.toUpperCase() : "—")
-
-    // Uso en drawCols
-    drawCols(
-      [
-        ["Tipo de proyecto", capitalizeFirst(datos.tipoProyecto)],
-        ["Tarifa", toUpper(datos.tipoTarifa)],
-        ["Región Tarifaria CFE", capitalizeFirst(datos.regionTarifariaCFE)],
-      ],
-      3,
-    )
-
-    const pulocalstorage = localStorage.getItem("cotizacionPU")
-    //aqui jalar el roy
-
-    // Fila 2: Ubicación (3/4) + ROI (1/4)
-    drawColsWeighted(
-      [
-        ["Ubicación", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
-  ["ROI", (datas && typeof datas.roiConiva === "number") ? datas.roiConiva.toFixed(2) : "—"],
-      ],
-      [3, 1],
-    )
-
-    // función para formatear números en MXN con separadores
-    const fmtNumber = (n) => {
-      const num = Number.parseFloat(String(n).replace(/[^\d.-]/g, "")) || 0
-      return num.toLocaleString("es-MX", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
+    // DATOS DEL PROYECTO (formato boceto)
+    // Helper para capitalizar
+    function capitalizeFirst(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—";
     }
+    section("DATOS DEL PROYECTO")
+    const datosProyecto = [
+      ["Ubicación:", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
+      ["Clasificación:", capitalizeFirst(datos.tipoProyecto)],
+      ["Tarifa:", datos.tipoTarifa || "—"],
+      ["Región CFE:", capitalizeFirst(datos.regionTarifariaCFE)],
+    ];
+    let espacioImagenY = y;
+    datosProyecto.forEach(([label, value]) => {
+      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
+      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
+      y -= lh;
+    });
+    y -= mm(8); // Espacio para imagen
+    // Aquí puedes agregar la imagen del proyecto
+    // page.drawImage(...)
+    y = espacioImagenY - mm(30); // deja espacio para imagen
 
-    // Fila 3 KPI: consumo, gasto, tarifa
-    kpiRow(
-      [
-        ["Consumo anual", datos.consumoAnual], // ya viene con kWh
-        ["Gasto anual", "$" + fmtNumber(datos.importeTotal)], // aquí lo formatea
-        ["Tarifa promedio", datos.tarifaPromedio],
-      ],
-      3,
-    )
+    // Consumo anual, gasto anual, tarifa prom
+    const datosKPI = [
+      ["Consumo Anual:", datos.consumoAnual],
+      ["Gasto Anual:", "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal)],
+      ["Tarifa Prom:", datos.tarifaPromedio],
+    ];
+    datosKPI.forEach(([label, value]) => {
+      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
+      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
+      y -= lh;
+    });
+    y -= mm(8);
 
-    section("DISEÑO DEL SISTEMA")
-    // Orden nuevo: N.º paneles, Potencia instalada, Tipo de inversor
-    kpiRow(
-      [
-        ["N.º de módulos", datos.numeroModulosCard || "—"],
-        ["Potencia instalada", datos.potenciaInstalada || "—"],
-        ["Tipo de inversor", datos.inversorPanel || "—"],
-      ],
-      3,
-    )
-
-    // Potencia de panel, Generación anual, Área aproximada
-    drawCols(
-      [
-        ["Potencia por panel", `${datos.potenciaPanel || "—"} W`],
-        ["Generación anual", resultadoSistemaSolar.generacionAnualAprox.toFixed(2) || "—"],
-        ["Área aproximada", `${resultadoSistemaSolar.areaAprox || "—"} m²`],
-      ],
-      3,
-    )
+    // TU SISTEMA SOLAR (formato boceto)
+    section("TU SISTEMA SOLAR")
+    let espacioPanelY = y;
+    const datosPaneles = [
+      ["Paneles solares:", datos.numeroModulosCard || "—"],
+      ["Potencia total inst.:", datos.potenciaInstalada || "—"],
+      ["% de Ahorro:", datos.porcentajeAhorro || "—"],
+      ["Área requerida:", `${datos.areaAprox || "—"} m²`],
+    ];
+    datosPaneles.forEach(([label, value]) => {
+      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
+      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
+      y -= lh;
+    });
+    y -= mm(8); // Espacio para imagen de paneles
+    // Aquí puedes agregar la imagen de paneles
+    // page.drawImage(...)
+    y = espacioPanelY - mm(30); // deja espacio para imagen
 
     // Gráfica en la PRIMERA hoja (más chica)
     await drawCanvasImageIfAny2("impactoChart", 145, 75)
