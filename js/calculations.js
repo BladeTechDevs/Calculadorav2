@@ -11,7 +11,7 @@ window.solarCalculations = {
     consumoData.tarifas = []
 
     // Recopilar datos de consumo e importes
-    for (let i = 1; i <= numPeriodos; i++) {
+    for (let i = 0; i <= numPeriodos; i++) {
       const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value || 0)
       const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value || 0)
       consumoData.consumos.push(consumo)

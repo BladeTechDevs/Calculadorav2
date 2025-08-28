@@ -1194,6 +1194,7 @@ console.log("produccionMensual:", produccionMensual)
 
 // Llamada:
 // Llama una vez después de que existan los elementos
+console.log("mensulaes", consumosMensuales, produccionMensual)
 setupImpactoResponsive(mesesDisplay, consumosMensuales, produccionMensual)
 
 function setupImpactoResponsive(labels, consumoArr, produccionArr) {

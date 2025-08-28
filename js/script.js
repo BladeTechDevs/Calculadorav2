@@ -1,11 +1,26 @@
 // Asegura que calcularSistemaSolar esté disponible globalmente
 window.calcularSistemaSolar = calcularSistemaSolar;
-document.getElementById("estadoProyecto").addEventListener("change", actualizarHSP)
+document
+  .getElementById("estadoProyecto")
+  .addEventListener("change", actualizarHSP);
 
 // Variables globales
-let hspData = {}
-let csvData = []
-const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+let hspData = {};
+let csvData = [];
+const meses = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
 const mesesCompletos = [
   "Enero",
   "Febrero",
@@ -19,36 +34,49 @@ const mesesCompletos = [
   "Octubre",
   "Noviembre",
   "Diciembre",
-]
-  // Formateo internacional en inputs de Cotización P.U.
-  const cotizacionInputs = [
-    "panel", "inversor", "mantenimiento", "estructura", "materiales",
-    "instalacion", "carpeta", "flete", "interconexion", "uve",
-    "uie", "medidor", "total"
-  ];
+];
+// Formateo internacional en inputs de Cotización P.U.
+const cotizacionInputs = [
+  "panel",
+  "inversor",
+  "mantenimiento",
+  "estructura",
+  "materiales",
+  "instalacion",
+  "carpeta",
+  "flete",
+  "interconexion",
+  "uve",
+  "uie",
+  "medidor",
+  "total",
+];
 
-  function formatNumberIntl(value) {
-    if (value === "" || isNaN(value)) return "";
-    const num = parseFloat(value.replace(/,/g, ""));
-    return num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  cotizacionInputs.forEach(id => {
-    const input = document.getElementById(id);
-    if (input) {
-      // Solo limpiar y formatear al perder el foco
-      input.addEventListener("blur", function(e) {
-        if (input.value !== "") {
-          let raw = input.value.replace(/,/g, "");
-          if (!isNaN(raw) && /^\d+(\.\d+)?$/.test(raw)) {
-            input.value = formatNumberIntl(raw);
-          } else {
-            input.value = input.value;
-          }
-        }
-      });
-    }
+function formatNumberIntl(value) {
+  if (value === "" || isNaN(value)) return "";
+  const num = parseFloat(value.replace(/,/g, ""));
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
+}
+
+cotizacionInputs.forEach((id) => {
+  const input = document.getElementById(id);
+  if (input) {
+    // Solo limpiar y formatear al perder el foco
+    input.addEventListener("blur", function (e) {
+      if (input.value !== "") {
+        let raw = input.value.replace(/,/g, "");
+        if (!isNaN(raw) && /^\d+(\.\d+)?$/.test(raw)) {
+          input.value = formatNumberIntl(raw);
+        } else {
+          input.value = input.value;
+        }
+      }
+    });
+  }
+});
 
 // Tarifas por tipo de proyecto
 const tarifasPorProyecto = {
@@ -74,42 +102,55 @@ const tarifasPorProyecto = {
     { value: "dist", text: "DIST – Demanda Industrial en Subtransmisión" },
     { value: "dit", text: "DIT – Demanda Industrial en Transmisión" },
   ],
-}
+};
 
 function actualizarTarifasPorProyecto() {
-  const tipoProyecto = document.getElementById("tipoProyecto").value
-  const tarifaSelect = document.getElementById("tipoTarifa")
-  tarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>'
+  const tipoProyecto = document.getElementById("tipoProyecto").value;
+  const tarifaSelect = document.getElementById("tipoTarifa");
+  tarifaSelect.innerHTML = '<option value="">Selecciona una tarifa</option>';
   if (tarifasPorProyecto[tipoProyecto]) {
     tarifasPorProyecto[tipoProyecto].forEach((t) => {
-      const option = document.createElement("option")
-      option.value = t.value
-      option.textContent = t.text
-      tarifaSelect.appendChild(option)
-    })
+      const option = document.createElement("option");
+      option.value = t.value;
+      option.textContent = t.text;
+      tarifaSelect.appendChild(option);
+    });
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const tipoProyectoSelect = document.getElementById("tipoProyecto")
+  const tipoProyectoSelect = document.getElementById("tipoProyecto");
   if (tipoProyectoSelect) {
-    tipoProyectoSelect.addEventListener("change", actualizarTarifasPorProyecto)
-    actualizarTarifasPorProyecto() // Inicializa al cargar
+    tipoProyectoSelect.addEventListener("change", actualizarTarifasPorProyecto);
+    actualizarTarifasPorProyecto(); // Inicializa al cargar
   }
-})
+});
 
 // Generar tabla de consumo dinámica
 function generarTablaConsumo() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const tablaBody = document.getElementById("tablaConsumoBody")
-  const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-  const bimestres = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"]
-  tablaBody.innerHTML = ""
-  const totalTarifa = 0
-  const totalConsumo = 0
-  const totalImporte = 0
-  const count = 0
-  const periodos = tipoPeriodo === "mensual" ? meses : bimestres
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const tablaBody = document.getElementById("tablaConsumoBody");
+  const meses = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
+  const bimestres = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
+  tablaBody.innerHTML = "";
+  const totalTarifa = 0;
+  const totalConsumo = 0;
+  const totalImporte = 0;
+  const count = 0;
+  const periodos = tipoPeriodo === "mensual" ? meses : bimestres;
 
   for (let i = 0; i < periodos.length; i++) {
     tablaBody.innerHTML += `
@@ -118,40 +159,44 @@ function generarTablaConsumo() {
                 <td style='padding:6px;'><input type='number' id='tarifa${i}' style='width:80px;'></td>
                 <td style='padding:6px;'><input type='number' id='consumo${i}' style='width:80px;'></td>
                 <td style='padding:6px;'><input type='number' id='importe${i}' style='width:80px;'></td>
-            </tr>`
+            </tr>`;
   }
 
   // Actualizar totales al cambiar inputs
   tablaBody.querySelectorAll("input").forEach((input) => {
-    input.addEventListener("input", actualizarTotalesConsumo)
-  })
-  actualizarTotalesConsumo()
+    input.addEventListener("input", actualizarTotalesConsumo);
+  });
+  actualizarTotalesConsumo();
 }
 
 function actualizarTotalesConsumo() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  let totalConsumo = 0
-  let totalImporte = 0
-  let totalTarifas = 0
-  let contadorTarifas = 0
+  let totalConsumo = 0;
+  let totalImporte = 0;
+  let totalTarifas = 0;
+  let contadorTarifas = 0;
 
   for (let i = 0; i < numPeriodos; i++) {
-    const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
-    const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
-    const tarifa = Number.parseFloat(document.getElementById(`tarifa${i}`)?.value) || 0
+    const consumo =
+      Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0;
+    const importe =
+      Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0;
+    const tarifa =
+      Number.parseFloat(document.getElementById(`tarifa${i}`)?.value) || 0;
 
-    totalConsumo += consumo
-    totalImporte += importe
+    totalConsumo += consumo;
+    totalImporte += importe;
 
     if (tarifa > 0) {
-      totalTarifas += tarifa
-      contadorTarifas++
+      totalTarifas += tarifa;
+      contadorTarifas++;
     }
   }
 
-  const tarifaPromedio = contadorTarifas > 0 ? totalTarifas / contadorTarifas : 0
+  const tarifaPromedio =
+    contadorTarifas > 0 ? totalTarifas / contadorTarifas : 0;
 
   // Update display elements
   // document.getElementById("totalConsumoDisplay").textContent = `${totalConsumo.toFixed(0)} kWh`
@@ -168,37 +213,37 @@ function actualizarTotalesConsumo() {
 async function loadCSVData() {
   try {
     const response = await fetch(
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hsp_Hoja1-kr8ml1Lz0SvIbQmWD96PSGcSC2lQAt.csv",
-    )
-    const csvText = await response.text()
-    console.log(csvText)
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hsp_Hoja1-kr8ml1Lz0SvIbQmWD96PSGcSC2lQAt.csv"
+    );
+    const csvText = await response.text();
+    console.log(csvText);
     // Parse CSV
-    const lines = csvText.split("\n")
-    const headers = lines[0].split(",")
+    const lines = csvText.split("\n");
+    const headers = lines[0].split(",");
 
-    csvData = []
+    csvData = [];
 
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {
-        const values = lines[i].split(",")
-        const rowData = {}
+        const values = lines[i].split(",");
+        const rowData = {};
 
         headers.forEach((header, index) => {
-          rowData[header.trim()] = values[index] ? values[index].trim() : ""
-        })
+          rowData[header.trim()] = values[index] ? values[index].trim() : "";
+        });
 
         if (rowData.Estado) {
-          csvData.push(rowData)
+          csvData.push(rowData);
           // Store average HSP value for quick access
-          hspData[rowData.Estado] = Number.parseFloat(rowData.Promedio) || 0
+          hspData[rowData.Estado] = Number.parseFloat(rowData.Promedio) || 0;
         }
       }
     }
-    console.log("CSV data loaded successfully:", csvData)
+    console.log("CSV data loaded successfully:", csvData);
 
-    inicializarEstados()
+    inicializarEstados();
   } catch (error) {
-    console.error("Error loading CSV data:", error)
+    console.error("Error loading CSV data:", error);
     // Fallback to hardcoded data if CSV fails
     hspData = {
       Aguascalientes: 5.91,
@@ -233,23 +278,23 @@ async function loadCSVData() {
       Veracruz: 4.6,
       Yucatán: 5.3,
       Zacatecas: 5.76,
-    }
-    inicializarEstados()
+    };
+    inicializarEstados();
   }
 }
 
 function inicializarEstados() {
-  const estadoSelect = document.getElementById("estadoProyecto")
-  estadoSelect.innerHTML = '<option value="">Seleccionar estado</option>'
+  const estadoSelect = document.getElementById("estadoProyecto");
+  estadoSelect.innerHTML = '<option value="">Seleccionar estado</option>';
 
   Object.keys(hspData)
     .sort()
     .forEach((estado) => {
-      const option = document.createElement("option")
-      option.value = estado
-      option.textContent = estado
-      estadoSelect.appendChild(option)
-    })
+      const option = document.createElement("option");
+      option.value = estado;
+      option.textContent = estado;
+      estadoSelect.appendChild(option);
+    });
 }
 
 function actualizarHSP() {
@@ -296,36 +341,116 @@ function actualizarHSP() {
   }
 }
 
-
 function mostrarDatosIrradiacion(estadoData) {
-  // Create or update irradiation data display
-  let irradiacionDiv = document.getElementById("irradiacionData")
+  if (!estadoData) return;
 
+  // 1) Asegurar contenedor (oculto)
+  let irradiacionDiv = document.getElementById("irradiacionData");
   if (!irradiacionDiv) {
-    irradiacionDiv = document.createElement("div")
-    irradiacionDiv.id = "irradiacionData"
-    irradiacionDiv.className = "form-section"
+    irradiacionDiv = document.createElement("div");
+    irradiacionDiv.id = "irradiacionData";
+    irradiacionDiv.className = "form-section";
+    // Mantenerlo invisible
+    irradiacionDiv.style.display = "none";
 
-    // Insert after the Datos del Proyecto section
-    const proyectoSection = document.querySelector("#estadoProyecto").closest(".form-section")
-    proyectoSection.parentNode.insertBefore(irradiacionDiv, proyectoSection.nextSibling)
+    // Insertar después de la sección que contiene #estadoProyecto
+    const proyectoSection = document
+      .querySelector("#estadoProyecto")
+      ?.closest(".form-section");
+    if (proyectoSection && proyectoSection.parentNode) {
+      proyectoSection.parentNode.insertBefore(
+        irradiacionDiv,
+        proyectoSection.nextSibling
+      );
+    } else {
+      // fallback: colgarlo del body si no encontramos la sección
+      document.body.appendChild(irradiacionDiv);
+    }
   }
 
-  irradiacionDiv.innerHTML = `
-      
-    `
+  // 2) Mapeo de meses: keys del CSV -> ids esperados por recopilarDatosdeIrradiacionAnual()
+  const mapa = [
+    ["Enero", "irradiacionEnero"],
+    ["Febrero", "irradiacionFebrero"],
+    ["Marzo", "irradiacionMarzo"],
+    ["Abril", "irradiacionAbril"],
+    ["Mayo", "irradiacionMayo"],
+    ["Junio", "irradiacionJunio"],
+    ["Julio", "irradiacionJulio"],
+    ["Agosto", "irradiacionAgosto"],
+    ["Septiembre", "irradiacionSeptiembre"],
+    ["Octubre", "irradiacionOctubre"],
+    ["Noviembre", "irradiacionNoviembre"],
+    ["Diciembre", "irradiacionDiciembre"],
+  ];
+
+  // 3) Crear/actualizar inputs hidden con los valores numéricos
+  const toNum = (v) => {
+    const n = Number.parseFloat(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // Construir objeto para localStorage
+  const irrObj = {};
+
+  mapa.forEach(([keyMes, idInput]) => {
+    const val = toNum(estadoData[keyMes]);
+
+    // si no existe el input, créalo; si existe, solo actualiza value
+    let input = document.getElementById(idInput);
+    if (!input) {
+      input = document.createElement("input");
+      input.type = "hidden";
+      input.id = idInput;
+      input.name = idInput;
+      irradiacionDiv.appendChild(input);
+    }
+    input.value = val;
+
+    // llenar objeto para persistir
+    const nombreProp = idInput.replace("irradiacion", "").toLowerCase(); // ej. 'Enero' -> 'enero'
+    irrObj[nombreProp] = val;
+  });
+
+  // 4) (Opcional) también guardamos mínima, máxima y promedio como hidden (no los lees en recopilar*, pero pueden servir)
+  const extras = [
+    ["Minima", "irradiacionMinima"],
+    ["Maxima", "irradiacionMaxima"],
+    ["Promedio", "irradiacionPromedio"],
+  ];
+  extras.forEach(([key, id]) => {
+    const val = toNum(estadoData[key]);
+    let input = document.getElementById(id);
+    if (!input) {
+      input = document.createElement("input");
+      input.type = "hidden";
+      input.id = id;
+      input.name = id;
+      irradiacionDiv.appendChild(input);
+    }
+    input.value = val;
+  });
+
+  // 5) Persistir en localStorage (útil para otros módulos)
+  try {
+    localStorage.setItem("irradiacionAnualInputs", JSON.stringify(irrObj));
+  } catch (e) {
+    console.warn("No se pudo persistir irradiacionAnualInputs:", e);
+  }
+
+  console.log("[HSP] Inputs ocultos de irradiación actualizados:", irrObj);
 }
 
 function generarInputsConsumo() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const container = document.getElementById("consumoInputsGrid")
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const container = document.getElementById("consumoInputsGrid");
 
   // Tus valores fijos de prueba
-  const consumosDemo = [690, 631, 422, 970, 1011, 752]
-  const importesDemo = [1695, 1685, 489, 2798, 2998, 2269]
+  const consumosDemo = [690, 631, 422, 970, 1011, 752];
+  const importesDemo = [1695, 1685, 489, 2798, 2998, 2269];
 
   // Según tipoPeriodo decides si usar 12 o 6 periodos
-  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6;
   const periodos =
     tipoPeriodo === "mensual"
       ? [
@@ -342,23 +467,30 @@ function generarInputsConsumo() {
           "Noviembre",
           "Diciembre",
         ]
-      : ["Bimestre 1", "Bimestre 2", "Bimestre 3", "Bimestre 4", "Bimestre 5", "Bimestre 6"]
+      : [
+          "Bimestre 1",
+          "Bimestre 2",
+          "Bimestre 3",
+          "Bimestre 4",
+          "Bimestre 5",
+          "Bimestre 6",
+        ];
 
-  container.innerHTML = ""
+  container.innerHTML = "";
 
   for (let i = 0; i < numPeriodos; i++) {
     // Si hay datos en el arreglo, los usamos; si no, dejamos vacío
-    const consumoDemo = consumosDemo[i] ?? ""
-    const importeDemo = importesDemo[i] ?? ""
+    const consumoDemo = consumosDemo[i] ?? "";
+    const importeDemo = importesDemo[i] ?? "";
 
-    const periodoCard = document.createElement("div")
+    const periodoCard = document.createElement("div");
     periodoCard.style.cssText = `
       background: white;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 0.75rem;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    `
+    `;
 
     periodoCard.innerHTML = `
       <div style="font-weight: 600; color: #1e40af; margin-bottom: 0.5rem; text-align: center; font-size: 0.85rem;">
@@ -378,73 +510,78 @@ function generarInputsConsumo() {
                  oninput="window.actualizarTotalesConsumo()">
         </div>
       </div>
-    `
+    `;
 
-    container.appendChild(periodoCard)
+    container.appendChild(periodoCard);
   }
 
   // Inicializar totales
-  window.actualizarTotalesConsumo()
+  window.actualizarTotalesConsumo();
 }
 
 function calcularTarifaAutomatica(index) {
-  const consumo = Number.parseFloat(document.getElementById(`consumo${index}`)?.value) || 0
-  const importe = Number.parseFloat(document.getElementById(`importe${index}`)?.value) || 0
-  const tarifaInput = document.getElementById(`tarifa${index}`)
+  const consumo =
+    Number.parseFloat(document.getElementById(`consumo${index}`)?.value) || 0;
+  const importe =
+    Number.parseFloat(document.getElementById(`importe${index}`)?.value) || 0;
+  const tarifaInput = document.getElementById(`tarifa${index}`);
   if (!tarifaInput) {
-    window.actualizarTotalesConsumo?.()
-    return
+    window.actualizarTotalesConsumo?.();
+    return;
   } // ← si no existe, sal con gracia
-  tarifaInput.value = consumo > 0 && importe > 0 ? (importe / consumo).toFixed(3) : ""
-  window.actualizarTotalesConsumo?.()
+  tarifaInput.value =
+    consumo > 0 && importe > 0 ? (importe / consumo).toFixed(3) : "";
+  window.actualizarTotalesConsumo?.();
 }
 
 function generarInputsPago() {
-  const tipoPeriodo = document.getElementById("tipoPeriodo").value
-  const container = document.getElementById("pagoInputs") || document.getElementById("pagoRow")
-  if (!container) return // ← evita crashear si no existe
-  const numCampos = tipoPeriodo === "mensual" ? 12 : 6
+  const tipoPeriodo = document.getElementById("tipoPeriodo").value;
+  const container =
+    document.getElementById("pagoInputs") || document.getElementById("pagoRow");
+  if (!container) return; // ← evita crashear si no existe
+  const numCampos = tipoPeriodo === "mensual" ? 12 : 6;
 
-  container.innerHTML = ""
+  container.innerHTML = "";
   for (let i = 0; i < numCampos; i++) {
-    const pagoInput = document.createElement("input")
-    pagoInput.type = "number"
-    pagoInput.className = "consumo-input"
-    pagoInput.placeholder = tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`
-    pagoInput.id = `pago${i}`
-    pagoInput.step = "0.01"
-    container.appendChild(pagoInput)
+    const pagoInput = document.createElement("input");
+    pagoInput.type = "number";
+    pagoInput.className = "consumo-input";
+    pagoInput.placeholder =
+      tipoPeriodo === "mensual" ? `${meses[i]} ($)` : `Bim ${i + 1} ($)`;
+    pagoInput.id = `pago${i}`;
+    pagoInput.step = "0.01";
+    container.appendChild(pagoInput);
   }
 }
 
 function showToast(message, type = "info") {
-  const container = document.getElementById("toast-container")
-  if (!container) return
+  const container = document.getElementById("toast-container");
+  if (!container) return;
 
-  const toast = document.createElement("div")
-  toast.className = "toast"
-  toast.textContent = message
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
 
   // Colores según tipo
-  if (type === "error") toast.style.background = "#dc2626" // rojo
-  if (type === "success") toast.style.background = "#16a34a" // verde
-  if (type === "warning") toast.style.background = "#67AA47" // amarillo
+  if (type === "error") toast.style.background = "#dc2626"; // rojo
+  if (type === "success") toast.style.background = "#16a34a"; // verde
+  if (type === "warning") toast.style.background = "#67AA47"; // amarillo
 
-  container.appendChild(toast)
+  container.appendChild(toast);
 
   // Quitar después de animación
   setTimeout(() => {
-    toast.remove()
-  }, 4000) // 4 segundos
+    toast.remove();
+  }, 4000); // 4 segundos
 }
 
-const consumos = []
-const importes = []
-const kwintsladaConEficiancia = 0
-const generacionAnualAprox = 0
+const consumos = [];
+const importes = [];
+const kwintsladaConEficiancia = 0;
+const generacionAnualAprox = 0;
 function calcularSistemaSolar() {
   // Desactivar el botón
-  document.getElementById("btnCalcular").disabled = true
+  document.getElementById("btnCalcular").disabled = true;
   /*
   function validarCliente() {
     const nombre = document.getElementById("nombreCliente")?.value.trim()
@@ -583,90 +720,177 @@ function calcularSistemaSolar() {
   } */
 
   try {
-    const datos = window.dataManager.guardarEnLocalStorage()
-    const resultados = datos.resultados
+    const datos = window.dataManager.guardarEnLocalStorage();
+    const resultados = datos.resultados;
 
     // Mostrar resultados en la interfaz
-    document.getElementById("resultsPlaceholder").style.display = "none"
-    document.getElementById("resultsContent").style.display = "block"
+    document.getElementById("resultsPlaceholder").style.display = "none";
+    document.getElementById("resultsContent").style.display = "block";
 
-    document.getElementById("consumoAnual").textContent = `${resultados.consumoAnual.toFixed(0)} kWh`
-    document.getElementById("consumoMensual").textContent = `${resultados.consumoMensual.toFixed(0)} kWh`
-    document.getElementById("consumoDiario").textContent = `${resultados.consumoDiario.toFixed(1)} kWh`
-    document.getElementById("importeTotal").textContent = `$${resultados.importeTotalAnual.toFixed(2)}`
-    document.getElementById("importePromedio").textContent = `$${resultados.importePromedio.toFixed(2)}`
-    document.getElementById("tarifaPromedio").textContent = `$${resultados.tarifaPromedio.toFixed(3)}`
-    document.getElementById("potenciaNecesaria").textContent = `${resultados.potenciaNecesaria.toFixed(2)} kW`
-    document.getElementById("numeroModulos").textContent = `${resultados.numeroModulos}`
-    document.getElementById("potenciaInstalada").textContent = `${resultados.potenciaInstalada.toFixed(2)} kW`
-    document.getElementById("hsp").textContent = `${resultados.hspPromedio.toFixed(2)} h`
-    document.getElementById("ahorroCO2").textContent = `${resultados.ahorroCO2.toFixed(3)} t`
-    document.getElementById("arboles").textContent = `${resultados.arboles.toFixed(0)} árboles`
-    document.getElementById("porcentajeAhorro").textContent = `${resultados.porcentajeAhorro.toFixed(1)}%`
-    document.getElementById("generacionAnual").textContent = `${resultados.generacionAnual.toFixed(2)} KWh`
-    document.getElementById("porcentajeGeneracion").textContent = `${resultados.porcentajeAhorro.toFixed(2)}%`
-    document.getElementById("roi").textContent = `${datos.cotizacion.roiConIva.toFixed(1)} años`
+    document.getElementById(
+      "consumoAnual"
+    ).textContent = `${resultados.consumoAnual.toFixed(0)} kWh`;
+    document.getElementById(
+      "consumoMensual"
+    ).textContent = `${resultados.consumoMensual.toFixed(0)} kWh`;
+    document.getElementById(
+      "consumoDiario"
+    ).textContent = `${resultados.consumoDiario.toFixed(1)} kWh`;
+    document.getElementById(
+      "importeTotal"
+    ).textContent = `$${resultados.importeTotalAnual.toFixed(2)}`;
+    document.getElementById(
+      "importePromedio"
+    ).textContent = `$${resultados.importePromedio.toFixed(2)}`;
+    document.getElementById(
+      "tarifaPromedio"
+    ).textContent = `$${resultados.tarifaPromedio.toFixed(3)}`;
+    document.getElementById(
+      "potenciaNecesaria"
+    ).textContent = `${resultados.potenciaNecesaria.toFixed(2)} kW`;
+    document.getElementById(
+      "numeroModulos"
+    ).textContent = `${resultados.numeroModulos}`;
+    document.getElementById(
+      "potenciaInstalada"
+    ).textContent = `${resultados.potenciaInstalada.toFixed(2)} kW`;
+    document.getElementById(
+      "hsp"
+    ).textContent = `${resultados.hspPromedio.toFixed(2)} h`;
+    document.getElementById(
+      "ahorroCO2"
+    ).textContent = `${resultados.ahorroCO2.toFixed(3)} t`;
+    document.getElementById(
+      "arboles"
+    ).textContent = `${resultados.arboles.toFixed(0)} árboles`;
+    document.getElementById(
+      "porcentajeAhorro"
+    ).textContent = `${resultados.porcentajeAhorro.toFixed(1)}%`;
+    document.getElementById(
+      "generacionAnual"
+    ).textContent = `${resultados.generacionAnual.toFixed(2)} KWh`;
+    document.getElementById(
+      "porcentajeGeneracion"
+    ).textContent = `${resultados.porcentajeAhorro.toFixed(2)}%`;
+    document.getElementById(
+      "roi"
+    ).textContent = `${datos.cotizacion.roiConIva.toFixed(1)} años`;
 
     // Llenar tabla detallada y crear gráficas
     window.llenarTablaDetallada(
       datos.consumo.consumos,
       datos.consumo.importes,
       datos.consumo.tarifas,
-      datos.consumo.tipoPeriodo,
-    )
-    window.crearGraficaIrradiacion(datos.proyecto.estadoProyecto)
-    const produccion = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      datos.consumo.tipoPeriodo
+    );
+    console.log("Datos para tabla detallada:", datos);
+    window.crearGraficaIrradiacion(datos.proyecto.estadoProyecto);
+
+    let kwintsladaConEficianciaa =
+      datos.resultados.kwintsladaConEficiancia2 || 0;
+
     //generar grafiaca de impacto
-    window.setupImpactoResponsive(mesesDisplay, datos.consumo.consumos, produccion)
-    // Mostrar botón de cotización móvil
-    const btnCot = document.getElementById("btnCotizarMobile")
-    if (btnCot) {
-      btnCot.classList.add("show")
-      btnCot.disabled = false
-      btnCot.removeAttribute("hidden")
-      btnCot.scrollIntoView({ behavior: "smooth", block: "center" })
+    //si datos.consumo.consumos tiene 6 valores intercalale 0 entre cada valor para que tenga 12 valores
+    let consumosMensuales = datos.consumo.consumos || [];
+    if (consumosMensuales.length === 6) {
+      const nuevoArreglo = [];
+      for (let i = 0; i < consumosMensuales.length; i++) {
+        nuevoArreglo.push(consumosMensuales[i]); // valor bimestral
+        nuevoArreglo.push(0); // mes vacío
+      }
+      consumosMensuales = nuevoArreglo;
+    }
+    let produccion = [];
+    // Utilidad: cuántos días tiene un mes
+    function diasEnMes(mes, anio) {
+      // mes: 0 = enero, 11 = diciembre
+      return new Date(anio, mes + 1, 0).getDate();
     }
 
-    showToast("Cálculo completado exitosamente.", "success")
+    // En tu cálculo de produccionMensual:
+    // 1) Define el orden de los meses en español (en minúsculas porque tu objeto viene así)
+    const mesesOrdenados = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+
+    // 2) Convierte el objeto en un arreglo en orden
+    const irradiacionMensualArray = mesesOrdenados.map(
+      (m) => datos.irradiacionAnual[m] || 0
+    );
+    console.log("irradiacionMensualArray", irradiacionMensualArray);
+    const anioActual = new Date().getFullYear();
+    for (let i = 0; i < 12; i++) {
+      const dias = diasEnMes(i, anioActual);
+      produccion[i] =
+        irradiacionMensualArray[i] *
+        kwintsladaConEficianciaa *
+        dias;
+    }
+    console.log("mensulaes", datos.consumo.consumos, produccion);
+    window.setupImpactoResponsive(mesesDisplay, consumosMensuales, produccion);
+    // Mostrar botón de cotización móvil
+    const btnCot = document.getElementById("btnCotizarMobile");
+    if (btnCot) {
+      btnCot.classList.add("show");
+      btnCot.disabled = false;
+      btnCot.removeAttribute("hidden");
+      btnCot.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    showToast("Cálculo completado exitosamente.", "success");
   } catch (error) {
-    console.error("Error en el cálculo:", error)
-    showToast("Error en el cálculo: " + error.message, "error")
-    document.getElementById("btnCalcular").disabled = false
+    console.error("Error en el cálculo:", error);
+    showToast("Error en el cálculo: " + error.message, "error");
+    document.getElementById("btnCalcular").disabled = false;
   }
 }
 
 function nuevoCalculo() {
   // Usar DataManager para limpiar datos
-  window.dataManager.limpiarDatos()
+  window.dataManager.limpiarDatos();
 
   // Reactivar botón calcular
-  const btnCalc = document.getElementById("btnCalcular")
-  if (btnCalc) btnCalc.disabled = false
+  const btnCalc = document.getElementById("btnCalcular");
+  if (btnCalc) btnCalc.disabled = false;
 
   // Asegurar que el botón de cotización móvil se vea y esté habilitado
-  const btnCot = document.getElementById("btnCotizarMobile")
+  const btnCot = document.getElementById("btnCotizarMobile");
   if (btnCot) {
-    btnCot.classList.add("show")
-    btnCot.disabled = false
-    btnCot.removeAttribute("hidden")
+    btnCot.classList.add("show");
+    btnCot.disabled = false;
+    btnCot.removeAttribute("hidden");
   }
 
   // Limpiar resultados en pantalla
-  const results = document.getElementById("resultsContent")
-  const placeholder = document.getElementById("resultsPlaceholder")
-  if (results) results.style.display = "none"
-  if (placeholder) placeholder.style.display = "flex"
+  const results = document.getElementById("resultsContent");
+  const placeholder = document.getElementById("resultsPlaceholder");
+  if (results) results.style.display = "none";
+  if (placeholder) placeholder.style.display = "flex";
 
   // Limpiar todos los inputs
-  document.querySelectorAll("input").forEach((i) => { i.value = "" })
+  document.querySelectorAll("input").forEach((i) => {
+    i.value = "";
+  });
   // Limpiar todos los selects
-  document.querySelectorAll("select").forEach((s) => { s.selectedIndex = 0 })
+  document.querySelectorAll("select").forEach((s) => {
+    s.selectedIndex = 0;
+  });
 
-  console.log("Nuevo cálculo iniciado - datos limpiados")
+  console.log("Nuevo cálculo iniciado - datos limpiados");
 }
 
 function llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo) {
-
   const tbody = document.getElementById("detalleTableBody");
   tbody.innerHTML = "";
 
@@ -691,27 +915,56 @@ function llenarTablaDetallada(consumos, importes, tarifas, tipoPeriodo) {
     tbody.appendChild(row);
   }
   // Implementación de llenarTablaDetallada
-  console.log("llenarTablaDetallada llamada con:", consumos, importes, tarifas, tipoPeriodo)
+  console.log(
+    "llenarTablaDetallada llamada con:",
+    consumos,
+    importes,
+    tarifas,
+    tipoPeriodo
+  );
 }
 
 function crearGraficaIrradiacion(estadoProyecto) {
   try {
     console.log("crearGraficaIrradiacion llamada con:", estadoProyecto);
-
     if (!estadoProyecto) return;
 
     // 1) Buscar fila del estado en csvData
-      const estadoData = csvData.find((row) => row.Estado === estadoProyecto);
-  if (!estadoData) {
-    console.log("[v0] No data found for state:", estadoProyecto);
-    return;
-  } 
+    const estadoData = csvData.find((row) => row.Estado === estadoProyecto);
+    if (!estadoData) {
+      console.log("[v0] No data found for state:", estadoProyecto);
+      return;
+    }
+
     // 2) Extraer meses en orden
     const mesesCSV = [
-      "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-      "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
     ];
-    const mesesDisplay = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+    const mesesDisplay = [
+      "Ene",
+      "Feb",
+      "Mar",
+      "Abr",
+      "May",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dic",
+    ];
 
     const irradiacionData = mesesCSV.map((m) => {
       const v = Number.parseFloat(estadoData[m]);
@@ -722,13 +975,23 @@ function crearGraficaIrradiacion(estadoProyecto) {
     let promedio = Number.parseFloat(estadoData.Promedio);
     if (!Number.isFinite(promedio)) {
       const nums = irradiacionData.filter((v) => Number.isFinite(v));
-      promedio = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+      promedio = nums.length
+        ? nums.reduce((a, b) => a + b, 0) / nums.length
+        : 0;
     }
 
-    // 4) Guardar en localStorage para otros módulos (impacto, etc.)
+    // ➕ Extender datos y etiquetas para incluir la barra de Promedio al final
+    const etiquetasX = [...mesesDisplay, "Prom"];
+    const dataConProm = [...irradiacionData, promedio];
+
+    // 4) Guardar en localStorage
     localStorage.setItem(
       "irradiacionAnual",
-      JSON.stringify({ estado: estadoProyecto, irradiacion: irradiacionData, promedio })
+      JSON.stringify({
+        estado: estadoProyecto,
+        irradiacion: irradiacionData,
+        promedio,
+      })
     );
 
     // 5) Dibujar en canvas
@@ -749,9 +1012,9 @@ function crearGraficaIrradiacion(estadoProyecto) {
     const chartW = W - padding * 2;
     const chartH = H - padding * 2;
 
-    // Escala Y
-    const maxVal = Math.max(...irradiacionData, promedio, 0);
-    const niceMax = (function niceCeil(x){
+    // Escala Y (considera también el promedio)
+    const maxVal = Math.max(...dataConProm, 0);
+    const niceMax = (function niceCeil(x) {
       if (x <= 0) return 1;
       const exp = Math.floor(Math.log10(x));
       const base = Math.pow(10, exp);
@@ -790,32 +1053,44 @@ function crearGraficaIrradiacion(estadoProyecto) {
       ctx.fillText(val.toFixed(1), Math.max(10, padding * 0.35), y + 4);
     }
 
-    // Etiquetas X
+    // Etiquetas X (12 meses + Prom)
     ctx.fillStyle = "#666";
     ctx.textAlign = "center";
-    const N = irradiacionData.length; // 12
+    const N = dataConProm.length; // 13
     for (let i = 0; i < N; i++) {
       const x = padding + (chartW * (i + 0.5)) / N;
-      ctx.fillText(mesesDisplay[i], x, H - padding + 16);
+      ctx.fillText(etiquetasX[i], x, H - padding + 16);
     }
 
-    // Barras
+    // Barras (última = promedio, con estilo distinto)
     const groupW = chartW / Math.max(1, N);
     const barW = Math.min(32, groupW * 0.7);
+
     for (let i = 0; i < N; i++) {
-      const val = irradiacionData[i];
+      const val = dataConProm[i];
       const barH = (val / yMax) * chartH;
       const x = padding + groupW * i + (groupW - barW) / 2;
       const y = H - padding - barH;
 
-      const grad = ctx.createLinearGradient(0, y, 0, y + barH);
-      grad.addColorStop(0, "#73b248");
-      grad.addColorStop(1, "#106e3a");
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, y, barW, barH);
+      const isProm = i === N - 1;
 
-      ctx.strokeStyle = "#106e3a";
+      if (isProm) {
+        // Promedio en azul/índigo
+        const gradProm = ctx.createLinearGradient(0, y, 0, y + barH);
+        gradProm.addColorStop(0, "#4f46e5");
+        gradProm.addColorStop(1, "#1d4ed8");
+        ctx.fillStyle = gradProm;
+        ctx.strokeStyle = "#1d4ed8";
+      } else {
+        const grad = ctx.createLinearGradient(0, y, 0, y + barH);
+        grad.addColorStop(0, "#73b248");
+        grad.addColorStop(1, "#106e3a");
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = "#106e3a";
+      }
+
       ctx.lineWidth = 1;
+      ctx.fillRect(x, y, barW, barH);
       ctx.strokeRect(x, y, barW, barH);
 
       // valor arriba de cada barra (si hay espacio)
@@ -826,7 +1101,7 @@ function crearGraficaIrradiacion(estadoProyecto) {
       }
     }
 
-    // Línea de promedio
+    // Línea de promedio (referencia)
     const yProm = H - padding - (promedio / yMax) * chartH;
     ctx.save();
     ctx.strokeStyle = "rgba(29,78,216,0.9)"; // azul
@@ -845,11 +1120,19 @@ function crearGraficaIrradiacion(estadoProyecto) {
     ctx.fillText(`Irradiación Solar - ${estadoProyecto}`, W / 2, 22);
     ctx.font = "12px Arial";
     ctx.fillText("(kWh/m²/día)", W / 2, 40);
-    ctx.fillText(`Promedio anual: ${promedio.toFixed(2)} kWh/m²/día`, W / 2, H - 6);
+    ctx.fillText(
+      `Promedio anual: ${promedio.toFixed(2)} kWh/m²/día`,
+      W / 2,
+      H - 6
+    );
 
-    console.log("[HSP] Datos mensuales:", irradiacionData, "Promedio:", promedio);
+    console.log(
+      "[HSP] Datos mensuales:",
+      irradiacionData,
+      "Promedio:",
+      promedio
+    );
 
-    // 6) Mostrar detalles si existe la función
     if (typeof window.mostrarDatosIrradiacion === "function") {
       window.mostrarDatosIrradiacion(estadoData);
     }
@@ -857,8 +1140,6 @@ function crearGraficaIrradiacion(estadoProyecto) {
     console.error("Error en crearGraficaIrradiacion:", err);
   }
 }
-
-
 
 function crearGraficaIrradiacion2(estado) {
   const canvas = document.getElementById("irradiacionChart");
@@ -872,10 +1153,33 @@ function crearGraficaIrradiacion2(estado) {
   }
 
   const mesesCSV = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
-  const mesesDisplay = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const mesesDisplay = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
 
   // Extract monthly irradiation data (kWh/m²/día)
   const irradiacionData = [];
@@ -894,7 +1198,7 @@ function crearGraficaIrradiacion2(estado) {
   const promedioCalc = (() => {
     const p = Number.parseFloat(estadoData.Promedio);
     if (Number.isFinite(p)) return p;
-    const nums = irradiacionData.filter(v => Number.isFinite(v));
+    const nums = irradiacionData.filter((v) => Number.isFinite(v));
     return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
   })();
 
@@ -949,8 +1253,8 @@ function crearGraficaIrradiacion2(estado) {
   }
 
   // Barras
-  const barWidth = (chartWidth / N) * 0.8;    // 80%
-  const barSpacing = (chartWidth / N) * 0.2;  // 20%
+  const barWidth = (chartWidth / N) * 0.8; // 80%
+  const barSpacing = (chartWidth / N) * 0.2; // 20%
 
   for (let i = 0; i < N; i++) {
     const x = padding + (chartWidth * i) / N + barSpacing / 2;
@@ -959,7 +1263,7 @@ function crearGraficaIrradiacion2(estado) {
     const y = canvas.height - padding - barHeight;
 
     // Promedio con estilo distinto
-    const isProm = (i === N - 1);
+    const isProm = i === N - 1;
 
     if (isProm) {
       // color distinto para la barra de Promedio
@@ -988,7 +1292,8 @@ function crearGraficaIrradiacion2(estado) {
   }
 
   // Línea horizontal de promedio (referencia)
-  const yProm = canvas.height - padding - (promedioCalc / valueRange) * chartHeight;
+  const yProm =
+    canvas.height - padding - (promedioCalc / valueRange) * chartHeight;
   ctx.save();
   ctx.strokeStyle = "rgba(79,70,229,0.9)"; // indigo
   ctx.lineWidth = 1.5;
@@ -1111,14 +1416,15 @@ const mesesDisplay = [
   "Promedio",
 ];
 
-
 function setupImpactoResponsive(labels, consumoArr, produccionArr) {
   const canvas = document.getElementById("impactoChart");
   if (!canvas) return;
 
   // --- utilidades: promedio robusto (ignora null/undefined/NaN) ---
   const avg = (arr) => {
-    const nums = (arr || []).map(v => Number(v)).filter(v => Number.isFinite(v));
+    const nums = (arr || [])
+      .map((v) => Number(v))
+      .filter((v) => Number.isFinite(v));
     return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
   };
 
@@ -1135,12 +1441,11 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
     const parent = canvas.parentElement || canvas;
     const cssWidth = canvas.style.width
       ? parseInt(getComputedStyle(canvas).width)
-      : (parent.clientWidth || 600);
+      : parent.clientWidth || 600;
 
     const cssHeight = canvas.style.height
       ? parseInt(getComputedStyle(canvas).height)
       : 320;
-
 
     const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
     canvas.width = Math.floor(cssWidth * dpr);
@@ -1157,7 +1462,11 @@ function setupImpactoResponsive(labels, consumoArr, produccionArr) {
     const pad = Math.max(40, Math.min(100, Math.floor(W * 0.08)));
 
     // 3) Decide si rotar labels en X (usar largo extendido)
-    const L = Math.min(labelsExt.length, consumoExt.length, produccionExt.length);
+    const L = Math.min(
+      labelsExt.length,
+      consumoExt.length,
+      produccionExt.length
+    );
     const rotateX = (W < 480 && L > 6) || (W < 360 && L > 4);
 
     // 4) Dibuja con los arreglos extendidos (incluyen “Promedio” al final)
@@ -1206,8 +1515,14 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Dimensiones (en CSS px, ya transformados con DPR)
   const cs = getComputedStyle(canvas);
-  const W = Math.max(50, Math.floor(parseFloat(cs.width) || canvas.width || 600));
-  const H = Math.max(50, Math.floor(parseFloat(cs.height) || canvas.height || 320));
+  const W = Math.max(
+    50,
+    Math.floor(parseFloat(cs.width) || canvas.width || 600)
+  );
+  const H = Math.max(
+    50,
+    Math.floor(parseFloat(cs.height) || canvas.height || 320)
+  );
 
   const padding = paddingPx;
 
@@ -1379,26 +1694,26 @@ function niceCeil(x) {
 }
 
 // Render inicial de inputs (bimestral por defecto) y persistencia de la elección
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('tipoPeriodo');
+document.addEventListener("DOMContentLoaded", () => {
+  const select = document.getElementById("tipoPeriodo");
   if (!select) return;
 
   // Leer último valor guardado o usar 'bimestral' por defecto
-  const saved = localStorage.getItem('tipoPeriodo') || 'bimestral';
+  const saved = localStorage.getItem("tipoPeriodo") || "bimestral";
   select.value = saved;
 
   // Pintar inputs de inicio
   generarInputsConsumo();
 
   // Guardar y regenerar al cambiar
-  select.addEventListener('change', () => {
-    localStorage.setItem('tipoPeriodo', select.value);
+  select.addEventListener("change", () => {
+    localStorage.setItem("tipoPeriodo", select.value);
     generarInputsConsumo();
   });
 });
 
-  // Borra todo el localStorage cada vez que se recarga la página
-  window.addEventListener("load", () => {
-    localStorage.clear();
-    console.log("LocalStorage limpiado al recargar la página");
-  });
+// Borra todo el localStorage cada vez que se recarga la página
+window.addEventListener("load", () => {
+  localStorage.clear();
+  console.log("LocalStorage limpiado al recargar la página");
+});

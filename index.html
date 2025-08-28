@@ -573,9 +573,14 @@
             const raw = $('profit')?.value
             const p = toNumber(raw)
             if (!p) return { monto: 0, etiqueta: '—' }
-            if (p <= 1) return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' }
-            if (p < 100) return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' }
-            return { monto: p, etiqueta: fmt(p) + ' (monto)' }
+
+            if (p <= 1) {
+              // Ej: 0.2 → 20% del subtotal
+              return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' }
+            }
+
+            // Cualquier número mayor a 1 se trata como porcentaje
+            return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' }
           }
 
           const renderTabla = () => {
@@ -585,7 +590,7 @@
             const numeroModulos = getNumeroDeModulos() || 1
 
             // ids que siempre se multiplican por N
-            const idsSiemprePorModulo = new Set(['panel', 'materiales', 'estructura'])
+            const idsSiemprePorModulo = new Set(['panel', 'materiales', 'estructura', "instalacion"])
 
             // si el inversor es "Microinversor", entonces también multiplicar "inversor"
             const multiplicarInversor = (inversorOmicro && String(inversorOmicro) === 'Microinversor')

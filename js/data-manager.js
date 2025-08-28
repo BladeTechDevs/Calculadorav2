@@ -8,7 +8,27 @@ class DataManager {
       sistema: {},
       cotizacion: {},
       resultados: {},
+      irradiacionAnual: {},
     }
+  }
+
+  //recopilar datos de iinterfaz y guardarlos en this.data
+  recopilarDatosdeIrradiacionAnual() {
+   this.data.irradiacionAnual = {
+      enero: Number.parseFloat(document.getElementById("irradiacionEnero")?.value) || 0,
+      febrero: Number.parseFloat(document.getElementById("irradiacionFebrero")?.value) || 0,
+      marzo: Number.parseFloat(document.getElementById("irradiacionMarzo")?.value) || 0,
+      abril: Number.parseFloat(document.getElementById("irradiacionAbril")?.value) || 0,
+      mayo: Number.parseFloat(document.getElementById("irradiacionMayo")?.value) || 0,
+      junio: Number.parseFloat(document.getElementById("irradiacionJunio")?.value) || 0,
+      julio: Number.parseFloat(document.getElementById("irradiacionJulio")?.value) || 0,
+      agosto: Number.parseFloat(document.getElementById("irradiacionAgosto")?.value) || 0,
+      septiembre: Number.parseFloat(document.getElementById("irradiacionSeptiembre")?.value) || 0,
+      octubre: Number.parseFloat(document.getElementById("irradiacionOctubre")?.value) || 0,
+      noviembre: Number.parseFloat(document.getElementById("irradiacionNoviembre")?.value) || 0,
+      diciembre: Number.parseFloat(document.getElementById("irradiacionDiciembre")?.value) || 0,
+   }
+    return this.data.irradiacionAnual
   }
 
   // Recopilar datos del cliente
@@ -60,7 +80,7 @@ class DataManager {
     const importes = []
     const tarifas = []
 
-    for (let i = 0; i < numPeriodos; i++) {
+    for (let i = 1; i < numPeriodos+1; i++) {
       const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
       const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
       const tarifa = Number.parseFloat(document.getElementById(`tarifa${i}`)?.value) || 0
@@ -69,7 +89,7 @@ class DataManager {
       importes.push(importe)
       tarifas.push(tarifa)
     }
-
+    console.log(consumos)
     this.data.consumo = {
       tipoPeriodo,
       consumos,
@@ -155,7 +175,7 @@ class DataManager {
     const numeroModulos = Math.ceil((consumoDiario * 1000) / (hspPromedio * proyectoData.potenciaPanel * 0.76))
     const potenciaInstalada = (proyectoData.potenciaPanel * numeroModulos) / 1000
     const generacionAnual = numeroModulos * (proyectoData.potenciaPanel / 1000) * hspPromedio * 365
-
+    const kwintsladaConEficiancia2 = proyectoData.potenciaPanel * numeroModulos * 0.76 / 1000;
     // Cálculos ambientales
     const ahorroCO2 = (generacionAnual * 439.963) / 1000000
     const arboles = ahorroCO2 * 155
@@ -178,6 +198,7 @@ class DataManager {
       porcentajeAhorro,
       generacionAnualAprox: generacionAnual,
       kwintsladaConEficiancia: potenciaInstalada * 0.76,
+      kwintsladaConEficiancia2 : kwintsladaConEficiancia2
     }
 
     return this.data.resultados
@@ -191,6 +212,7 @@ class DataManager {
     this.recopilarDatosProyecto()
     this.recopilarDatosConsumo()
     this.recopilarDatosCotizacion()
+    this.recopilarDatosdeIrradiacionAnual()
 
     // 2. Calcular resultados del sistema
     this.calcularSistema()
@@ -200,6 +222,7 @@ class DataManager {
     localStorage.setItem("datosEjecutivo", JSON.stringify(this.data.ejecutivo))
     localStorage.setItem("datosProyecto", JSON.stringify(this.data.proyecto))
     localStorage.setItem("datosConsumo", JSON.stringify(this.data.consumo))
+    console.log(this.data.consumo)
     localStorage.setItem("cotizacionPU", JSON.stringify(this.data.cotizacion))
     localStorage.setItem(
       "resultadosSistemaSolar",
@@ -215,6 +238,7 @@ class DataManager {
         areaAprox: this.data.proyecto.areaAprox,
       }),
     )
+    localStorage.setItem("irradiacionAnual", JSON.stringify(this.data.irradiacionAnual))
 
     console.log("Todos los datos guardados correctamente en localStorage")
     return this.data
@@ -229,6 +253,7 @@ class DataManager {
       this.data.consumo = JSON.parse(localStorage.getItem("datosConsumo") || "{}")
       this.data.cotizacion = JSON.parse(localStorage.getItem("cotizacionPU") || "{}")
       this.data.resultados = JSON.parse(localStorage.getItem("resultadosSistemaSolar") || "{}")
+      this.data.irradiacionAnual = JSON.parse(localStorage.getItem("irradiacionAnual") || "{}")
 
       return this.data
     } catch (error) {
@@ -256,6 +281,7 @@ class DataManager {
       sistema: {},
       cotizacion: {},
       resultados: {},
+      irradiacionAnual: {},
     }
 
     console.log("Todos los datos eliminados del localStorage")
