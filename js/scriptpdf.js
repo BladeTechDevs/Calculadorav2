@@ -1131,11 +1131,11 @@ async function exportToBasePdf() {
     // Dibuja datos del proyecto
     let tempY = datosY;
     datosProyecto.forEach(([label, value]) => {
-      const labelW = widthOf(label, fsBase, fontBold);
-      const gap = mm(4); // Espacio pequeño entre título y valor
-      page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
-      page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
-      tempY -= lh;
+  const labelW = widthOf(label, fsBase, fontBold);
+  const gap = mm(1.2); // Junta más el título y la respuesta
+  page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
+  page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
+  tempY -= lh;
     });
 
     // Dibuja KPIs con imagen
