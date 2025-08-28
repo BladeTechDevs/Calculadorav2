@@ -834,7 +834,7 @@ function calcularSistemaSolar() {
       const dias = diasEnMes(i, anioActual);
       produccion[i] =
         irradiacionMensualArray[i] *
-        (kwintsladaConEficianciaa / 2) *
+        kwintsladaConEficianciaa  *
         dias;
     }
     console.log("mensulaes", datos.consumo.consumos, produccion);

@@ -102,7 +102,7 @@ async function exportToBasePdf() {
 
     console.log(datas)
     // Fallback por si los campos de subtotal/iva/total no están llenos todavía
-    const _subtotal = datas.subtotal || 0
+    const _subtotal = datas.subtotal + datas.profit || 0
     const _iva = datas.iva || _subtotal * 0.16
     const _total = datas.total || _subtotal + _iva
 
@@ -761,9 +761,9 @@ async function exportToBasePdf() {
       const potenciaPanel = datos.potenciaPanel || "—"
 
       // const totalForm = toNumber(document.getElementById("total")?.value)
-      const totalForm = datas.subtotal || 0
+      const totalForm = datas.subtotal + datas.profit || 0
       const subtotalPU = totalForm
-      const ivaPU = datas.iva || subtotalPU * 0.16
+      const ivaPU = datas.iva || datas.subtotal * 0.16
       const totalPU = datas.total || subtotalPU + ivaPU
 
       const headH = 20,

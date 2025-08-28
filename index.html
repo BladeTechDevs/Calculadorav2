@@ -687,7 +687,7 @@
               <tr><td style="${thtd};${thLeft}" colspan="2">Sin datos de cotización aún.</td></tr>
             `}
             <tr>
-              <td style="${thtd};${thLeft};font-weight:600">Subtotal</td>
+              <td style="${thtd};${thLeft};font-weight:600">Subtotal 1</td>
               <td id="subtotalDisplay" style="${thtd};font-weight:600">${fmt(subtotal)}</td>
             </tr>
             <tr>
@@ -695,8 +695,8 @@
               <td style="${thtd}">${fmt(profit)}</td>
             </tr>
             <tr>
-              <td style="${thtd};${thLeft}">Base Imponible</td>
-              <td style="${thtd}">${fmt(base)}</td>
+              // <td style="${thtd};${thLeft};font-weight:600">Subtotal 2</td>
+              <td style="${thtd};font-weight:600">${fmt(base)}</td>
             </tr>
             <tr>
               <td style="${thtd};${thLeft}">IVA (${(IVA_RATE * 100).toFixed(0)}%)</td>
@@ -1631,6 +1631,249 @@
       return valido;
     }
   </script>
+
+  <script>
+    // JS para el panel de Cálculo en Vivo
+(() => {
+  // ===== CONFIG =====
+  const $ = id => document.getElementById(id);
+  const toNum = v => {
+    if (v === null || v === undefined) return 0;
+    const s = String(v).replace(/[^\d.-]/g, "");
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // Debounce para no recalcular en cada tecla
+  let t = null;
+  const schedule = () => { clearTimeout(t); t = setTimeout(recalcAll, 120); };
+
+  // === 1) AUTOCOMPLETO CONSUMO / IMPORTE / TARIFA ===
+  function wireConsumptionAutoFill() {
+    const kwhRow = $("kwhRow");
+    const pagoRow = $("pagoRow");
+    const tarifaRow = $("tarifaRow");
+    [kwhRow, pagoRow, tarifaRow].forEach(row => {
+      if (!row) return;
+      row.addEventListener("input", e => {
+        const el = e.target;
+        if (!(el instanceof HTMLInputElement)) return;
+
+        // Detecta índice por el id: consumo3, importe3, tarifa3
+        const m = el.id.match(/(consumo|importe|tarifa)(\d+)/);
+        if (!m) { schedule(); return; }
+
+        const [, tipo, idxStr] = m;
+        const i = parseInt(idxStr, 10);
+
+        const c = $("consumo" + i);
+        const p = $("importe" + i);
+        const r = $("tarifa" + i);
+
+        const consumo = toNum(c?.value);
+        const importe = toNum(p?.value);
+        const tarifa  = toNum(r?.value);
+
+        // Reglas de autocompletado “suaves”:
+        // - Si hay consumo + tarifa y cambió alguno de esos → rellena importe
+        if ((el === c || el === r) && consumo > 0 && tarifa > 0) {
+          if (p) p.value = (consumo * tarifa).toFixed(2);
+        }
+        // - Si hay consumo + importe y cambió alguno → rellena tarifa
+        if ((el === c || el === p) && consumo > 0 && importe > 0) {
+          if (r) r.value = (importe / consumo).toFixed(3);
+        }
+        // - Si solo hay importe + tarifa → rellena consumo
+        if ((el === p || el === r) && importe > 0 && tarifa > 0 && (!consumo || el === r)) {
+          if (c) c.value = (importe / tarifa).toFixed(0);
+        }
+
+        schedule();
+      });
+    });
+  }
+
+  // === 2) RE-CÁLCULO DE KPIs EN VIVO ===
+  function readConsumosImportes() {
+    const tipoPeriodo = $("tipoPeriodo")?.value || "bimestral";
+    const n = (tipoPeriodo === "mensual") ? 12 : 6;
+
+    const consumos = [];
+    const importes = [];
+    const tarifas  = [];
+    let totalTarifas = 0, nTarifas = 0;
+
+    for (let i = 0; i < n; i++) {
+      const c = toNum($("consumo" + i)?.value);
+      const p = toNum($("importe" + i)?.value);
+      const rStr = $("tarifa" + i)?.value ?? "";
+      const r = rStr === "" ? 0 : toNum(rStr);
+
+      consumos.push(c);
+      importes.push(p);
+      tarifas.push(r);
+      if (r > 0) { totalTarifas += r; nTarifas++; }
+    }
+
+    const consumoTotal = consumos.reduce((a,b) => a + b, 0);
+    const consumoAnual = consumoTotal;         // <- NO duplicar por bimestral
+    const consumoMensual = consumoAnual / 12;  // promedio mensual
+    const consumoDiario = consumoAnual / 365;
+
+    const importeTotalAnual = importes.reduce((a,b) => a + b, 0);
+    const importePromedio   = importeTotalAnual / 12;
+    const tarifaPromedio    = nTarifas > 0 ? (totalTarifas / nTarifas) : 0;
+
+    return {
+      tipoPeriodo, consumos, importes, tarifas,
+      consumoAnual, consumoMensual, consumoDiario,
+      importeTotalAnual, importePromedio, tarifaPromedio
+    };
+  }
+
+  function recalcAll() {
+    // Datos base
+    const base = readConsumosImportes();
+
+    // HSP y diseño (usar lo que haya disponible)
+    const estado = $("estadoProyecto")?.value || "";
+    let hsp = Number(window.hspValue);
+    if (!Number.isFinite(hsp)) {
+      // fallback si tienes hspData por estado (opcional)
+      if (window.hspData && estado && Number.isFinite(window.hspData[estado])) {
+        hsp = Number(window.hspData[estado]);
+      }
+    }
+    if (!Number.isFinite(hsp) || hsp <= 0) hsp = 0;
+
+    const potenciaPanel = toNum($("potenciaPanel")?.value); // Wp por módulo
+    const inversorPanel = $("inversorPanel")?.value || "";
+    const areaAprox     = toNum($("areaAprox")?.value);
+
+    // Cálculos de energía (solo si hay lo suficiente)
+    let numeroModulos = 0, potenciaInstalada = 0, generacionAnual = 0, potenciaNecesaria = 0;
+    if (potenciaPanel > 0 && hsp > 0) {
+      // Usar tu misma lógica “suave”
+      potenciaNecesaria = base.consumoDiario / (hsp * 0.76);
+      numeroModulos = Math.ceil((base.consumoDiario * 1000) / (hsp * potenciaPanel * 0.76));
+      potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
+      generacionAnual = numeroModulos * (potenciaPanel / 1000) * hsp * 365;
+    }
+
+    // Ahorros y eco — si tienes produccionMensual, úsala; si no, usa generacionAnual
+    let sumaGen = 0;
+    const prodMens = JSON.parse(localStorage.getItem("produccionMensual") || "[]");
+    if (Array.isArray(prodMens) && prodMens.length) {
+      sumaGen = prodMens.reduce((a,b) => a + toNum(b), 0);
+    } else {
+      sumaGen = generacionAnual;
+    }
+    const ahorroCO2 = (sumaGen * 439.963) / 1_000_000;
+    const arboles   = ahorroCO2 * 155;
+    const porcentajeAhorro = (base.consumoAnual > 0 && generacionAnual > 0)
+      ? (generacionAnual / base.consumoAnual) * 100
+      : 0;
+
+    // === Pintar tarjetas si existen ===
+    const setTxt = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+
+    setTxt("totalConsumoDisplay", `${Math.round(base.consumoAnual)} kWh`);
+    setTxt("totalImporteDisplay", `$${base.importeTotalAnual.toFixed(2)}`);
+    setTxt("tarifaPromedioDisplay", `$${base.tarifaPromedio.toFixed(3)}`);
+
+    setTxt("consumoAnual",   `${base.consumoAnual.toFixed(0)} kWh`);
+    setTxt("consumoMensual", `${base.consumoMensual.toFixed(0)} kWh`);
+    setTxt("consumoDiario",  `${base.consumoDiario.toFixed(1)} kWh`);
+
+    if (hsp > 0) setTxt("hsp", `${hsp.toFixed(2)} h`);
+    if (potenciaNecesaria > 0) setTxt("potenciaNecesaria", `${potenciaNecesaria.toFixed(2)} kW`);
+    if (numeroModulos > 0) setTxt("numeroModulos", `${numeroModulos}`);
+    if (potenciaInstalada > 0) setTxt("potenciaInstalada", `${potenciaInstalada.toFixed(2)} kW`);
+    if (generacionAnual > 0) setTxt("generacionAnual", `${generacionAnual.toFixed(2)} KWh`);
+    if (porcentajeAhorro > 0) setTxt("porcentajeAhorro", `${porcentajeAhorro.toFixed(1)}%`);
+    if (Number.isFinite(ahorroCO2)) setTxt("ahorroCO2", `${ahorroCO2.toFixed(3)} t`);
+    if (Number.isFinite(arboles)) setTxt("arboles", `${arboles.toFixed(0)} árboles`);
+
+    // === Guardar en localStorage (para que PDF/PU tengan lo último) ===
+    const resultados = {
+      tipoPeriodo: base.tipoPeriodo,
+      consumos: base.consumos,
+      importes: base.importes,
+      consumoTotal: base.consumoAnual,
+      consumoAnual: base.consumoAnual,
+      consumoMensual: base.consumoMensual,
+      consumoDiario: base.consumoDiario,
+      importeTotalAnual: base.importeTotalAnual,
+      importePromedio: base.importePromedio,
+      tarifas: base.tarifas,
+      tarifaPromedio: base.tarifaPromedio,
+      estado: estado,
+      hspPromedio: hsp,
+      potenciaPanel,
+      potenciaNecesaria,
+      numeroModulos,
+      generacionAnual,
+      potenciaInstalada,
+      ahorroCO2,
+      porcentajeAhorro: Number.isFinite(porcentajeAhorro) ? porcentajeAhorro.toFixed(1) : "0",
+      selectInversor: inversorPanel || "",
+      areaAprox,
+      consumoAnualDeEnergia: base.consumoAnual * base.tarifaPromedio
+    };
+    localStorage.setItem("resultadosSistemaSolar", JSON.stringify(resultados));
+
+    // === Disparar renders dependientes ===
+    // Tu tabla P.U. ya observa 'potenciaInstalada', así que al actualizar ese texto se re-renderiza sola.
+    // Si necesitas forzar, toca un campo observado:
+    const potEl = $("potenciaInstalada");
+    if (potEl) {
+      // fuerza al MutationObserver a ver un cambio (no hace falta si ya cambió el texto)
+      potEl.dataset.bump = String(Date.now());
+    }
+  }
+
+  
+
+  // === 3) ENLACES DE EVENTOS GLOBALES ===
+  function wireGlobal() {
+    // Elementos del diseño/datos que afectan KPIs
+    [
+      "tipoPeriodo","estadoProyecto","potenciaPanel","potenciaInversor",
+      "inversorPanel","areaAprox"
+    ].forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("input", schedule);
+      el.addEventListener("change", schedule);
+    });
+
+    // Si regeneras inputs al cambiar período, vuelve a cablear autocompletos
+    const tipoPeriodo = $("tipoPeriodo");
+    if (tipoPeriodo) {
+      tipoPeriodo.addEventListener("change", () => {
+        // Tu función existente que vuelve a crear inputs:
+        if (typeof generarInputsConsumo === "function") {
+          generarInputsConsumo();
+        }
+        wireConsumptionAutoFill();
+        schedule();
+      });
+    }
+
+    // Al cargar, cablea consumo y hace primer recálculo
+    wireConsumptionAutoFill();
+    schedule();
+  }
+
+  // Inicio
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireGlobal);
+  } else {
+    wireGlobal();
+  }
+})();
+</script>
+
 
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

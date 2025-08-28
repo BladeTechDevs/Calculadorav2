@@ -159,13 +159,13 @@ class DataManager {
     const hspPromedio = window.hspData?.[estado] || 5.5
 
     // Cálculos básicos
-    const consumoAnual = consumoData.tipoPeriodo === "mensual" ? consumoData.consumoTotal : consumoData.consumoTotal * 2
+    const consumoAnual = consumoData.tipoPeriodo === "mensual" ? consumoData.consumoTotal : consumoData.consumoTotal 
 
     const consumoMensual = consumoAnual / 12
     const consumoDiario = consumoAnual / 365
 
     const importeTotalAnual =
-      consumoData.tipoPeriodo === "mensual" ? consumoData.importeTotal : consumoData.importeTotal * 2
+      consumoData.tipoPeriodo === "mensual" ? consumoData.importeTotal : consumoData.importeTotal 
 
     const importePromedio = importeTotalAnual / (consumoData.tipoPeriodo === "mensual" ? 12 : 6)
     const tarifaPromedio = consumoAnual > 0 ? importeTotalAnual / consumoAnual : 0
