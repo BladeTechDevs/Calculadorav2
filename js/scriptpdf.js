@@ -629,18 +629,18 @@ async function exportToBasePdf() {
       // Header
       page.drawRectangle({
         x: left, y: y - headH, width: W, height: headH,
-        color: primeL, borderColor: primeD, borderWidth: 0.8,
+        color: primeD, borderColor: primeD, borderWidth: 1.2,
       })
       const thY = y - 14
-      page.drawText("Partida",     { x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Descripción", { x: centerX(X.desc,    col.desc,    "Descripción", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Cantidad",    { x: centerX(X.cant,    col.cant,    "Cantidad", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("P.U.",        { x: centerX(X.pu,      col.pu,      "P.U.", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
-      page.drawText("Importe",     { x: centerX(X.imp,     col.imp,     "Importe", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: primeD })
+  page.drawText("Partida",     { x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white })
+  page.drawText("Descripción", { x: centerX(X.desc,    col.desc,    "Descripción", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white })
+  page.drawText("Cantidad",    { x: centerX(X.cant,    col.cant,    "Cantidad", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white })
+  page.drawText("P.U.",        { x: centerX(X.pu,      col.pu,      "P.U.", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white })
+  page.drawText("Importe",     { x: centerX(X.imp,     col.imp,     "Importe", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white })
 
       // Column lines
       ;["partida","desc","cant","pu","imp","end"].forEach((k) => {
-        page.drawLine({ start: { x: X[k], y: y - headH }, end: { x: X[k], y: y - headH - rowH }, thickness: 0.8, color: primeD })
+        page.drawLine({ start: { x: X[k], y: y - headH }, end: { x: X[k], y: y - headH - rowH }, thickness: 1.2, color: primeD })
       })
       y -= headH
 
@@ -672,8 +672,8 @@ async function exportToBasePdf() {
 
       const notesH = 30
       page.drawRectangle({
-        x: left, y: y - notesH, width: leftW, height: notesH,
-        color: rgb(0.97, 1, 0.97), borderColor: primeD, borderWidth: 0.6,
+  x: left, y: y - notesH, width: leftW, height: notesH,
+  color: white, borderColor: primeD, borderWidth: 0.8,
       })
       page.drawText("*Cotización válida por 7 días naturales.", { x: left + 8, y: y - 12, size: fsBase, font, color: ink })
       page.drawText("*Fecha de inicio de trabajos por definir con cliente.", { x: left + 8, y: y - 24, size: fsBase, font, color: ink })
@@ -697,27 +697,39 @@ async function exportToBasePdf() {
         const isTotal = i === 2
 
         // Label
+        let labelColor, labelTextColor, valueColor, valueTextColor;
+        if (isTotal) {
+          labelColor = rgb(0.933, 0.961, 0.153);
+          labelTextColor = ink;
+          valueColor = rgb(0.933, 0.961, 0.153);
+          valueTextColor = ink;
+        } else {
+          labelColor = white;
+          labelTextColor = ink;
+          valueColor = white;
+          valueTextColor = ink;
+        }
         page.drawRectangle({
           x: rightX, y: yRowTop - rowTH, width: labelW, height: rowTH,
-          color: isTotal ? rgb(0.933, 0.961, 0.153) : primeL, borderColor: primeD, borderWidth: 0.8,
+          color: labelColor, borderColor: primeD, borderWidth: 0.8,
         })
-        const lfSize = isTotal ? fsBase + 3 : fsBase
+        const lfSize = isTotal ? fsBase + 3 : fsBase;
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
-          y: yRowTop - 14, size: lfSize, font: fontBold, color: isTotal ? ink : primeD,
+          y: yRowTop - 14, size: lfSize, font: fontBold, color: labelTextColor,
         })
 
         // Valor
-        const vx = rightX + labelW
+        const vx = rightX + labelW;
         page.drawRectangle({
           x: vx, y: yRowTop - rowTH, width: rightW - labelW, height: rowTH,
-          color: isTotal ? rgb(0.933, 0.961, 0.153) : white, borderColor: primeD, borderWidth: 0.8,
+          color: valueColor, borderColor: primeD, borderWidth: 0.8,
         })
-        const vSize = isTotal ? fsBase + 1 : fsBase
-        const txt = values[i]
+        const vSize = isTotal ? fsBase + 1 : fsBase;
+        const txt = values[i];
         page.drawText(txt, {
           x: centerText(vx, rightW - labelW, txt, vSize, isTotal ? fontBold : font),
-          y: yRowTop - 14, size: vSize, font: isTotal ? fontBold : font, color: ink,
+          y: yRowTop - 14, size: vSize, font: isTotal ? fontBold : font, color: valueTextColor,
         })
       }
 
@@ -729,7 +741,7 @@ async function exportToBasePdf() {
       const items = [
         { img: "panel.png",     value: datos.numeroModulosCard || "—",      title: "Paneles Solares" },
         { img: "potencia.png",  value: datos.potenciaInstalada || "—",      title: "Potencia Total Instalada" },
-        { img: "porcentaje.png",value: datos.porcentajeAhorro || "—",       title: "% de Ahorro" },
+        { img: "porcentaje.png",value: datos.porcentajeAhorro || "—",       title: "de Ahorro" },
         { img: "area.png",      value: (datos.areaAprox ? datos.areaAprox + " m2" : "— m2"), title: "Área Requerida" },
       ]
 
@@ -742,7 +754,7 @@ async function exportToBasePdf() {
       const cardH = mm(imgMM) + 32
       ensure(cardH + 8)
 
-      const blockH = mm(imgMM) + 18
+      const blockH = mm(imgMM) + 32
       ensure(blockH + 8)
       const totalW = cols * colW + (cols - 1) * gap
       const startX = (PW - totalW) / 2
@@ -752,19 +764,38 @@ async function exportToBasePdf() {
       for (let i = 0; i < cols; i++) {
         const x = finalStartX + i * (colW + gap)
         let iconW = mm(imgMM), iconH = mm(imgMM)
+        // Centrar cada tarjeta verticalmente
+        const cardTopY = y
+        const cardCenterX = x + colW / 2
+        // Imagen arriba
         try {
           const imgBytes = await fetch(`img/${items[i].img}`).then(r => r.arrayBuffer())
           const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
-          page.drawImage(imgEmbed, { x, y: y - iconH, width: iconW, height: iconH })
+          page.drawImage(imgEmbed, {
+            x: cardCenterX - iconW / 2,
+            y: cardTopY - iconH,
+            width: iconW,
+            height: iconH
+          })
         } catch {}
-
+        // Valor centrado debajo de la imagen
         const v = String(items[i].value ?? "—")
-        page.drawText(v, { x: x + iconW + 6, y: y - 8, size: valueSize, font: fontBold, color: ink })
-
+        const vWidth = widthOf(v, valueSize, fontBold)
+        page.drawText(v, {
+          x: cardCenterX - vWidth / 2,
+          y: cardTopY - iconH - 16,
+          size: valueSize,
+          font: fontBold,
+          color: ink
+        })
+        // Título centrado abajo
         const tWidth = widthOf(items[i].title, titleSize, fontBold)
         page.drawText(items[i].title, {
-          x: x + (colW - tWidth) / 2, y: y - iconH - 12,
-          size: titleSize, font: fontBold, color: ink,
+          x: cardCenterX - tWidth / 2,
+          y: cardTopY - iconH - 10 - valueSize - 8,
+          size: titleSize,
+          font: fontBold,
+          color: ink
         })
       }
       y -= blockH + 8
@@ -809,9 +840,9 @@ async function exportToBasePdf() {
       tempY -= rowLH_first
     })
 
-    let kpiW = mm(22), kpiGap = mm(20), kpiImgH = mm(12)
+    let kpiW = mm(22), kpiGap = mm(20), kpiImgH = mm(10)
     const kpiXStart = left + mm(75)
-    let kpiYStart = datosY - mm(3)
+    let kpiYStart = datosY - mm(3.9)
     const totalKPIWidth = datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap
     const areaWidth = mm(80)
     const offsetX = kpiXStart + (areaWidth - totalKPIWidth) / 2
@@ -839,7 +870,7 @@ async function exportToBasePdf() {
     let espacioPanelY = y
     y = espacioPanelY - mm(3)
 
-    await drawCanvasImageIfAny2("impactoChart", 180, 85)
+    await drawCanvasImageIfAny2("impactoChart", 180, 78)
 
     newPage()
     section("INVERSIÓN")
