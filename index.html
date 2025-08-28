@@ -351,7 +351,7 @@
   line-height:1.4;
 ">
             <i class="fas fa-info-circle" style="margin-right:6px; color:#16a34a;"></i>
-            Nota: Puede llenar <strong>Pagos por período</strong> o <strong>Tarifas promedio</strong>, cualquiera de los
+            Nota: Puede llenar <strong>Importe</strong> o <strong>Tarifas</strong>, cualquiera de los
             dos funciona.
             <br>
             <i style="margin-left:20px;">Si ingresa uno, el otro se autocompletará automáticamente.</i>
@@ -517,6 +517,36 @@
       </div>
 
       <script>
+        // === Formateo con comas ===
+        function formatWithCommas(input) {
+          let raw = input.value.replace(/,/g, '');
+          if (raw === '' || isNaN(raw)) return;
+          const parts = raw.split('.');
+          parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); // agrega comas
+          input.value = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
+          try { input.setSelectionRange(input.value.length, input.value.length); } catch { }
+        }
+
+        // === Conectar todos los inputs de Cotización P.U. ===
+        const idsPU = [
+          "panel", "inversor", "monitoreo", "estructura", "materiales",
+          "instalacion", "carpeta", "flete", "interconexion", "uve",
+          "uie", "medidor", "total"
+        ];
+
+        idsPU.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.type = "text"; // evitar bloqueo de comas
+            el.addEventListener("input", () => formatWithCommas(el));
+            el.addEventListener("blur", () => formatWithCommas(el));
+          }
+        });
+
+        // Profit (%) lo dejamos normal (porcentaje), no con comas
+      </script>
+
+      <script>
 
         ; (() => {
           const IVA_RATE = 0.16
@@ -532,7 +562,7 @@
             ['uve', 'UVIE'],
             ['uie', 'UIE'],
             ['medidor', 'Medidor'],
-            ['monitoreo','Monitoreo']
+            ['monitoreo', 'Monitoreo']
           ]
 
           let resultados = {}
@@ -1258,29 +1288,72 @@
       const select = document.getElementById('tipoPeriodo');
       const n = (select && select.value === 'mensual') ? 12 : 6;
 
+      // Contenedores originales (los vamos a vaciar/ocultar para no duplicar)
       const kwhRow = document.getElementById('kwhRow');
       const pagoRow = document.getElementById('pagoRow');
       const tarifaRow = document.getElementById('tarifaRow');
       if (!kwhRow || !pagoRow || !tarifaRow) return;
 
-      // Limpiar contenedores
       kwhRow.innerHTML = '';
       pagoRow.innerHTML = '';
       tarifaRow.innerHTML = '';
+
+      // Crear contenedor de tabla si no existe
+      const consumoContainer = document.getElementById('consumoContainer');
+      let tablaHost = document.getElementById('tablaConsumoContainer');
+      if (!tablaHost) {
+        tablaHost = document.createElement('div');
+        tablaHost.id = 'tablaConsumoContainer';
+        consumoContainer.appendChild(tablaHost);
+      }
+      // Oculta los grids (solo aspecto, no rompes otros selectores)
+      kwhRow.parentElement.style.display = 'none';
+      pagoRow.parentElement.style.display = 'none';
+      tarifaRow.parentElement.style.display = 'none';
 
       // Etiquetas por período
       const periodosMensuales = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
       const periodosBimestrales = ["Bim 1", "Bim 2", "Bim 3", "Bim 4", "Bim 5", "Bim 6"];
       const periodos = (n === 12) ? periodosMensuales : periodosBimestrales;
 
-      // Helpers
+      // ===== Helpers =====
       const toNum = (v) => {
         if (v === null || v === undefined) return NaN;
-        const x = parseFloat(String(v).trim().replace(',', '.'));
+        const x = parseFloat(String(v).trim().replace(/,/g, '').replace(',', '.'));
         return Number.isFinite(x) ? x : NaN;
       };
       const hasNum = (v) => !Number.isNaN(toNum(v));
       const fix2 = (x) => (Math.round((x + Number.EPSILON) * 100) / 100).toFixed(2);
+
+      // Formateo con comas conservando decimales escritos
+      function formatInput(input) {
+        let raw = input.value.replace(/,/g, '');
+        if (raw === '' || isNaN(raw)) return;
+        const parts = raw.split('.');
+        // parte entera con comas
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        input.value = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
+        // coloca el cursor al final (simple y estable)
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch { }
+      }
+
+      const actualizarPie = () => {
+        let sTarifa = 0, sConsumo = 0, sImporte = 0, cT = 0, cK = 0, cP = 0;
+        for (let i = 1; i <= n; i++) {
+          const k = document.getElementById(`consumo${i}`),
+            p = document.getElementById(`importe${i}`),
+            t = document.getElementById(`tarifa${i}`);
+          const consumo = toNum(k?.value), importe = toNum(p?.value), tarifa = toNum(t?.value);
+          if (hasNum(tarifa)) { sTarifa += tarifa; cT++; }
+          if (hasNum(consumo)) { sConsumo += consumo; cK++; }
+          if (hasNum(importe)) { sImporte += importe; cP++; }
+        }
+        document.getElementById('sumaConsumo').textContent = fix2(sConsumo);
+        document.getElementById('sumaImporte').textContent = fix2(sImporte);
+        document.getElementById('promTarifa').textContent = cT ? fix2(sTarifa / cT) : '0.00';
+        document.getElementById('promConsumo').textContent = cK ? fix2(sConsumo / cK) : '0.00';
+        document.getElementById('promImporte').textContent = cP ? fix2(sImporte / cP) : '0.00';
+      };
 
       const recalcular = (i, source) => {
         const k = document.getElementById(`consumo${i}`);
@@ -1292,89 +1365,123 @@
         const tarifa = toNum(t.value);
 
         if (source === 'importe') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(importe)) t.value = fix2(importe / consumo);
+          if (hasNum(consumo) && consumo > 0 && hasNum(importe)) {
+            t.value = fix2(importe / consumo);
+            formatInput(t);
+          }
         } else if (source === 'tarifa') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(tarifa)) p.value = fix2(tarifa * consumo);
+          if (hasNum(consumo) && consumo > 0 && hasNum(tarifa)) {
+            p.value = fix2(tarifa * consumo);
+            formatInput(p);
+          }
         } else if (source === 'consumo') {
           if (hasNum(consumo) && consumo > 0) {
             if (hasNum(importe) && importe > 0) {
               t.value = fix2(importe / consumo);
+              formatInput(t);
             } else if ((!hasNum(importe) || importe === 0) && hasNum(tarifa) && tarifa > 0) {
               p.value = fix2(tarifa * consumo);
+              formatInput(p);
             }
           }
         }
 
-        // Si tienes funciones globales para totales, llámalas sin romper si no existen
+        actualizarPie();
         window.actualizarTotales?.();
         window.actualizarTotalesConsumo?.();
       };
 
-      // Construcción de inputs
+      // ===== Construir tabla con columna "Periodo" =====
+      const table = document.createElement('table');
+      table.className = 'tabla-consumo';
+      table.innerHTML = `
+    <thead>
+      <tr>
+        <th style="width:22%">Periodo</th>
+        <th style="width:22%">Tarifa $</th>
+        <th style="width:28%">Consumo kWh</th>
+        <th style="width:28%">Importe</th>
+      </tr>
+    </thead>
+    <tbody id="tablaConsumoBody"></tbody>
+    <tfoot>
+      <tr class="sum" style="display:none">
+        <td class="label">Suma</td>
+        <td></td>
+        <td><span id="sumaConsumo">0.00</span></td>
+        <td><span id="sumaImporte">0.00</span></td>
+      </tr>
+      <tr class="avg" style="display:none">
+        <td class="label">Promedio</td>
+        <td><span id="promTarifa">0.00</span></td>
+        <td><span id="promConsumo">0.00</span></td>
+        <td><span id="promImporte">0.00</span></td>
+      </tr>
+      <tr class="avg" style="display:none">
+        <td></td><td></td><td></td><td></td>
+      </tr>
+    </tfoot>
+  `;
+      const tbody = table.querySelector('#tablaConsumoBody');
+
+      // Render filas con Periodo + T/K/P (se conservan tus ids)
       for (let i = 1; i <= n; i++) {
-        const periodo = periodos[i - 1] || `Periodo ${i}`;
+        const tr = document.createElement('tr');
 
-        // Mini etiqueta
-        const makeLabel = () => {
-          const d = document.createElement('div');
-          d.textContent = periodo;
-          d.style.fontSize = "12px";
-          d.style.fontWeight = "normal";
-          d.style.color = "#6c757d";
-          d.style.textAlign = "center";
-          d.style.marginBottom = "2px";
-          return d;
-        };
+        // Periodo visible
+        const tdPeriodo = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'periodo-etq';
+        badge.textContent = periodos[i - 1] || `Periodo ${i}`;
+        tdPeriodo.appendChild(badge);
 
-        const baseCol = () => {
-          const d = document.createElement('div');
-          d.style.display = "flex";
-          d.style.flexDirection = "column";
-          d.style.alignItems = "center";
-          d.style.margin = "0 5px";
-          return d;
-        };
-
-        // Consumo (kWh)
-        const contK = baseCol();
-        const k = document.createElement('input');
-        k.type = 'number'; k.step = 'any'; k.inputMode = 'decimal';
-        k.className = 'consumo-input'; k.id = `consumo${i}`;
-        k.placeholder = '0';
-        k.addEventListener('input', () => recalcular(i, 'consumo'));
-        contK.appendChild(makeLabel());
-        contK.appendChild(k);
-
-        // Importe ($)
-        const contP = baseCol();
-        const p = document.createElement('input');
-        p.type = 'number'; p.step = 'any'; p.inputMode = 'decimal';
-        p.className = 'consumo-input'; p.id = `importe${i}`;
-        p.placeholder = '0';
-        p.addEventListener('input', () => recalcular(i, 'importe'));
-        contP.appendChild(makeLabel());
-        contP.appendChild(p);
-
-        // Tarifa ($/kWh)
-        const contT = baseCol();
+        const tdT = document.createElement('td');
         const t = document.createElement('input');
-        t.type = 'number'; t.step = 'any'; t.inputMode = 'decimal';
+        t.type = 'text'; // <- para permitir comas visibles
+        t.inputMode = 'decimal';
         t.className = 'consumo-input'; t.id = `tarifa${i}`;
-        t.placeholder = '0';
-        t.addEventListener('input', () => recalcular(i, 'tarifa'));
-        contT.appendChild(makeLabel());
-        contT.appendChild(t);
+        t.placeholder = '0'; t.title = periodos[i - 1] || `Periodo ${i}`;
+        t.addEventListener('input', () => { recalcular(i, 'tarifa'); formatInput(t); });
+        t.addEventListener('blur', () => formatInput(t));
 
-        kwhRow.appendChild(contK);
-        pagoRow.appendChild(contP);
-        tarifaRow.appendChild(contT);
+        const tdK = document.createElement('td');
+        const k = document.createElement('input');
+        k.type = 'text';
+        k.inputMode = 'decimal';
+        k.className = 'consumo-input'; k.id = `consumo${i}`;
+        k.placeholder = '0'; k.title = periodos[i - 1] || `Periodo ${i}`;
+        k.addEventListener('input', () => { recalcular(i, 'consumo'); formatInput(k); });
+        k.addEventListener('blur', () => formatInput(k));
+
+        const tdP = document.createElement('td');
+        const p = document.createElement('input');
+        p.type = 'text';
+        p.inputMode = 'decimal';
+        p.className = 'consumo-input'; p.id = `importe${i}`;
+        p.placeholder = '0'; p.title = periodos[i - 1] || `Periodo ${i}`;
+        p.addEventListener('input', () => { recalcular(i, 'importe'); formatInput(p); });
+        p.addEventListener('blur', () => formatInput(p));
+
+        tdT.appendChild(t);
+        tdK.appendChild(k);
+        tdP.appendChild(p);
+
+        tr.appendChild(tdPeriodo);
+        tr.appendChild(tdT);
+        tr.appendChild(tdK);
+        tr.appendChild(tdP);
+        tbody.appendChild(tr);
       }
 
-      // Llama a los totales al finalizar render
+      // Montar en el host
+      tablaHost.innerHTML = '';
+      tablaHost.appendChild(table);
+
+      // Inicializar pie y totales externos
+      actualizarPie();
       window.actualizarTotales?.();
       window.actualizarTotalesConsumo?.();
     }
-
 
     //valores de preuba, quitar en produccion
 
@@ -1635,245 +1742,245 @@
 
   <script>
     // JS para el panel de Cálculo en Vivo
-(() => {
-  // ===== CONFIG =====
-  const $ = id => document.getElementById(id);
-  const toNum = v => {
-    if (v === null || v === undefined) return 0;
-    const s = String(v).replace(/[^\d.-]/g, "");
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : 0;
-  };
+    (() => {
+      // ===== CONFIG =====
+      const $ = id => document.getElementById(id);
+      const toNum = v => {
+        if (v === null || v === undefined) return 0;
+        const s = String(v).replace(/[^\d.-]/g, "");
+        const n = parseFloat(s);
+        return Number.isFinite(n) ? n : 0;
+      };
 
-  // Debounce para no recalcular en cada tecla
-  let t = null;
-  const schedule = () => { clearTimeout(t); t = setTimeout(recalcAll, 120); };
+      // Debounce para no recalcular en cada tecla
+      let t = null;
+      const schedule = () => { clearTimeout(t); t = setTimeout(recalcAll, 120); };
 
-  // === 1) AUTOCOMPLETO CONSUMO / IMPORTE / TARIFA ===
-  function wireConsumptionAutoFill() {
-    const kwhRow = $("kwhRow");
-    const pagoRow = $("pagoRow");
-    const tarifaRow = $("tarifaRow");
-    [kwhRow, pagoRow, tarifaRow].forEach(row => {
-      if (!row) return;
-      row.addEventListener("input", e => {
-        const el = e.target;
-        if (!(el instanceof HTMLInputElement)) return;
+      // === 1) AUTOCOMPLETO CONSUMO / IMPORTE / TARIFA ===
+      function wireConsumptionAutoFill() {
+        const kwhRow = $("kwhRow");
+        const pagoRow = $("pagoRow");
+        const tarifaRow = $("tarifaRow");
+        [kwhRow, pagoRow, tarifaRow].forEach(row => {
+          if (!row) return;
+          row.addEventListener("input", e => {
+            const el = e.target;
+            if (!(el instanceof HTMLInputElement)) return;
 
-        // Detecta índice por el id: consumo3, importe3, tarifa3
-        const m = el.id.match(/(consumo|importe|tarifa)(\d+)/);
-        if (!m) { schedule(); return; }
+            // Detecta índice por el id: consumo3, importe3, tarifa3
+            const m = el.id.match(/(consumo|importe|tarifa)(\d+)/);
+            if (!m) { schedule(); return; }
 
-        const [, tipo, idxStr] = m;
-        const i = parseInt(idxStr, 10);
+            const [, tipo, idxStr] = m;
+            const i = parseInt(idxStr, 10);
 
-        const c = $("consumo" + i);
-        const p = $("importe" + i);
-        const r = $("tarifa" + i);
+            const c = $("consumo" + i);
+            const p = $("importe" + i);
+            const r = $("tarifa" + i);
 
-        const consumo = toNum(c?.value);
-        const importe = toNum(p?.value);
-        const tarifa  = toNum(r?.value);
+            const consumo = toNum(c?.value);
+            const importe = toNum(p?.value);
+            const tarifa = toNum(r?.value);
 
-        // Reglas de autocompletado “suaves”:
-        // - Si hay consumo + tarifa y cambió alguno de esos → rellena importe
-        if ((el === c || el === r) && consumo > 0 && tarifa > 0) {
-          if (p) p.value = (consumo * tarifa).toFixed(2);
-        }
-        // - Si hay consumo + importe y cambió alguno → rellena tarifa
-        if ((el === c || el === p) && consumo > 0 && importe > 0) {
-          if (r) r.value = (importe / consumo).toFixed(3);
-        }
-        // - Si solo hay importe + tarifa → rellena consumo
-        if ((el === p || el === r) && importe > 0 && tarifa > 0 && (!consumo || el === r)) {
-          if (c) c.value = (importe / tarifa).toFixed(0);
-        }
+            // Reglas de autocompletado “suaves”:
+            // - Si hay consumo + tarifa y cambió alguno de esos → rellena importe
+            if ((el === c || el === r) && consumo > 0 && tarifa > 0) {
+              if (p) p.value = (consumo * tarifa).toFixed(2);
+            }
+            // - Si hay consumo + importe y cambió alguno → rellena tarifa
+            if ((el === c || el === p) && consumo > 0 && importe > 0) {
+              if (r) r.value = (importe / consumo).toFixed(3);
+            }
+            // - Si solo hay importe + tarifa → rellena consumo
+            if ((el === p || el === r) && importe > 0 && tarifa > 0 && (!consumo || el === r)) {
+              if (c) c.value = (importe / tarifa).toFixed(0);
+            }
 
-        schedule();
-      });
-    });
-  }
-
-  // === 2) RE-CÁLCULO DE KPIs EN VIVO ===
-  function readConsumosImportes() {
-    const tipoPeriodo = $("tipoPeriodo")?.value || "bimestral";
-    const n = (tipoPeriodo === "mensual") ? 12 : 6;
-
-    const consumos = [];
-    const importes = [];
-    const tarifas  = [];
-    let totalTarifas = 0, nTarifas = 0;
-
-    for (let i = 0; i < n; i++) {
-      const c = toNum($("consumo" + i)?.value);
-      const p = toNum($("importe" + i)?.value);
-      const rStr = $("tarifa" + i)?.value ?? "";
-      const r = rStr === "" ? 0 : toNum(rStr);
-
-      consumos.push(c);
-      importes.push(p);
-      tarifas.push(r);
-      if (r > 0) { totalTarifas += r; nTarifas++; }
-    }
-
-    const consumoTotal = consumos.reduce((a,b) => a + b, 0);
-    const consumoAnual = consumoTotal;         // <- NO duplicar por bimestral
-    const consumoMensual = consumoAnual / 12;  // promedio mensual
-    const consumoDiario = consumoAnual / 365;
-
-    const importeTotalAnual = importes.reduce((a,b) => a + b, 0);
-    const importePromedio   = importeTotalAnual / 12;
-    const tarifaPromedio    = nTarifas > 0 ? (totalTarifas / nTarifas) : 0;
-
-    return {
-      tipoPeriodo, consumos, importes, tarifas,
-      consumoAnual, consumoMensual, consumoDiario,
-      importeTotalAnual, importePromedio, tarifaPromedio
-    };
-  }
-
-  function recalcAll() {
-    // Datos base
-    const base = readConsumosImportes();
-
-    // HSP y diseño (usar lo que haya disponible)
-    const estado = $("estadoProyecto")?.value || "";
-    let hsp = Number(window.hspValue);
-    if (!Number.isFinite(hsp)) {
-      // fallback si tienes hspData por estado (opcional)
-      if (window.hspData && estado && Number.isFinite(window.hspData[estado])) {
-        hsp = Number(window.hspData[estado]);
+            schedule();
+          });
+        });
       }
-    }
-    if (!Number.isFinite(hsp) || hsp <= 0) hsp = 0;
 
-    const potenciaPanel = toNum($("potenciaPanel")?.value); // Wp por módulo
-    const inversorPanel = $("inversorPanel")?.value || "";
-    const areaAprox     = toNum($("areaAprox")?.value);
+      // === 2) RE-CÁLCULO DE KPIs EN VIVO ===
+      function readConsumosImportes() {
+        const tipoPeriodo = $("tipoPeriodo")?.value || "bimestral";
+        const n = (tipoPeriodo === "mensual") ? 12 : 6;
 
-    // Cálculos de energía (solo si hay lo suficiente)
-    let numeroModulos = 0, potenciaInstalada = 0, generacionAnual = 0, potenciaNecesaria = 0;
-    if (potenciaPanel > 0 && hsp > 0) {
-      // Usar tu misma lógica “suave”
-      potenciaNecesaria = base.consumoDiario / (hsp * 0.76);
-      numeroModulos = Math.ceil((base.consumoDiario * 1000) / (hsp * potenciaPanel * 0.76));
-      potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
-      generacionAnual = numeroModulos * (potenciaPanel / 1000) * hsp * 365;
-    }
+        const consumos = [];
+        const importes = [];
+        const tarifas = [];
+        let totalTarifas = 0, nTarifas = 0;
 
-    // Ahorros y eco — si tienes produccionMensual, úsala; si no, usa generacionAnual
-    let sumaGen = 0;
-    const prodMens = JSON.parse(localStorage.getItem("produccionMensual") || "[]");
-    if (Array.isArray(prodMens) && prodMens.length) {
-      sumaGen = prodMens.reduce((a,b) => a + toNum(b), 0);
-    } else {
-      sumaGen = generacionAnual;
-    }
-    const ahorroCO2 = (sumaGen * 439.963) / 1_000_000;
-    const arboles   = ahorroCO2 * 155;
-    const porcentajeAhorro = (base.consumoAnual > 0 && generacionAnual > 0)
-      ? (generacionAnual / base.consumoAnual) * 100
-      : 0;
+        for (let i = 0; i < n; i++) {
+          const c = toNum($("consumo" + i)?.value);
+          const p = toNum($("importe" + i)?.value);
+          const rStr = $("tarifa" + i)?.value ?? "";
+          const r = rStr === "" ? 0 : toNum(rStr);
 
-    // === Pintar tarjetas si existen ===
-    const setTxt = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
-
-    setTxt("totalConsumoDisplay", `${Math.round(base.consumoAnual)} kWh`);
-    setTxt("totalImporteDisplay", `$${base.importeTotalAnual.toFixed(2)}`);
-    setTxt("tarifaPromedioDisplay", `$${base.tarifaPromedio.toFixed(3)}`);
-
-    setTxt("consumoAnual",   `${base.consumoAnual.toFixed(0)} kWh`);
-    setTxt("consumoMensual", `${base.consumoMensual.toFixed(0)} kWh`);
-    setTxt("consumoDiario",  `${base.consumoDiario.toFixed(1)} kWh`);
-
-    if (hsp > 0) setTxt("hsp", `${hsp.toFixed(2)} h`);
-    if (potenciaNecesaria > 0) setTxt("potenciaNecesaria", `${potenciaNecesaria.toFixed(2)} kW`);
-    if (numeroModulos > 0) setTxt("numeroModulos", `${numeroModulos}`);
-    if (potenciaInstalada > 0) setTxt("potenciaInstalada", `${potenciaInstalada.toFixed(2)} kW`);
-    if (generacionAnual > 0) setTxt("generacionAnual", `${generacionAnual.toFixed(2)} KWh`);
-    if (porcentajeAhorro > 0) setTxt("porcentajeAhorro", `${porcentajeAhorro.toFixed(1)}%`);
-    if (Number.isFinite(ahorroCO2)) setTxt("ahorroCO2", `${ahorroCO2.toFixed(3)} t`);
-    if (Number.isFinite(arboles)) setTxt("arboles", `${arboles.toFixed(0)} árboles`);
-
-    // === Guardar en localStorage (para que PDF/PU tengan lo último) ===
-    const resultados = {
-      tipoPeriodo: base.tipoPeriodo,
-      consumos: base.consumos,
-      importes: base.importes,
-      consumoTotal: base.consumoAnual,
-      consumoAnual: base.consumoAnual,
-      consumoMensual: base.consumoMensual,
-      consumoDiario: base.consumoDiario,
-      importeTotalAnual: base.importeTotalAnual,
-      importePromedio: base.importePromedio,
-      tarifas: base.tarifas,
-      tarifaPromedio: base.tarifaPromedio,
-      estado: estado,
-      hspPromedio: hsp,
-      potenciaPanel,
-      potenciaNecesaria,
-      numeroModulos,
-      generacionAnual,
-      potenciaInstalada,
-      ahorroCO2,
-      porcentajeAhorro: Number.isFinite(porcentajeAhorro) ? porcentajeAhorro.toFixed(1) : "0",
-      selectInversor: inversorPanel || "",
-      areaAprox,
-      consumoAnualDeEnergia: base.consumoAnual * base.tarifaPromedio
-    };
-    localStorage.setItem("resultadosSistemaSolar", JSON.stringify(resultados));
-
-    // === Disparar renders dependientes ===
-    // Tu tabla P.U. ya observa 'potenciaInstalada', así que al actualizar ese texto se re-renderiza sola.
-    // Si necesitas forzar, toca un campo observado:
-    const potEl = $("potenciaInstalada");
-    if (potEl) {
-      // fuerza al MutationObserver a ver un cambio (no hace falta si ya cambió el texto)
-      potEl.dataset.bump = String(Date.now());
-    }
-  }
-
-  
-
-  // === 3) ENLACES DE EVENTOS GLOBALES ===
-  function wireGlobal() {
-    // Elementos del diseño/datos que afectan KPIs
-    [
-      "tipoPeriodo","estadoProyecto","potenciaPanel","potenciaInversor",
-      "inversorPanel","areaAprox"
-    ].forEach(id => {
-      const el = $(id);
-      if (!el) return;
-      el.addEventListener("input", schedule);
-      el.addEventListener("change", schedule);
-    });
-
-    // Si regeneras inputs al cambiar período, vuelve a cablear autocompletos
-    const tipoPeriodo = $("tipoPeriodo");
-    if (tipoPeriodo) {
-      tipoPeriodo.addEventListener("change", () => {
-        // Tu función existente que vuelve a crear inputs:
-        if (typeof generarInputsConsumo === "function") {
-          generarInputsConsumo();
+          consumos.push(c);
+          importes.push(p);
+          tarifas.push(r);
+          if (r > 0) { totalTarifas += r; nTarifas++; }
         }
+
+        const consumoTotal = consumos.reduce((a, b) => a + b, 0);
+        const consumoAnual = consumoTotal;         // <- NO duplicar por bimestral
+        const consumoMensual = consumoAnual / 12;  // promedio mensual
+        const consumoDiario = consumoAnual / 365;
+
+        const importeTotalAnual = importes.reduce((a, b) => a + b, 0);
+        const importePromedio = importeTotalAnual / 12;
+        const tarifaPromedio = nTarifas > 0 ? (totalTarifas / nTarifas) : 0;
+
+        return {
+          tipoPeriodo, consumos, importes, tarifas,
+          consumoAnual, consumoMensual, consumoDiario,
+          importeTotalAnual, importePromedio, tarifaPromedio
+        };
+      }
+
+      function recalcAll() {
+        // Datos base
+        const base = readConsumosImportes();
+
+        // HSP y diseño (usar lo que haya disponible)
+        const estado = $("estadoProyecto")?.value || "";
+        let hsp = Number(window.hspValue);
+        if (!Number.isFinite(hsp)) {
+          // fallback si tienes hspData por estado (opcional)
+          if (window.hspData && estado && Number.isFinite(window.hspData[estado])) {
+            hsp = Number(window.hspData[estado]);
+          }
+        }
+        if (!Number.isFinite(hsp) || hsp <= 0) hsp = 0;
+
+        const potenciaPanel = toNum($("potenciaPanel")?.value); // Wp por módulo
+        const inversorPanel = $("inversorPanel")?.value || "";
+        const areaAprox = toNum($("areaAprox")?.value);
+
+        // Cálculos de energía (solo si hay lo suficiente)
+        let numeroModulos = 0, potenciaInstalada = 0, generacionAnual = 0, potenciaNecesaria = 0;
+        if (potenciaPanel > 0 && hsp > 0) {
+          // Usar tu misma lógica “suave”
+          potenciaNecesaria = base.consumoDiario / (hsp * 0.76);
+          numeroModulos = Math.ceil((base.consumoDiario * 1000) / (hsp * potenciaPanel * 0.76));
+          potenciaInstalada = (potenciaPanel * numeroModulos) / 1000;
+          generacionAnual = numeroModulos * (potenciaPanel / 1000) * hsp * 365;
+        }
+
+        // Ahorros y eco — si tienes produccionMensual, úsala; si no, usa generacionAnual
+        let sumaGen = 0;
+        const prodMens = JSON.parse(localStorage.getItem("produccionMensual") || "[]");
+        if (Array.isArray(prodMens) && prodMens.length) {
+          sumaGen = prodMens.reduce((a, b) => a + toNum(b), 0);
+        } else {
+          sumaGen = generacionAnual;
+        }
+        const ahorroCO2 = (sumaGen * 439.963) / 1_000_000;
+        const arboles = ahorroCO2 * 155;
+        const porcentajeAhorro = (base.consumoAnual > 0 && generacionAnual > 0)
+          ? (generacionAnual / base.consumoAnual) * 100
+          : 0;
+
+        // === Pintar tarjetas si existen ===
+        const setTxt = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+
+        setTxt("totalConsumoDisplay", `${Math.round(base.consumoAnual)} kWh`);
+        setTxt("totalImporteDisplay", `$${base.importeTotalAnual.toFixed(2)}`);
+        setTxt("tarifaPromedioDisplay", `$${base.tarifaPromedio.toFixed(3)}`);
+
+        setTxt("consumoAnual", `${base.consumoAnual.toFixed(0)} kWh`);
+        setTxt("consumoMensual", `${base.consumoMensual.toFixed(0)} kWh`);
+        setTxt("consumoDiario", `${base.consumoDiario.toFixed(1)} kWh`);
+
+        if (hsp > 0) setTxt("hsp", `${hsp.toFixed(2)} h`);
+        if (potenciaNecesaria > 0) setTxt("potenciaNecesaria", `${potenciaNecesaria.toFixed(2)} kW`);
+        if (numeroModulos > 0) setTxt("numeroModulos", `${numeroModulos}`);
+        if (potenciaInstalada > 0) setTxt("potenciaInstalada", `${potenciaInstalada.toFixed(2)} kW`);
+        if (generacionAnual > 0) setTxt("generacionAnual", `${generacionAnual.toFixed(2)} KWh`);
+        if (porcentajeAhorro > 0) setTxt("porcentajeAhorro", `${porcentajeAhorro.toFixed(1)}%`);
+        if (Number.isFinite(ahorroCO2)) setTxt("ahorroCO2", `${ahorroCO2.toFixed(3)} t`);
+        if (Number.isFinite(arboles)) setTxt("arboles", `${arboles.toFixed(0)} árboles`);
+
+        // === Guardar en localStorage (para que PDF/PU tengan lo último) ===
+        const resultados = {
+          tipoPeriodo: base.tipoPeriodo,
+          consumos: base.consumos,
+          importes: base.importes,
+          consumoTotal: base.consumoAnual,
+          consumoAnual: base.consumoAnual,
+          consumoMensual: base.consumoMensual,
+          consumoDiario: base.consumoDiario,
+          importeTotalAnual: base.importeTotalAnual,
+          importePromedio: base.importePromedio,
+          tarifas: base.tarifas,
+          tarifaPromedio: base.tarifaPromedio,
+          estado: estado,
+          hspPromedio: hsp,
+          potenciaPanel,
+          potenciaNecesaria,
+          numeroModulos,
+          generacionAnual,
+          potenciaInstalada,
+          ahorroCO2,
+          porcentajeAhorro: Number.isFinite(porcentajeAhorro) ? porcentajeAhorro.toFixed(1) : "0",
+          selectInversor: inversorPanel || "",
+          areaAprox,
+          consumoAnualDeEnergia: base.consumoAnual * base.tarifaPromedio
+        };
+        localStorage.setItem("resultadosSistemaSolar", JSON.stringify(resultados));
+
+        // === Disparar renders dependientes ===
+        // Tu tabla P.U. ya observa 'potenciaInstalada', así que al actualizar ese texto se re-renderiza sola.
+        // Si necesitas forzar, toca un campo observado:
+        const potEl = $("potenciaInstalada");
+        if (potEl) {
+          // fuerza al MutationObserver a ver un cambio (no hace falta si ya cambió el texto)
+          potEl.dataset.bump = String(Date.now());
+        }
+      }
+
+
+
+      // === 3) ENLACES DE EVENTOS GLOBALES ===
+      function wireGlobal() {
+        // Elementos del diseño/datos que afectan KPIs
+        [
+          "tipoPeriodo", "estadoProyecto", "potenciaPanel", "potenciaInversor",
+          "inversorPanel", "areaAprox"
+        ].forEach(id => {
+          const el = $(id);
+          if (!el) return;
+          el.addEventListener("input", schedule);
+          el.addEventListener("change", schedule);
+        });
+
+        // Si regeneras inputs al cambiar período, vuelve a cablear autocompletos
+        const tipoPeriodo = $("tipoPeriodo");
+        if (tipoPeriodo) {
+          tipoPeriodo.addEventListener("change", () => {
+            // Tu función existente que vuelve a crear inputs:
+            if (typeof generarInputsConsumo === "function") {
+              generarInputsConsumo();
+            }
+            wireConsumptionAutoFill();
+            schedule();
+          });
+        }
+
+        // Al cargar, cablea consumo y hace primer recálculo
         wireConsumptionAutoFill();
         schedule();
-      });
-    }
+      }
 
-    // Al cargar, cablea consumo y hace primer recálculo
-    wireConsumptionAutoFill();
-    schedule();
-  }
-
-  // Inicio
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", wireGlobal);
-  } else {
-    wireGlobal();
-  }
-})();
-</script>
+      // Inicio
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", wireGlobal);
+      } else {
+        wireGlobal();
+      }
+    })();
+  </script>
 
 
 

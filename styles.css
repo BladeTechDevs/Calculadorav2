@@ -740,3 +740,70 @@ body {
 .mobile-only {
   /* opcionalmente deja vacío o solo estilos visuales */
 }
+
+/* este es todo el css de la tabla de consumo */
+.tabla-consumo {
+  width: 100%;
+  border-collapse: separate;  /* permite border-radius */
+  border-spacing: 0;
+  font-size: 0.88rem;
+  border: 1px solid #e2e8f0; /* gris claro */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.tabla-consumo thead th {
+  background: #f8fafc; /* gris muy claro */
+  color: #1e293b;      /* gris oscuro */
+  text-align: center;
+  padding: 10px 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tabla-consumo tbody td,
+.tabla-consumo tfoot td {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tabla-consumo tbody tr:last-child td {
+  border-bottom: none; /* quita línea extra */
+}
+
+.tabla-consumo input.consumo-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  text-align: right;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tabla-consumo input.consumo-input:focus {
+  border-color: #3b82f6; /* azul */
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+  outline: none;
+}
+
+.tabla-consumo tfoot tr.sum td {
+  background: #f9fafb;
+  font-weight: 700;
+}
+
+.tabla-consumo tfoot tr.avg td {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.tabla-consumo tfoot td {
+  text-align: right;
+}
+
+.tabla-consumo tfoot td.label {
+  text-align: left;
+  font-weight: 700;
+}
