@@ -594,7 +594,7 @@ const generacionAnualAprox = 0;
 function calcularSistemaSolar() {
   // Desactivar el botón
   document.getElementById("btnCalcular").disabled = true;
-  /*
+  
   function validarCliente() {
     const nombre = document.getElementById("nombreCliente")?.value.trim()
     const direccion = document.getElementById("direccionCliente")?.value.trim()
@@ -664,11 +664,24 @@ function calcularSistemaSolar() {
   }
 
   function validarProyecto() {
+    // Antes de validar, poner 0 en los inputs de Cotización P.U. si están vacíos (excepto profit)
+    const cotizacionIds = [
+      "panel", "inversor", "mantenimiento", "estructura", "materiales",
+      "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor", "total"
+    ];
+    cotizacionIds.forEach(id => {
+      const input = document.getElementById(id);
+      if (input && (input.value === null || input.value === "")) {
+        input.value = 0;
+      }
+    });
+    // ...existing code...
     const tipo = document.getElementById("tipoProyecto")?.value
     const tarifa = document.getElementById("tipoTarifa")?.value
     const estado = document.getElementById("estadoProyecto")?.value
     const municipio = document.getElementById("municipioProyecto")?.value.trim()
     const potencia = document.getElementById("potenciaPanel")?.value
+    const profit = document.getElementById("profit")?.value
 
     if (!tipo) {
       showToast("Selecciona el tipo de proyecto.", "warning")
@@ -688,6 +701,15 @@ function calcularSistemaSolar() {
     }
     if (!potencia || Number.parseFloat(potencia) <= 0) {
       showToast("Ingresa la potencia del panel.", "warning")
+      return false
+    }
+    const areaAprox = document.getElementById("areaAprox")?.value
+    if (!areaAprox || Number.parseFloat(areaAprox) <= 0) {
+      showToast("Ingresa el área aproximada.", "warning")
+      return false
+    }
+    if (!profit || Number.parseFloat(profit) <= 0) {
+      showToast("Ingresa el profit (%).", "warning")
       return false
     }
 
@@ -729,7 +751,7 @@ function calcularSistemaSolar() {
   if (!validarConsumo()) {
     document.getElementById("btnCalcular").disabled = false
     return
-  } */
+  } 
 
   try {
     const datos = window.dataManager.guardarEnLocalStorage();
