@@ -864,12 +864,12 @@ function nuevoCalculo() {
   const btnCalc = document.getElementById("btnCalcular");
   if (btnCalc) btnCalc.disabled = false;
 
-  // Asegurar que el botón de cotización móvil se vea y esté habilitado
+  // Ocultar el botón de cotización móvil en mobile
   const btnCot = document.getElementById("btnCotizarMobile");
   if (btnCot) {
-    btnCot.classList.add("show");
-    btnCot.disabled = false;
-    btnCot.removeAttribute("hidden");
+    btnCot.classList.remove("show");
+    btnCot.disabled = true;
+    btnCot.setAttribute("hidden", "true");
   }
 
   // Limpiar resultados en pantalla
