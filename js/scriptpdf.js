@@ -261,10 +261,10 @@ async function exportToBasePdf() {
       const colW_R = gridW - colW_L;
 
       // espaciado compacto
-      const rowLH_first = 12; // primera línea
-      const rowLH_wrap = 11; // líneas adicionales
-      const gapSingle = 8;  // gap si no hay wrap
-      const gapMulti = 6;  // gap si hay wrap
+      const rowLH_first = 11; // primera línea
+      const rowLH_wrap = 10; // líneas adicionales
+      const gapSingle = 5;  // gap si no hay wrap
+      const gapMulti = 4;  // gap si hay wrap
 
       const iconMM = 3.6;
       const iconPad = 5;
@@ -1051,7 +1051,7 @@ async function exportToBasePdf() {
         {
           img: "potencia.png",
           value: datos.potenciaInstalada || "—",
-          title: "Potencia Total Inst.",
+          title: "Potencia Total Instalada",
         },
         {
           img: "porcentaje.png",
@@ -1112,8 +1112,8 @@ async function exportToBasePdf() {
           x: x + (colW - tWidth) / 2,
           y: y - iconH - 12,
           size: titleSize,
-          font,
-          color: mute,
+          font: fontBold,
+          color: ink,
         });
       }
       y -= blockH + 8;
@@ -1147,9 +1147,9 @@ async function exportToBasePdf() {
     ];
     // KPIs a la derecha
     const datosKPI = [
-      { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
-      { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
-      { label: "Tarifa Prom", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
+  { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
+  { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
+  { label: "Tarifa Promedio", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
     ];
 
     // Layout horizontal: datos del proyecto a la izquierda, KPIs a la derecha
@@ -1187,9 +1187,9 @@ async function exportToBasePdf() {
       // Valor arriba, centrado respecto a la imagen (más grande)
       const kpiValueSize = 11; // Un poco más chicos
       page.drawText(kpi.value, { x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
-      // Nombre abajo, centrado respecto a la imagen
-      const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
-      page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, font) / 2, y: imgY - mm(6), size: kpiTitleSize, font, color: mute });
+  // Nombre abajo, centrado respecto a la imagen
+  const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
+  page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2, y: imgY - mm(6), size: kpiTitleSize, font: fontBold, color: ink });
     }
     // Ajusta y para el siguiente bloque
     y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
@@ -1292,12 +1292,12 @@ async function exportToBasePdf() {
       font: fontBold,
       color: ink,
     })
-    page.drawText("Árboles equiv.", {
-      x: x + (blockW - widthOf("Árboles equiv.", fsSmall + 1, font)) / 2,
+    page.drawText("Árboles equivalentes", {
+      x: x + (blockW - widthOf("Árboles equivalentes", fsSmall + 1, font)) / 2,
       y: iconY_arbol - mm(6), // debajo del ícono
       size: fsSmall + 1,
-      font,
-      color: mute,
+      font: fontBold,
+      color: ink,
     })
 
     // ================= CO2 (bloque 3) =================
@@ -1324,8 +1324,8 @@ async function exportToBasePdf() {
       x: x + (blockW - widthOf("Ahorro CO2", fsSmall + 1, font)) / 2,
       y: iconY_co2 - mm(6), // debajo del ícono
       size: fsSmall + 1,
-      font,
-      color: mute,
+      font: fontBold,
+      color: ink,
     })
 
     // ================= mover cursor =================
