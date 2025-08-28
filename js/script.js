@@ -595,7 +595,7 @@ function calcularSistemaSolar() {
   // Desactivar el botón
   document.getElementById("btnCalcular").disabled = true;
   
-  function validarCliente() {
+  /*function validarCliente() {
     const nombre = document.getElementById("nombreCliente")?.value.trim()
     const direccion = document.getElementById("direccionCliente")?.value.trim()
     const estado = document.getElementById("estadoCliente")?.value
@@ -751,7 +751,7 @@ function calcularSistemaSolar() {
   if (!validarConsumo()) {
     document.getElementById("btnCalcular").disabled = false
     return
-  } 
+  } */
 
   try {
     const datos = window.dataManager.guardarEnLocalStorage();

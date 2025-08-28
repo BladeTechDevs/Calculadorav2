@@ -202,18 +202,18 @@ async function exportToBasePdf() {
     }
 
     // Título superior negro, más arriba y compacto
-    const sectionTopTitle = (txt) => {
-      const h = fsTitle + 2
-      const padY = 2
-      ensure(h + 6)
-      page.drawText(txt, {
-        x: left + contentWidth - widthOf(txt, fsTitle, font),
-        y: y - h + padY,
-        size: fsTitle,
-        font: font,
-      })
-      y -= h + 4
-    }
+    const sectionTopTitle = (txt, useBold = false, size = fsTitle, extraY = 0) => {
+  const h = size + 2;
+  const padY = 2;
+  ensure(h + 6);
+  page.drawText(txt, {
+    x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font),
+    y: y - h + padY + extraY,
+    size: size,
+    font: useBold ? fontBold : font,
+  });
+  y -= h + 4;
+}
 
     // ========= PANEL Información de los involucrados (3/4 – 1/4) =========
     const iconCache = {}
@@ -307,7 +307,7 @@ async function exportToBasePdf() {
         width: contentWidth,
         height: H,
         color: white,
-        borderColor: prime,
+        borderColor: primeD, // contorno verde oscuro
         borderWidth: 1,
         borderRadius: radius,
       })
@@ -317,11 +317,11 @@ async function exportToBasePdf() {
         y: y - titleH,
         width: contentWidth,
         height: titleH,
-        color: headerSoft,
+        color: primeD, // header verde oscuro
         borderRadius: radius,
       })
       const title = "Información de los involucrados"
-      page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: primeD })
+  page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: white })
 
       // separador vertical en 3/4
       const sepX = left + padX + colW_L + midGap / 2
@@ -958,8 +958,8 @@ async function exportToBasePdf() {
         borderWidth: 0.8,
       })
 
-  const labels = ["Subtotal", "IVA", "Total"]
-  const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
+      const labels = ["Subtotal", "IVA", "Total"]
+      const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
 
       const centerText = (x0, w, text, size, fnt) => x0 + (w - widthOf(text, size, fnt)) / 2
 
@@ -978,7 +978,7 @@ async function exportToBasePdf() {
           borderColor: primeD,
           borderWidth: 0.8,
         })
-  const lfSize = isTotal ? fsBase + 3 : fsBase
+        const lfSize = isTotal ? fsBase + 3 : fsBase
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
           y: yRowTop - 14,
@@ -1094,9 +1094,11 @@ async function exportToBasePdf() {
 
     // === 4) Composición ===
     // Título top: COTIZACIÓN PRELIMINAR – FOLIO {folio}
-    sectionTopTitle(`COTIZACIÓN PRELIMINAR`)
-    sectionTopTitle(`FOLIO:  SFVI-${datos.folio || "—"}`)
-    y -= mm(4)
+    const folioFontSize = Math.max(10, fsTitle - 4);
+    // Espacio mínimo entre ambos títulos
+    sectionTopTitle(`COTIZACIÓN PRELIMINAR`, true, fsTitle, mm(1));
+    sectionTopTitle(`FOLIO:  SFVI-${datos.folio || "—"}`, true, folioFontSize, 0);
+    y -= mm(2);
     // Panel (involucrados)
     await drawInfoPanelWithIcons()
 
@@ -1131,11 +1133,11 @@ async function exportToBasePdf() {
     // Dibuja datos del proyecto
     let tempY = datosY;
     datosProyecto.forEach(([label, value]) => {
-  const labelW = widthOf(label, fsBase, fontBold);
-  const gap = mm(1.2); // Junta más el título y la respuesta
-  page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
-  page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
-  tempY -= lh;
+      const labelW = widthOf(label, fsBase, fontBold);
+      const gap = mm(1.2); // Junta más el título y la respuesta
+      page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
+      page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
+      tempY -= lh;
     });
 
     // Dibuja KPIs con imagen
@@ -1213,7 +1215,7 @@ async function exportToBasePdf() {
     })
 
     const invValue = typeof _total === "number" ? fmtMXN(_total) : String(_total)
-  const invValueSize = 9 // tamaño reducido para valores grandes
+    const invValueSize = 9 // tamaño reducido para valores grandes
     const invValueW = widthOf(invValue, invValueSize, fontBold)
     page.drawText(invValue, {
       x: roiCenterX - invValueW / 2,
