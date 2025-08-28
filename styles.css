@@ -556,6 +556,12 @@ body {
     -webkit-overflow-scrolling: touch;
   }
 
+  @media (max-width: 600px) {
+    .form-panel {
+      margin-top: 60px !important; /* igual a la altura del header en mobile */
+    }
+  }
+
   /* SOLO logo en teléfono */
   .logo span { display: none; }
   .contact-info { display: none; }
