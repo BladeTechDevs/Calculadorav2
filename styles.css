@@ -756,30 +756,40 @@ body {
    (No se borra nada; solo se sobrescribe)
    ============================ */
 
-/* 1) Evitar hueco blanco al final del formulario en mobile */
+/* === FIX: botones visibles en mobile sin hueco extra === */
 @media (max-width: 768px) {
-  .form-panel {
-    padding-bottom: 1rem !important; /* antes tenías 4rem */
-  }
-
-  /* 2) Botón Generar Cotización "pegajoso" sin empujar contenido */
+  /* 1) Quita el sticky para no tapar a los otros botones */
   #btnCotizarMobile.show {
-    position: sticky !important;
-    bottom: 8px !important;
+    position: static !important;
+    bottom: auto !important;
   }
 
-  /* 3) Márgenes consistentes entre botones (último sin hueco extra) */
+  /* 2) Base: poco padding inferior */
+  .form-panel {
+    padding-bottom: 1rem !important;
+  }
+
+  /* 3) Solo cuando aparece el botón "Generar Cotización",
+        añade el espacio justo para los botones + safe area. */
+  .form-panel:has(#btnCotizarMobile.show) {
+    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom)) !important;
+    /* 64px ≈ alto de un botón; ajusta a 56–72 si tu botón es más chico/grande */
+  }
+
+  /* 4) Márgenes coherentes entre botones (último sin hueco extra) */
   .calculate-btn,
   .calculate-btn-c {
     margin-bottom: 0.75rem !important;
   }
-  #btnCotizarMobile {
+  #btnCotizarMobile {           /* el último */
     margin-bottom: 0 !important;
   }
 }
 
-/* Refuerzo para pantallas muy pequeñas */
+/* Refuerzo pantallas muy pequeñas */
 @media (max-width: 480px) {
   .form-panel { padding-bottom: 1rem !important; }
-  #btnCotizarMobile.show { bottom: 8px !important; }
+  .form-panel:has(#btnCotizarMobile.show) {
+    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom)) !important;
+  }
 }
