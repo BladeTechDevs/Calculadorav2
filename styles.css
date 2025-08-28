@@ -719,7 +719,7 @@ body {
   #btnCotizarMobile.show {
     display: inline-flex;
     margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0 !important;
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
     min-height: 32px;
