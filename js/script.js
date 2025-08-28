@@ -1,3 +1,15 @@
+  // Hacer scroll al inicio del formulario para evitar que el header lo cubra en mobile
+  const formulario = document.querySelector("form");
+  if (formulario) {
+    formulario.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  // Ocultar el botón de cotización móvil en mobile antes de mostrarlo
+  const btnCotMobile = document.getElementById("btnCotizarMobile");
+  if (btnCotMobile) {
+    btnCotMobile.classList.remove("show");
+    btnCotMobile.disabled = true;
+    btnCotMobile.setAttribute("hidden", "true");
+  }
 // Asegura que calcularSistemaSolar esté disponible globalmente
 window.calcularSistemaSolar = calcularSistemaSolar;
 document
