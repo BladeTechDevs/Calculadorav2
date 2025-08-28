@@ -341,7 +341,6 @@ body {
 .calculate-btn:hover {
   background: linear-gradient(135deg, #106e3a 0%, #0f5132 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(115, 178, 72, 0.3);
 }
 .calculate-btn:active { transform: translateY(0); }
 
@@ -375,10 +374,7 @@ body {
   text-align: center;
   transition: all 0.3s ease;
 }
-.metric-card:hover {
-  border-color: rgba(115, 178, 72, 0.4);
-  transform: translateY(-2px);
-}
+.metric-card:hover { border-color: rgba(115, 178, 72, 0.4); transform: translateY(-2px); }
 .metric-icon { font-size: 1.7rem; color: #73b248; margin-bottom: .6rem; }
 .metric-value { font-size: 1.3rem; font-weight: 700; color: #1a202c; margin-bottom: .2rem; }
 .metric-label { font-size: .7rem; color: #4a5568; text-transform: uppercase; letter-spacing: .5px; }
@@ -458,10 +454,7 @@ body {
   justify-content: center;
   gap: 0.6rem;
 }
-.export-btn:hover {
-  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
-  transform: translateY(-2px);
-}
+.export-btn:hover { transform: translateY(-2px); }
 
 /* Loading overlay */
 .loading-overlay {
@@ -755,4 +748,38 @@ body {
 /* Ya no uses .mobile-only para mostrar nada */
 .mobile-only {
   /* opcionalmente deja vacío o solo estilos visuales */
+}
+
+
+/* ============================
+   FIX MOBILE – OVERRIDES
+   (No se borra nada; solo se sobrescribe)
+   ============================ */
+
+/* 1) Evitar hueco blanco al final del formulario en mobile */
+@media (max-width: 768px) {
+  .form-panel {
+    padding-bottom: 1rem !important; /* antes tenías 4rem */
+  }
+
+  /* 2) Botón Generar Cotización "pegajoso" sin empujar contenido */
+  #btnCotizarMobile.show {
+    position: sticky !important;
+    bottom: 8px !important;
+  }
+
+  /* 3) Márgenes consistentes entre botones (último sin hueco extra) */
+  .calculate-btn,
+  .calculate-btn-c {
+    margin-bottom: 0.75rem !important;
+  }
+  #btnCotizarMobile {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Refuerzo para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .form-panel { padding-bottom: 1rem !important; }
+  #btnCotizarMobile.show { bottom: 8px !important; }
 }
