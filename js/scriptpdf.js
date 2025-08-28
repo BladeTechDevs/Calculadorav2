@@ -4,16 +4,16 @@ const fsKPI = 13
 const widthOf = (t, size = fsBase, f = font) => f.widthOfTextAtSize(String(t), size)
 // Chip de sección (verde)
 const section = (txt) => {
-    const padY = 2,
-      padX = 8
-    const w = widthOf(txt, fsTitle, font) + padX * 2
-    const h = fsTitle + padY * 1.2
-    ensure(h + 8)
-    page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
-    page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: font, color: white })
-    // Línea verde tenue eliminada
-    y -= h + 8
-  }
+  const padY = 2,
+    padX = 8
+  const w = widthOf(txt, fsTitle, font) + padX * 2
+  const h = fsTitle + padY * 1.2
+  ensure(h + 8)
+  page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
+  page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: font, color: white })
+  // Línea verde tenue eliminada
+  y -= h + 8
+}
 
 async function exportToBasePdf() {
   const PDFLib = window.PDFLib
@@ -569,7 +569,7 @@ async function exportToBasePdf() {
       let dataURL = null
       try {
         dataURL = c.toDataURL("image/png", 1)
-      } catch {}
+      } catch { }
 
       // 4) restaurar layout
       document.body.classList.remove("pdf-export")
@@ -958,8 +958,8 @@ async function exportToBasePdf() {
         borderWidth: 0.8,
       })
 
-      const labels = ["Sub Total", "IVA", "Total"]
-      const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
+  const labels = ["Subtotal", "IVA", "Total"]
+  const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
 
       const centerText = (x0, w, text, size, fnt) => x0 + (w - widthOf(text, size, fnt)) / 2
 
@@ -974,11 +974,11 @@ async function exportToBasePdf() {
           y: yRowTop - rowTH,
           width: labelW,
           height: rowTH,
-          color: isTotal ? rgb(1, 0.7, 0) : primeL,
+          color: isTotal ? rgb(0.933, 0.961, 0.153) : primeL, // #EEF527 para Total
           borderColor: primeD,
           borderWidth: 0.8,
         })
-        const lfSize = isTotal ? fsBase + 1 : fsBase
+  const lfSize = isTotal ? fsBase + 3 : fsBase
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
           y: yRowTop - 14,
@@ -994,17 +994,17 @@ async function exportToBasePdf() {
           y: yRowTop - rowTH,
           width: rightW - labelW,
           height: rowTH,
-          color: isTotal ? rgb(1, 0.7, 0) : white,
+          color: isTotal ? rgb(0.933, 0.961, 0.153) : white, // #EEF527 para Total
           borderColor: primeD,
           borderWidth: 0.8,
         })
         const vSize = isTotal ? fsBase + 1 : fsBase
         const txt = values[i]
         page.drawText(txt, {
-          x: centerText(vx, rightW - labelW, txt, vSize, fontBold),
+          x: centerText(vx, rightW - labelW, txt, vSize, isTotal ? fontBold : font),
           y: yRowTop - 14,
           size: vSize,
-          font: fontBold,
+          font: isTotal ? fontBold : font,
           color: ink,
         })
       }
@@ -1069,7 +1069,7 @@ async function exportToBasePdf() {
             width: iconW,
             height: iconH,
           });
-        } catch (e) {}
+        } catch (e) { }
         // Valor a la derecha de la imagen
         const v = String(items[i].value ?? "—");
         page.drawText(v, {
@@ -1148,19 +1148,19 @@ async function exportToBasePdf() {
       const kpi = datosKPI[i];
       const baseX = kpiXStart + i * (kpiW + kpiGap);
       // Imagen en medio
-      let imgY = kpiYStart - mm(2) - kpiImgH/2;
-      let imgX = baseX + kpiW/2 - mm(6);
+      let imgY = kpiYStart - mm(2) - kpiImgH / 2;
+      let imgX = baseX + kpiW / 2 - mm(6);
       try {
         const imgBytes = await fetch(`img/${kpi.img}`).then(r => r.arrayBuffer());
         const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
         page.drawImage(imgEmbed, { x: imgX, y: imgY, width: mm(12), height: kpiImgH });
-      } catch {}
+      } catch { }
       // Valor arriba, centrado respecto a la imagen (más grande)
       const kpiValueSize = 11; // Un poco más chicos
-      page.drawText(kpi.value, { x: baseX + kpiW/2 - widthOf(kpi.value, kpiValueSize, fontBold)/2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
+      page.drawText(kpi.value, { x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
       // Nombre abajo, centrado respecto a la imagen
       const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
-      page.drawText(kpi.label, { x: baseX + kpiW/2 - widthOf(kpi.label, kpiTitleSize, font)/2, y: imgY - mm(6), size: kpiTitleSize, font, color: mute });
+      page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, font) / 2, y: imgY - mm(6), size: kpiTitleSize, font, color: mute });
     }
     // Ajusta y para el siguiente bloque
     y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
@@ -1168,6 +1168,7 @@ async function exportToBasePdf() {
     // Reducir aún más el espacio entre KPIs y 'TU SISTEMA SOLAR'
     y += mm(4); // Sube el título para que quede más cerca de los KPIs
     section("TU SISTEMA SOLAR")
+    y -= mm(3); // Sube el título para que quede más cerca de los KPIs
     await drawSistemaSolarSection()
     let espacioPanelY = y;
     y = espacioPanelY - mm(3); // menos espacio antes de la gráfica
@@ -1177,104 +1178,122 @@ async function exportToBasePdf() {
 
     newPage()
     section("INVERSIÓN")
+    y -= mm(16)
 
-    section("INVERSIÓN")
-y -= mm(18)
+    // Configuración general
+    const invCircleR = mm(12)
+    const blockW = mm(54)   // ancho de cada bloque
+    const blockH = mm(40)   // alto de bloque
+    const gap = mm(10)      // separación entre bloques
+    const totalWidth = blockW * 3 + gap * 2
+    const startX = left + (contentWidth - totalWidth) / 2
+    const centerY = y - blockH / 2
 
-// Configuración general
-const invCircleR = mm(12)
-const itemGap = mm(40) // separación horizontal entre bloques
-const items = ["arbol", "inversion", "co2"]
-const totalWidth = items.length * mm(14 + 16) + (items.length - 1) * itemGap
+    // Utilidad: evita NaN en los textos
+    const safe = (v) => (v == null || Number.isNaN(Number(v)) ? "—" : String(v))
 
-// punto inicial centrado
-const startX = left + (contentWidth - totalWidth) / 2
-const baseY = y - invCircleR
+    // ================= ROI (bloque 1) =================
+    let x = startX
+    const roiCenterX = x + blockW / 2
+    const roiCenterY = centerY + blockH / 2
 
-// 1) Árboles
-let x = startX
-try {
-  const imgBytes = await fetch('img/arbol.png').then(r => r.arrayBuffer())
-  const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
-  page.drawImage(imgEmbed, { x, y: baseY, width: mm(14), height: mm(14) })
-} catch {}
-page.drawText(`${datos.arboles || "—"} árboles`, {
-  x: x + mm(16),
-  y: baseY + mm(7) - fsKPI / 2,
-  size: fsKPI,
-  font: fontBold,
-  color: ink,
-})
-page.drawText("Árboles equiv.", {
-  x,
-  y: baseY - 12,
-  size: fsSmall + 1,
-  font,
-  color: mute,
-})
+    page.drawEllipse({
+      x: roiCenterX, // centro correcto
+      y: roiCenterY, // centro correcto
+      xScale: invCircleR,
+      yScale: invCircleR,
+      color: rgb(0.93, 0.98, 0.95),
+      borderColor: rgb(0.15, 0.72, 0.3),
+      borderWidth: 1.2,
+    })
 
-// 2) Círculo de inversión
-x += mm(14 + 16) + itemGap
-page.drawEllipse({
-  x: x + invCircleR,
-  y: baseY + invCircleR,
-  xScale: invCircleR,
-  yScale: invCircleR,
-  color: rgb(0.93, 0.98, 0.95),
-  borderColor: rgb(0.15, 0.72, 0.3),
-  borderWidth: 1.2,
-})
-const invValue = typeof _total === "number" ? fmtMXN(_total) : String(_total)
-const invValueSize = fsKPI + 1
-const invValueW = widthOf(invValue, invValueSize, fontBold)
-page.drawText(invValue, {
-  x: x + invCircleR - invValueW / 2,
-  y: baseY + invCircleR - invValueSize / 2,
-  size: invValueSize,
-  font: fontBold,
-  color: primeD,
-})
-// ROI debajo
-page.drawText("ROI", {
-  x: x + invCircleR * 2 + mm(4),
-  y: baseY + invCircleR + 8,
-  size: fsBase,
-  font: fontBold,
-  color: ink,
-})
-page.drawText(`${datos.roi || "—"} años`, {
-  x: x + invCircleR * 2 + mm(4),
-  y: baseY + invCircleR - 2,
-  size: fsBase,
-  font,
-  color: ink,
-})
+    const invValue = typeof _total === "number" ? fmtMXN(_total) : String(_total)
+  const invValueSize = 9 // tamaño reducido para valores grandes
+    const invValueW = widthOf(invValue, invValueSize, fontBold)
+    page.drawText(invValue, {
+      x: roiCenterX - invValueW / 2,
+      y: roiCenterY - invValueSize / 2,
+      size: invValueSize,
+      font: fontBold,
+      color: primeD,
+    })
 
-// 3) CO2
-x += invCircleR * 2 + mm(20) + itemGap
-try {
-  const imgBytes = await fetch('img/co2.png').then(r => r.arrayBuffer())
-  const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
-  page.drawImage(imgEmbed, { x, y: baseY, width: mm(14), height: mm(14) })
-} catch {}
-page.drawText(`${datos.ahorroCO2 || "—"} t`, {
-  x: x + mm(16),
-  y: baseY + mm(7) - fsKPI / 2,
-  size: fsKPI,
-  font: fontBold,
-  color: ink,
-})
-page.drawText("Ahorro CO2", {
-  x,
-  y: baseY - 12,
-  size: fsSmall + 1,
-  font,
-  color: mute,
-})
+    // ROI texto a la derecha del círculo
+    const roiTextX = roiCenterX + invCircleR + mm(4)
+    page.drawText("ROI", {
+      x: roiTextX,
+      y: roiCenterY + fsBase + 2,
+      size: fsBase,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText(`${datos.roi || "—"} años`, {
+      x: roiTextX,
+      y: roiCenterY - fsBase,
+      size: fsBase,
+      font,
+      color: ink,
+    })
 
-// mover cursor
-y = baseY - mm(18)
+    // ================= ÁRBOLES (bloque 2) =================
+    x += blockW + gap
+    const iconSize = mm(14)
+    const iconHalf = iconSize / 2
+    const iconY_arbol = centerY + blockH / 2 - iconHalf
+    const iconX_arbol = x + blockW / 2 - iconHalf
 
+    try {
+      const imgBytes = await fetch('img/arbol.png').then(r => r.arrayBuffer())
+      const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
+      page.drawImage(imgEmbed, { x: iconX_arbol, y: iconY_arbol, width: iconSize, height: iconSize })
+    } catch { }
+
+    const tituloArbol = `${safe(datos.arboles)} árboles`
+    const kpiValueSize = 11; // mismo tamaño que Consumo Anual
+    page.drawText(tituloArbol, {
+      x: x + (blockW - widthOf(tituloArbol, kpiValueSize, fontBold)) / 2,
+      y: iconY_arbol + iconSize + mm(2), // más pegado al ícono
+      size: kpiValueSize,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText("Árboles equiv.", {
+      x: x + (blockW - widthOf("Árboles equiv.", fsSmall + 1, font)) / 2,
+      y: iconY_arbol - mm(6), // debajo del ícono
+      size: fsSmall + 1,
+      font,
+      color: mute,
+    })
+
+    // ================= CO2 (bloque 3) =================
+    x += blockW + gap
+    const iconY_co2 = centerY + blockH / 2 - iconHalf
+    const iconX_co2 = x + blockW / 2 - iconHalf
+
+    try {
+      const imgBytes = await fetch('img/co2.png').then(r => r.arrayBuffer())
+      const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
+      page.drawImage(imgEmbed, { x: iconX_co2, y: iconY_co2, width: iconSize, height: iconSize })
+    } catch { }
+
+    const tituloCO2 = `${safe(datos.ahorroCO2)} t`
+    page.drawText(tituloCO2, {
+      x: x + (blockW - widthOf(tituloCO2, kpiValueSize, fontBold)) / 2,
+      y: iconY_co2 + iconSize + mm(2), // más pegado al ícono
+      size: kpiValueSize,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText("Ahorro CO2", {
+      x: x + (blockW - widthOf("Ahorro CO2", fsSmall + 1, font)) / 2,
+      y: iconY_co2 - mm(6), // debajo del ícono
+      size: fsSmall + 1,
+      font,
+      color: mute,
+    })
+
+    // ================= mover cursor =================
+    y = centerY - blockH / 2 + mm(18)
 
     // Tabla de cotización
     section("COTIZACIÓN")
@@ -1313,7 +1332,7 @@ async function obtenerBasePdfBytes() {
       if (!resp.ok) throw new Error("HTTP " + resp.status)
       basePdfBytes = await resp.arrayBuffer()
       return basePdfBytes
-    } catch (_) {}
+    } catch (_) { }
   }
   return new Promise((resolve, reject) => {
     const input = document.createElement("input")
