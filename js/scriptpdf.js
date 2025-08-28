@@ -203,17 +203,17 @@ async function exportToBasePdf() {
 
     // Título superior negro, más arriba y compacto
     const sectionTopTitle = (txt, useBold = false, size = fsTitle, extraY = 0) => {
-  const h = size + 2;
-  const padY = 2;
-  ensure(h + 6);
-  page.drawText(txt, {
-    x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font),
-    y: y - h + padY + extraY,
-    size: size,
-    font: useBold ? fontBold : font,
-  });
-  y -= h + 4;
-}
+      const h = size + 2;
+      const padY = 2;
+      ensure(h + 6);
+      page.drawText(txt, {
+        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font),
+        y: y - h + padY + extraY,
+        size: size,
+        font: useBold ? fontBold : font,
+      });
+      y -= h + 4;
+    }
 
     // ========= PANEL Información de los involucrados (3/4 – 1/4) =========
     const iconCache = {}
@@ -250,114 +250,141 @@ async function exportToBasePdf() {
     }
 
     async function drawInfoPanelWithIcons() {
-      const padX = 14,
-        padY = 12
-      const titleH = 18
-      const radius = 10
-      const midGap = mm(6)
+      const padX = 14, padY = 12;
+      const titleH = 18;
+      const radius = 10;
+      const midGap = mm(6);
 
       // 3/4 – 1/4
-      const gridW = contentWidth - padX * 2 - midGap
-      const colW_L = gridW * 0.68
-      const colW_R = gridW - colW_L
+      const gridW = contentWidth - padX * 2 - midGap;
+      const colW_L = gridW * 0.68;
+      const colW_R = gridW - colW_L;
 
-      const rowGap = 14
-      const rowLH = 22
-      const iconMM = 3.6
-      const iconPad = 5
-      const labelColor = rgb(0.18, 0.18, 0.18)
+      // espaciado compacto
+      const rowLH_first = 12; // primera línea
+      const rowLH_wrap = 11; // líneas adicionales
+      const gapSingle = 8;  // gap si no hay wrap
+      const gapMulti = 6;  // gap si hay wrap
+
+      const iconMM = 3.6;
+      const iconPad = 5;
+        const iconYOffset = 4; // <<--- súbelo/bájalo a tu gusto (0, 1, 2, 3 px aprox)
+      const labelColor = rgb(0.18, 0.18, 0.18);
 
       const leftRows = [
         { icon: "nombreCliente.svg", label: "Cliente", value: datos.nombreCliente || "—" },
-        {
-          icon: "direccion.svg",
-          label: "Ubicación",
-          value: `${datos.direccionCliente || "—"}`,
-        },
+        { icon: "direccion.svg", label: "Ubicación", value: `${datos.direccionCliente || "—"}` },
         { icon: "telefono.svg", label: "Teléfono", value: datos.telefonoCliente || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoCliente || "—" },
-      ]
+      ];
       const rightRows = [
         { icon: "nombreEjecutivo.svg", label: "Ejecutivo", value: datos.nombreEjecutivo || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoEjecutivo || "—" },
         { icon: "whatsapp.svg", label: "Contacto", value: datos.whatsappEjecutivo || "—" },
-      ]
+      ];
 
+      // === medir alto real por columna ===
       const measureRowsHeight = (rows, colW) => {
-        let total = 0
-        rows.forEach((r) => {
-          const iconW = mm(iconMM) + iconPad
-          const lbl = r.label + ": "
-          const lblW = widthOf(lbl, fsBase, fontBold)
-          const textW = colW - iconW - lblW
-          const lines = wrapText(String(r.value || "—"), textW, fsBase, font)
-          total += Math.max(1, lines.length) * rowLH + rowGap
-        })
-        return total - rowGap
-      }
+        let total = 0;
+        rows.forEach((r, i) => {
+          const iconW = mm(iconMM) + iconPad;
+          const lbl = r.label + ": ";
+          const lblW = widthOf(lbl, fsBase, fontBold);
+          const textW = colW - iconW - lblW;
+          const lines = wrapText(String(r.value || "—"), textW, fsBase, font);
 
-      const bodyH = Math.max(measureRowsHeight(leftRows, colW_L), measureRowsHeight(rightRows, colW_R))
-      const H = padY + titleH - 90 + bodyH + padY
-      ensure(H + 6)
+          const cellH = rowLH_first + (Math.max(1, lines.length) - 1) * rowLH_wrap;
+          const gap = lines.length > 1 ? gapMulti : gapSingle;
+          total += cellH + gap;
+        });
+        // quitar el gap de la última fila
+        if (rows.length) {
+          const last = rows[rows.length - 1];
+          const iconW = mm(iconMM) + iconPad;
+          const lblW = widthOf(last.label + ": ", fsBase, fontBold);
+          const textW = colW - iconW - lblW;
+          const lns = wrapText(String(last.value || "—"), textW, fsBase, font);
+          total -= (lns.length > 1 ? gapMulti : gapSingle);
+        }
+        return total;
+      };
+
+      const bodyH = Math.max(measureRowsHeight(leftRows, colW_L), measureRowsHeight(rightRows, colW_R));
+      // ⬅️ quitar el “-90”
+      const H = padY + titleH + bodyH + (padY / 3);
+      ensure(H + 6);
 
       // contenedor
       page.drawRectangle({
-        x: left,
-        y: y - H,
-        width: contentWidth,
-        height: H,
-        color: white,
-        borderColor: primeD, // contorno verde oscuro
-        borderWidth: 1,
-        borderRadius: radius,
-      })
+        x: left, y: y - H, width: contentWidth, height: H,
+        color: white, borderColor: primeD, borderWidth: 1, borderRadius: radius,
+      });
+
       // encabezado
       page.drawRectangle({
-        x: left,
-        y: y - titleH,
-        width: contentWidth,
-        height: titleH,
-        color: primeD, // header verde oscuro
-        borderRadius: radius,
-      })
-      const title = "Información de los involucrados"
-  page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: white })
+        x: left, y: y - titleH, width: contentWidth, height: titleH,
+        color: primeD, borderRadius: radius,
+      });
+      page.drawText("Información de los involucrados", {
+        x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: white
+      });
 
-      // separador vertical en 3/4
-      const sepX = left + padX + colW_L + midGap / 2
+      // separador vertical SOLO en el cuerpo
+      const sepX = left + padX + colW_L + midGap / 2;
       page.drawLine({
-        start: { x: sepX, y: y - titleH - 6 },
-        end: { x: sepX, y: y - H + padY },
-        thickness: 0.5,
-        color: primeL,
-      })
+        start: { x: sepX, y: y - titleH - 2 },
+        end: { x: sepX, y: y - H + padY + 2 },
+        thickness: 0.5, color: primeL,
+      });
 
+      // === dibujar columnas ===
       const drawColumn = async (rows, baseX, colWUse) => {
-        let yy = y - titleH - 14
+        let yy = y - titleH - 14; // top del cuerpo
         for (const r of rows) {
-          const icon = await getIconEmbedded(r.icon, iconMM)
-          const iconW = mm(iconMM),
-            iconH = mm(iconMM)
-          page.drawImage(icon, { x: baseX, y: yy - iconH + 7, width: iconW, height: iconH })
-          const lbl = r.label + ": "
-          const lblW = widthOf(lbl, fsBase, fontBold)
-          const textStartX = baseX + iconW + iconPad + lblW
-          const textW = colWUse - (iconW + iconPad + lblW)
-          page.drawText(lbl, { x: baseX + iconW + iconPad, y: yy - 1, size: fsBase, font: fontBold, color: labelColor })
-          const lines = wrapText(String(r.value || "—"), textW, fsBase, font)
-          page.drawText(lines[0] || "", { x: textStartX, y: yy - 1, size: fsBase, font, color: ink })
-          for (let i = 1; i < lines.length; i++) {
-            yy -= rowLH
-            page.drawText(lines[i], { x: textStartX, y: yy - 1, size: fsBase, font, color: ink })
-          }
-          yy -= rowGap
-        }
-      }
+          const icon = await getIconEmbedded(r.icon, iconMM);
+          const iconW = mm(iconMM), iconH = mm(iconMM);
 
-      await drawColumn(leftRows, left + padX, colW_L)
-      await drawColumn(rightRows, left + padX + colW_L + midGap, colW_R)
-      y -= H + 6
+          const lbl = r.label + ": ";
+          const lblW = widthOf(lbl, fsBase, fontBold);
+          const textStartX = baseX + iconW + iconPad + lblW;
+          const textW = colWUse - (iconW + iconPad + lblW);
+          const lines = wrapText(String(r.value || "—"), textW, fsBase, font);
+
+          const rowTop = yy;
+
+          // icono alineado a la primera línea
+          page.drawImage(icon, {
+            x: baseX,
+            y: rowTop - iconH + (rowLH_first - fsBase) / 2 + 1 + iconYOffset,
+            width: iconW, height: iconH
+          });
+
+          // label + primera línea
+          page.drawText(lbl, { x: baseX + iconW + iconPad, y: rowTop - 1, size: fsBase, font: fontBold, color: labelColor });
+          page.drawText(lines[0] || "", { x: textStartX, y: rowTop - 1, size: fsBase, font, color: ink });
+
+          // avanzar por la primera línea
+          let innerY = rowTop - rowLH_first;
+
+          // líneas extra (interlineado más cerrado)
+          for (let i = 1; i < lines.length; i++) {
+            page.drawText(lines[i], { x: textStartX, y: innerY - 1, size: fsBase, font, color: ink });
+            innerY -= rowLH_wrap;
+          }
+
+          // gap según si hubo wrap
+          const gap = lines.length > 1 ? gapMulti : gapSingle;
+          yy = innerY - gap;
+        }
+      };
+
+      await drawColumn(leftRows, left + padX, colW_L);
+      await drawColumn(rightRows, left + padX + colW_L + midGap, colW_R);
+
+      y -= H + 6;
     }
+
+
 
     // 2-3 columnas compactas (ancho igual)
     // 2-3 columnas compactas (ancho igual) — valor centrado vertical y alineado a la izquierda
