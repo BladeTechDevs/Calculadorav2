@@ -55,7 +55,7 @@ body {
   font-family: "Acephimere", Arial, sans-serif;
   background: #ffffff;
   color: #1a202c;
-  height: 100vh;
+  height: 100dvh;               /* FIX: dvh para mobile */
   overflow: hidden;
   position: relative;
 }
@@ -142,15 +142,14 @@ body {
   animation: pulse 2s infinite;
 }
 @keyframes pulse {
-  0%,
-  100% { opacity: 1; }
+  0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
 
 /* Contenedor principal */
 .main-container {
-  height: 100vh;
-  padding-top: 45px; /* coincide con header en desktop */
+  height: 100dvh;               /* FIX: dvh para mobile */
+  padding-top: 45px;            /* coincide con header en desktop */
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0;
@@ -533,26 +532,18 @@ body {
   .metrics-grid { grid-template-columns: 1fr; }
   .consumo-grid { grid-template-columns: repeat(3, 1fr); }
 
-  /* Fondo del contenedor en mobile para evitar flashes */
+  /* FIX: separación por header sin franja blanca */
   .main-container {
-    padding-top: 0 !important;              /* sin padding para que no salga franja blanca */
-    background: rgba(248, 250, 252, 0.95);  /* mismo fondo que el panel */
+    padding-top: 60px !important;
+    background: rgba(248, 250, 252, 0.95);
   }
 
-  /* Separamos con margen en el panel (bajo el header) */
   .form-panel {
     padding: 1rem;
-    padding-bottom: 1rem;
-    margin-top: 70px; /* 60px de header + 10px de respiro */
-    padding-bottom: 4rem;
+    padding-bottom: 1rem !important;   /* FIX: sin espacio gigante */
+    margin-top: 0 !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  @media (max-width: 600px) {
-    .form-panel {
-      margin-top: 60px !important; /* igual a la altura del header en mobile */
-    }
   }
 
   /* SOLO logo en teléfono */
@@ -564,7 +555,7 @@ body {
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     min-height: 32px;
     white-space: nowrap;
     box-sizing: border-box;
@@ -577,7 +568,7 @@ body {
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     min-height: 32px;
     white-space: nowrap;
     box-sizing: border-box;
@@ -600,12 +591,10 @@ body {
     padding: 0 0.6rem;
   }
   .main-container {
-    padding-top: 0 !important;              /* seguimos evitando la franja */
+    padding-top: 65px !important;        /* FIX: match header 65px */
     background: rgba(248, 250, 252, 0.95);
   }
-  .form-panel {
-    margin-top: 75px; /* 65px de header + 10px */
-  }
+  .form-panel { margin-top: 0 !important; }
   .consumo-grid { grid-template-columns: repeat(2, 1fr); }
 
   .calculate-btn {
@@ -712,7 +701,7 @@ body {
   #btnCotizarMobile.show {
     display: inline-flex;
     margin-top: 0.5rem;
-    margin-bottom: 0 !important;
+    margin-bottom: calc(env(safe-area-inset-bottom) + 12px) !important; /* pequeño gap final */
     padding: 0.3rem 0.6rem;
     font-size: 0.7rem;
     min-height: 32px;
@@ -729,6 +718,8 @@ body {
     gap: 0.5rem;
     white-space: nowrap;
     box-sizing: border-box;
+    position: static !important;  /* FIX: no sticky */
+    bottom: auto !important;
   }
 
   /* Layout una columna en 769–1024; padding-top = 45px (altura header desktop) */
@@ -748,47 +739,4 @@ body {
 /* Ya no uses .mobile-only para mostrar nada */
 .mobile-only {
   /* opcionalmente deja vacío o solo estilos visuales */
-}
-
-
-/* ============================
-   FIX MOBILE – OVERRIDES
-   (No se borra nada; solo se sobrescribe)
-   ============================ */
-
-/* === FIX: botones visibles en mobile sin hueco extra === */
-/* === FIX definitivo: quepan todos los botones en mobile === */
-@media (max-width: 768px) {
-  /* El botón extra NO es sticky para que no tape nada */
-  #btnCotizarMobile.show {
-    position: static !important;
-    bottom: auto !important;
-  }
-
-  /* Espacio base para 2 botones (Nuevo Cálculo + Calcular) */
-  .form-panel {
-    padding-bottom: calc(1rem + 96px + env(safe-area-inset-bottom)) !important;
-    /* 96px ≈ 2 botones apilados; ajusta a 88–110 si tus botones varían */
-  }
-
-  /* Cuando aparece el 3er botón, agrega espacio extra */
-  .form-panel:has(#btnCotizarMobile.show) {
-    padding-bottom: calc(1rem + 144px + env(safe-area-inset-bottom)) !important;
-    /* 144px ≈ 3 botones */
-  }
-
-  /* Separación entre botones, sin hueco extra al final */
-  .calculate-btn,
-  .calculate-btn-c { margin-bottom: 0.75rem !important; }
-  #btnCotizarMobile { margin-bottom: 0 !important; }
-}
-
-@media (max-width: 480px) {
-  /* refuerzo para pantallas muy pequeñas */
-  .form-panel { 
-    padding-bottom: calc(1rem + 96px + env(safe-area-inset-bottom)) !important; 
-  }
-  .form-panel:has(#btnCotizarMobile.show) {
-    padding-bottom: calc(1rem + 144px + env(safe-area-inset-bottom)) !important;
-  }
 }
