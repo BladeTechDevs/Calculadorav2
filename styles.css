@@ -636,7 +636,7 @@ body {
 
   /* Ajuste del contenedor principal para evitar que se esconda detrás del header */
   .main-container {
-    padding-top: 80px; /* Aumentado para compensar header fijo en mobile/tablet */
+    padding-top: 110px; /* Más espacio para separar el header de la card en mobile/tablet */
   }
 
   /* SOLO logo en teléfono */
@@ -705,7 +705,7 @@ body {
     padding: 0 0.6rem;
   }
   .main-container {
-    padding-top: 90px; /* Más espacio para header fijo en móviles pequeños */
+    padding-top: 120px; /* Más espacio para header fijo en móviles pequeños */
   }
   .consumo-grid {
     grid-template-columns: repeat(2, 1fr);
