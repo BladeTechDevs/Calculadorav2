@@ -757,39 +757,38 @@ body {
    ============================ */
 
 /* === FIX: botones visibles en mobile sin hueco extra === */
+/* === FIX definitivo: quepan todos los botones en mobile === */
 @media (max-width: 768px) {
-  /* 1) Quita el sticky para no tapar a los otros botones */
+  /* El botón extra NO es sticky para que no tape nada */
   #btnCotizarMobile.show {
     position: static !important;
     bottom: auto !important;
   }
 
-  /* 2) Base: poco padding inferior */
+  /* Espacio base para 2 botones (Nuevo Cálculo + Calcular) */
   .form-panel {
-    padding-bottom: 1rem !important;
+    padding-bottom: calc(1rem + 96px + env(safe-area-inset-bottom)) !important;
+    /* 96px ≈ 2 botones apilados; ajusta a 88–110 si tus botones varían */
   }
 
-  /* 3) Solo cuando aparece el botón "Generar Cotización",
-        añade el espacio justo para los botones + safe area. */
+  /* Cuando aparece el 3er botón, agrega espacio extra */
   .form-panel:has(#btnCotizarMobile.show) {
-    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom)) !important;
-    /* 64px ≈ alto de un botón; ajusta a 56–72 si tu botón es más chico/grande */
+    padding-bottom: calc(1rem + 144px + env(safe-area-inset-bottom)) !important;
+    /* 144px ≈ 3 botones */
   }
 
-  /* 4) Márgenes coherentes entre botones (último sin hueco extra) */
+  /* Separación entre botones, sin hueco extra al final */
   .calculate-btn,
-  .calculate-btn-c {
-    margin-bottom: 0.75rem !important;
-  }
-  #btnCotizarMobile {           /* el último */
-    margin-bottom: 0 !important;
-  }
+  .calculate-btn-c { margin-bottom: 0.75rem !important; }
+  #btnCotizarMobile { margin-bottom: 0 !important; }
 }
 
-/* Refuerzo pantallas muy pequeñas */
 @media (max-width: 480px) {
-  .form-panel { padding-bottom: 1rem !important; }
+  /* refuerzo para pantallas muy pequeñas */
+  .form-panel { 
+    padding-bottom: calc(1rem + 96px + env(safe-area-inset-bottom)) !important; 
+  }
   .form-panel:has(#btnCotizarMobile.show) {
-    padding-bottom: calc(1rem + 64px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(1rem + 144px + env(safe-area-inset-bottom)) !important;
   }
 }
