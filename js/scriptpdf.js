@@ -1158,24 +1158,35 @@ async function exportToBasePdf() {
     const kpiX = left + mm(80); // Ajusta el valor para mover los KPIs a la derecha
     const kpiY = y;
     // Dibuja datos del proyecto
+    // Igualar separación a la de los involucrados
+    // Separar los datos de proyecto para alinearlos con los títulos de las imágenes
+    const rowLH_first = 15.5; // aumenta el espacio vertical para alinear con los KPIs
+    const gapSingle = mm(1.8);
     let tempY = datosY;
     datosProyecto.forEach(([label, value]) => {
       const labelW = widthOf(label, fsBase, fontBold);
-      const gap = mm(1.2); // Junta más el título y la respuesta
+      let displayValue = value;
+      if (label.trim().toLowerCase().startsWith("tarifa")) {
+        displayValue = String(value).toUpperCase();
+      }
       page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
-      page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
-      tempY -= lh;
+      page.drawText(displayValue, { x: datosX + labelW + gapSingle, y: tempY, size: fsBase, font, color: ink });
+      tempY -= rowLH_first;
     });
 
     // Dibuja KPIs con imagen
-    let kpiW = mm(22), kpiGap = mm(4), kpiImgH = mm(12);
-    // Mueve los KPIs más a la derecha y alinea verticalmente con los datos
-    const kpiXStart = left + mm(100); // Más a la derecha
-    // Altura alineada con la primera línea de datos de la izquierda
-    let kpiYStart = datosY;
+    let kpiW = mm(22), kpiGap = mm(20), kpiImgH = mm(12);
+    // Centrar los KPIs a partir de kpiXStart
+    const kpiXStart = left + mm(75);
+  let kpiYStart = datosY - mm(3); // Baja los KPIs 3 mm
+    // Calcular el ancho total ocupado por los KPIs
+    const totalKPIWidth = datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+    // Centrar el grupo de KPIs respecto al área disponible (puedes ajustar el área disponible si lo deseas)
+    const areaWidth = mm(80); // Ajusta este valor si quieres más o menos espacio total
+    const offsetX = kpiXStart + (areaWidth - totalKPIWidth) / 2;
     for (let i = 0; i < datosKPI.length; i++) {
       const kpi = datosKPI[i];
-      const baseX = kpiXStart + i * (kpiW + kpiGap);
+      const baseX = offsetX + i * (kpiW + kpiGap);
       // Imagen en medio
       let imgY = kpiYStart - mm(2) - kpiImgH / 2;
       let imgX = baseX + kpiW / 2 - mm(6);
@@ -1185,11 +1196,11 @@ async function exportToBasePdf() {
         page.drawImage(imgEmbed, { x: imgX, y: imgY, width: mm(12), height: kpiImgH });
       } catch { }
       // Valor arriba, centrado respecto a la imagen (más grande)
-      const kpiValueSize = 11; // Un poco más chicos
+      const kpiValueSize = 11;
       page.drawText(kpi.value, { x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
-  // Nombre abajo, centrado respecto a la imagen
-  const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
-  page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2, y: imgY - mm(6), size: kpiTitleSize, font: fontBold, color: ink });
+      // Nombre abajo, centrado respecto a la imagen
+      const kpiTitleSize = fsSmall + 1;
+      page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2, y: imgY - mm(6), size: kpiTitleSize, font: fontBold, color: ink });
     }
     // Ajusta y para el siguiente bloque
     y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
