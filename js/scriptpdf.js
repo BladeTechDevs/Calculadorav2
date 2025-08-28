@@ -1190,7 +1190,12 @@ async function exportToBasePdf() {
     const centerY = y - blockH / 2
 
     // Utilidad: evita NaN en los textos
-    const safe = (v) => (v == null || Number.isNaN(Number(v)) ? "—" : String(v))
+    // Extrae solo el número del texto, muestra '0' si no hay valor
+    const extractNumber = (txt, fallback = "0") => {
+      if (!txt || txt === "-" || txt === "—") return fallback;
+      const match = String(txt).match(/[\d,.]+/);
+      return match ? match[0] : fallback;
+    }
 
     // ================= ROI (bloque 1) =================
     let x = startX
@@ -1248,11 +1253,12 @@ async function exportToBasePdf() {
       page.drawImage(imgEmbed, { x: iconX_arbol, y: iconY_arbol, width: iconSize, height: iconSize })
     } catch { }
 
-    const tituloArbol = `${safe(datos.arboles)} árboles`
     const kpiValueSize = 11; // mismo tamaño que Consumo Anual
+    const arbolesValue = extractNumber(datos.arboles, "0");
+    const tituloArbol = `${arbolesValue} árboles`;
     page.drawText(tituloArbol, {
       x: x + (blockW - widthOf(tituloArbol, kpiValueSize, fontBold)) / 2,
-      y: iconY_arbol + iconSize + mm(2), // más pegado al ícono
+      y: iconY_arbol + iconSize + mm(2),
       size: kpiValueSize,
       font: fontBold,
       color: ink,
@@ -1276,10 +1282,11 @@ async function exportToBasePdf() {
       page.drawImage(imgEmbed, { x: iconX_co2, y: iconY_co2, width: iconSize, height: iconSize })
     } catch { }
 
-    const tituloCO2 = `${safe(datos.ahorroCO2)} t`
+    const co2Value = extractNumber(datos.ahorroCO2, "0");
+    const tituloCO2 = `${co2Value} t`;
     page.drawText(tituloCO2, {
       x: x + (blockW - widthOf(tituloCO2, kpiValueSize, fontBold)) / 2,
-      y: iconY_co2 + iconSize + mm(2), // más pegado al ícono
+      y: iconY_co2 + iconSize + mm(2),
       size: kpiValueSize,
       font: fontBold,
       color: ink,
