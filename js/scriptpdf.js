@@ -202,17 +202,17 @@ async function exportToBasePdf() {
     }
 
     // Título superior negro, más arriba y compacto
-    const sectionTopTitle = (txt) => {
-      const h = fsTitle + 2
-      const padY = 2
-      ensure(h + 6)
+    const sectionTopTitle = (txt, useBold = false, size = fsTitle, extraY = 0) => {
+      const h = size + 2;
+      const padY = 2;
+      ensure(h + 6);
       page.drawText(txt, {
-        x: left + contentWidth - widthOf(txt, fsTitle, font),
-        y: y - h + padY,
-        size: fsTitle,
-        font: font,
-      })
-      y -= h + 4
+        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font),
+        y: y - h + padY + extraY,
+        size: size,
+        font: useBold ? fontBold : font,
+      });
+      y -= h + 4;
     }
 
     // ========= PANEL Información de los involucrados (3/4 – 1/4) =========
@@ -250,114 +250,141 @@ async function exportToBasePdf() {
     }
 
     async function drawInfoPanelWithIcons() {
-      const padX = 14,
-        padY = 12
-      const titleH = 18
-      const radius = 10
-      const midGap = mm(6)
+      const padX = 14, padY = 12;
+      const titleH = 18;
+      const radius = 10;
+      const midGap = mm(6);
 
       // 3/4 – 1/4
-      const gridW = contentWidth - padX * 2 - midGap
-      const colW_L = gridW * 0.68
-      const colW_R = gridW - colW_L
+      const gridW = contentWidth - padX * 2 - midGap;
+      const colW_L = gridW * 0.68;
+      const colW_R = gridW - colW_L;
 
-      const rowGap = 14
-      const rowLH = 22
-      const iconMM = 3.6
-      const iconPad = 5
-      const labelColor = rgb(0.18, 0.18, 0.18)
+      // espaciado compacto
+      const rowLH_first = 11; // primera línea
+      const rowLH_wrap = 10; // líneas adicionales
+      const gapSingle = 5;  // gap si no hay wrap
+      const gapMulti = 4;  // gap si hay wrap
+
+      const iconMM = 3.6;
+      const iconPad = 5;
+        const iconYOffset = 4; // <<--- súbelo/bájalo a tu gusto (0, 1, 2, 3 px aprox)
+      const labelColor = rgb(0.18, 0.18, 0.18);
 
       const leftRows = [
         { icon: "nombreCliente.svg", label: "Cliente", value: datos.nombreCliente || "—" },
-        {
-          icon: "direccion.svg",
-          label: "Ubicación",
-          value: `${datos.direccionCliente || "—"}`,
-        },
+        { icon: "direccion.svg", label: "Ubicación", value: `${datos.direccionCliente || "—"}` },
         { icon: "telefono.svg", label: "Teléfono", value: datos.telefonoCliente || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoCliente || "—" },
-      ]
+      ];
       const rightRows = [
         { icon: "nombreEjecutivo.svg", label: "Ejecutivo", value: datos.nombreEjecutivo || "—" },
         { icon: "correo.svg", label: "Correo", value: datos.correoEjecutivo || "—" },
         { icon: "whatsapp.svg", label: "Contacto", value: datos.whatsappEjecutivo || "—" },
-      ]
+      ];
 
+      // === medir alto real por columna ===
       const measureRowsHeight = (rows, colW) => {
-        let total = 0
-        rows.forEach((r) => {
-          const iconW = mm(iconMM) + iconPad
-          const lbl = r.label + ": "
-          const lblW = widthOf(lbl, fsBase, fontBold)
-          const textW = colW - iconW - lblW
-          const lines = wrapText(String(r.value || "—"), textW, fsBase, font)
-          total += Math.max(1, lines.length) * rowLH + rowGap
-        })
-        return total - rowGap
-      }
+        let total = 0;
+        rows.forEach((r, i) => {
+          const iconW = mm(iconMM) + iconPad;
+          const lbl = r.label + ": ";
+          const lblW = widthOf(lbl, fsBase, fontBold);
+          const textW = colW - iconW - lblW;
+          const lines = wrapText(String(r.value || "—"), textW, fsBase, font);
 
-      const bodyH = Math.max(measureRowsHeight(leftRows, colW_L), measureRowsHeight(rightRows, colW_R))
-      const H = padY + titleH - 90 + bodyH + padY
-      ensure(H + 6)
+          const cellH = rowLH_first + (Math.max(1, lines.length) - 1) * rowLH_wrap;
+          const gap = lines.length > 1 ? gapMulti : gapSingle;
+          total += cellH + gap;
+        });
+        // quitar el gap de la última fila
+        if (rows.length) {
+          const last = rows[rows.length - 1];
+          const iconW = mm(iconMM) + iconPad;
+          const lblW = widthOf(last.label + ": ", fsBase, fontBold);
+          const textW = colW - iconW - lblW;
+          const lns = wrapText(String(last.value || "—"), textW, fsBase, font);
+          total -= (lns.length > 1 ? gapMulti : gapSingle);
+        }
+        return total;
+      };
+
+      const bodyH = Math.max(measureRowsHeight(leftRows, colW_L), measureRowsHeight(rightRows, colW_R));
+      // ⬅️ quitar el “-90”
+      const H = padY + titleH + bodyH + (padY / 3);
+      ensure(H + 6);
 
       // contenedor
       page.drawRectangle({
-        x: left,
-        y: y - H,
-        width: contentWidth,
-        height: H,
-        color: white,
-        borderColor: prime,
-        borderWidth: 1,
-        borderRadius: radius,
-      })
+        x: left, y: y - H, width: contentWidth, height: H,
+        color: white, borderColor: primeD, borderWidth: 1, borderRadius: radius,
+      });
+
       // encabezado
       page.drawRectangle({
-        x: left,
-        y: y - titleH,
-        width: contentWidth,
-        height: titleH,
-        color: headerSoft,
-        borderRadius: radius,
-      })
-      const title = "Información de los involucrados"
-      page.drawText(title, { x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: primeD })
+        x: left, y: y - titleH, width: contentWidth, height: titleH,
+        color: primeD, borderRadius: radius,
+      });
+      page.drawText("Información de los involucrados", {
+        x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: white
+      });
 
-      // separador vertical en 3/4
-      const sepX = left + padX + colW_L + midGap / 2
+      // separador vertical SOLO en el cuerpo
+      const sepX = left + padX + colW_L + midGap / 2;
       page.drawLine({
-        start: { x: sepX, y: y - titleH - 6 },
-        end: { x: sepX, y: y - H + padY },
-        thickness: 0.5,
-        color: primeL,
-      })
+        start: { x: sepX, y: y - titleH - 2 },
+        end: { x: sepX, y: y - H + padY + 2 },
+        thickness: 0.5, color: primeL,
+      });
 
+      // === dibujar columnas ===
       const drawColumn = async (rows, baseX, colWUse) => {
-        let yy = y - titleH - 14
+        let yy = y - titleH - 14; // top del cuerpo
         for (const r of rows) {
-          const icon = await getIconEmbedded(r.icon, iconMM)
-          const iconW = mm(iconMM),
-            iconH = mm(iconMM)
-          page.drawImage(icon, { x: baseX, y: yy - iconH + 7, width: iconW, height: iconH })
-          const lbl = r.label + ": "
-          const lblW = widthOf(lbl, fsBase, fontBold)
-          const textStartX = baseX + iconW + iconPad + lblW
-          const textW = colWUse - (iconW + iconPad + lblW)
-          page.drawText(lbl, { x: baseX + iconW + iconPad, y: yy - 1, size: fsBase, font: fontBold, color: labelColor })
-          const lines = wrapText(String(r.value || "—"), textW, fsBase, font)
-          page.drawText(lines[0] || "", { x: textStartX, y: yy - 1, size: fsBase, font, color: ink })
-          for (let i = 1; i < lines.length; i++) {
-            yy -= rowLH
-            page.drawText(lines[i], { x: textStartX, y: yy - 1, size: fsBase, font, color: ink })
-          }
-          yy -= rowGap
-        }
-      }
+          const icon = await getIconEmbedded(r.icon, iconMM);
+          const iconW = mm(iconMM), iconH = mm(iconMM);
 
-      await drawColumn(leftRows, left + padX, colW_L)
-      await drawColumn(rightRows, left + padX + colW_L + midGap, colW_R)
-      y -= H + 6
+          const lbl = r.label + ": ";
+          const lblW = widthOf(lbl, fsBase, fontBold);
+          const textStartX = baseX + iconW + iconPad + lblW;
+          const textW = colWUse - (iconW + iconPad + lblW);
+          const lines = wrapText(String(r.value || "—"), textW, fsBase, font);
+
+          const rowTop = yy;
+
+          // icono alineado a la primera línea
+          page.drawImage(icon, {
+            x: baseX,
+            y: rowTop - iconH + (rowLH_first - fsBase) / 2 + 1 + iconYOffset,
+            width: iconW, height: iconH
+          });
+
+          // label + primera línea
+          page.drawText(lbl, { x: baseX + iconW + iconPad, y: rowTop - 1, size: fsBase, font: fontBold, color: labelColor });
+          page.drawText(lines[0] || "", { x: textStartX, y: rowTop - 1, size: fsBase, font, color: ink });
+
+          // avanzar por la primera línea
+          let innerY = rowTop - rowLH_first;
+
+          // líneas extra (interlineado más cerrado)
+          for (let i = 1; i < lines.length; i++) {
+            page.drawText(lines[i], { x: textStartX, y: innerY - 1, size: fsBase, font, color: ink });
+            innerY -= rowLH_wrap;
+          }
+
+          // gap según si hubo wrap
+          const gap = lines.length > 1 ? gapMulti : gapSingle;
+          yy = innerY - gap;
+        }
+      };
+
+      await drawColumn(leftRows, left + padX, colW_L);
+      await drawColumn(rightRows, left + padX + colW_L + midGap, colW_R);
+
+      y -= H + 6;
     }
+
+
 
     // 2-3 columnas compactas (ancho igual)
     // 2-3 columnas compactas (ancho igual) — valor centrado vertical y alineado a la izquierda
@@ -958,8 +985,8 @@ async function exportToBasePdf() {
         borderWidth: 0.8,
       })
 
-  const labels = ["Subtotal", "IVA", "Total"]
-  const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
+      const labels = ["Subtotal", "IVA", "Total"]
+      const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
 
       const centerText = (x0, w, text, size, fnt) => x0 + (w - widthOf(text, size, fnt)) / 2
 
@@ -978,7 +1005,7 @@ async function exportToBasePdf() {
           borderColor: primeD,
           borderWidth: 0.8,
         })
-  const lfSize = isTotal ? fsBase + 3 : fsBase
+        const lfSize = isTotal ? fsBase + 3 : fsBase
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
           y: yRowTop - 14,
@@ -1024,7 +1051,7 @@ async function exportToBasePdf() {
         {
           img: "potencia.png",
           value: datos.potenciaInstalada || "—",
-          title: "Potencia Total Inst.",
+          title: "Potencia Total Instalada",
         },
         {
           img: "porcentaje.png",
@@ -1085,8 +1112,8 @@ async function exportToBasePdf() {
           x: x + (colW - tWidth) / 2,
           y: y - iconH - 12,
           size: titleSize,
-          font,
-          color: mute,
+          font: fontBold,
+          color: ink,
         });
       }
       y -= blockH + 8;
@@ -1094,9 +1121,11 @@ async function exportToBasePdf() {
 
     // === 4) Composición ===
     // Título top: COTIZACIÓN PRELIMINAR – FOLIO {folio}
-    sectionTopTitle(`COTIZACIÓN PRELIMINAR`)
-    sectionTopTitle(`FOLIO:  SFVI-${datos.folio || "—"}`)
-    y -= mm(4)
+    const folioFontSize = Math.max(10, fsTitle - 4);
+    // Espacio mínimo entre ambos títulos
+    sectionTopTitle(`COTIZACIÓN PRELIMINAR`, true, fsTitle, mm(1));
+    sectionTopTitle(`FOLIO:  SFVI-${datos.folio || "—"}`, true, folioFontSize, 0);
+    y -= mm(2);
     // Panel (involucrados)
     await drawInfoPanelWithIcons()
 
@@ -1118,9 +1147,9 @@ async function exportToBasePdf() {
     ];
     // KPIs a la derecha
     const datosKPI = [
-      { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
-      { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
-      { label: "Tarifa Prom", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
+  { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
+  { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
+  { label: "Tarifa Promedio", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
     ];
 
     // Layout horizontal: datos del proyecto a la izquierda, KPIs a la derecha
@@ -1131,11 +1160,11 @@ async function exportToBasePdf() {
     // Dibuja datos del proyecto
     let tempY = datosY;
     datosProyecto.forEach(([label, value]) => {
-  const labelW = widthOf(label, fsBase, fontBold);
-  const gap = mm(1.2); // Junta más el título y la respuesta
-  page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
-  page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
-  tempY -= lh;
+      const labelW = widthOf(label, fsBase, fontBold);
+      const gap = mm(1.2); // Junta más el título y la respuesta
+      page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
+      page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
+      tempY -= lh;
     });
 
     // Dibuja KPIs con imagen
@@ -1158,9 +1187,9 @@ async function exportToBasePdf() {
       // Valor arriba, centrado respecto a la imagen (más grande)
       const kpiValueSize = 11; // Un poco más chicos
       page.drawText(kpi.value, { x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
-      // Nombre abajo, centrado respecto a la imagen
-      const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
-      page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, font) / 2, y: imgY - mm(6), size: kpiTitleSize, font, color: mute });
+  // Nombre abajo, centrado respecto a la imagen
+  const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
+  page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2, y: imgY - mm(6), size: kpiTitleSize, font: fontBold, color: ink });
     }
     // Ajusta y para el siguiente bloque
     y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
@@ -1213,7 +1242,7 @@ async function exportToBasePdf() {
     })
 
     const invValue = typeof _total === "number" ? fmtMXN(_total) : String(_total)
-  const invValueSize = 9 // tamaño reducido para valores grandes
+    const invValueSize = 9 // tamaño reducido para valores grandes
     const invValueW = widthOf(invValue, invValueSize, fontBold)
     page.drawText(invValue, {
       x: roiCenterX - invValueW / 2,
@@ -1263,12 +1292,12 @@ async function exportToBasePdf() {
       font: fontBold,
       color: ink,
     })
-    page.drawText("Árboles equiv.", {
-      x: x + (blockW - widthOf("Árboles equiv.", fsSmall + 1, font)) / 2,
+    page.drawText("Árboles equivalentes", {
+      x: x + (blockW - widthOf("Árboles equivalentes", fsSmall + 1, font)) / 2,
       y: iconY_arbol - mm(6), // debajo del ícono
       size: fsSmall + 1,
-      font,
-      color: mute,
+      font: fontBold,
+      color: ink,
     })
 
     // ================= CO2 (bloque 3) =================
@@ -1295,8 +1324,8 @@ async function exportToBasePdf() {
       x: x + (blockW - widthOf("Ahorro CO2", fsSmall + 1, font)) / 2,
       y: iconY_co2 - mm(6), // debajo del ícono
       size: fsSmall + 1,
-      font,
-      color: mute,
+      font: fontBold,
+      color: ink,
     })
 
     // ================= mover cursor =================
