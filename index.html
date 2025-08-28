@@ -484,7 +484,7 @@
             <div class="form-group"><label for="inversor" style="font-weight:500;">Inversor:</label><input id="inversor"
                 style="width:100%;" type="text"></div>
             <div class="form-group"><label for="mantenimiento" style="font-weight:500;">Monitoreo:</label><input
-                type="text" id="mantenimiento" style="width:100%;"></div>
+                type="text" id="monitoreo" style="width:100%;"></div>
             <div class="form-group"><label for="estructura" style="font-weight:500;">Estructura:</label><input
                 type="text" id="estructura" style="width:100%;"></div>
             <div class="form-group"><label for="materiales" style="font-weight:500;">Materiales:</label><input
@@ -532,6 +532,7 @@
             ['uve', 'UVIE'],
             ['uie', 'UIE'],
             ['medidor', 'Medidor'],
+            ['monitoreo','Monitoreo']
           ]
 
           let resultados = {}
@@ -755,7 +756,7 @@
           (() => {
             // Campos que SÍ se suman (profit NO está aquí)
             const IDS_SUM = [
-              "panel", "inversor", "mantenimiento", "estructura", "materiales",
+              "panel", "inversor", "monitoreo", "estructura", "materiales",
               "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor"
             ];
 
@@ -1533,7 +1534,7 @@
 
       // IDs de TODAS las partidas que suman al subtotal
       const PARTIDAS = [
-        "panel", "inversor", "mantenimiento", "estructura", "materiales",
+        "panel", "inversor", "monitoreo", "estructura", "materiales",
         "instalacion", "carpeta", "flete", "interconexion", "uve",
         "uie", "medidor", "profit", "watts"
       ];
