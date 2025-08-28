@@ -1,3 +1,20 @@
+// Sección INVERSIÓN encapsulada en función async
+const fsTitle = 11
+const fsKPI = 13
+const widthOf = (t, size = fsBase, f = font) => f.widthOfTextAtSize(String(t), size)
+// Chip de sección (verde)
+const section = (txt) => {
+  const padY = 2,
+    padX = 8
+  const w = widthOf(txt, fsTitle, font) + padX * 2
+  const h = fsTitle + padY * 1.2
+  ensure(h + 8)
+  page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
+  page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: font, color: white })
+  // Línea verde tenue eliminada
+  y -= h + 8
+}
+
 async function exportToBasePdf() {
   const PDFLib = window.PDFLib
   const { PDFDocument, StandardFonts, rgb } = PDFLib
@@ -21,7 +38,7 @@ async function exportToBasePdf() {
 
     const $ = (id) => document.getElementById(id)
     const getVal = (id, fb = "") => ($(id)?.value ?? fb).toString().trim()
-  const getTxt = (id, fb = "") => ($(id)?.textContent ?? fb).toString().trim()
+    const getTxt = (id, fb = "") => ($(id)?.textContent ?? fb).toString().trim()
     const toNum = (v) => {
       if (typeof v === "number") return v
       if (!v) return 0
@@ -30,7 +47,7 @@ async function exportToBasePdf() {
       return isNaN(n) ? 0 : n
     }
     const fmtMXN = (n) =>
-  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(toNum(n))
+      new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(toNum(n))
 
     const datos = {
       // Cliente
@@ -95,7 +112,7 @@ async function exportToBasePdf() {
 
     // Tipografías
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold) // <<<< MOVIDO AQUÍ (antes de usar `section`)
 
     // === 3) Layout y paleta ===
     const mm = (v) => v * 2.834645669
@@ -123,16 +140,15 @@ async function exportToBasePdf() {
     // Escalas
     const fsBase = 8
     const fsSmall = 7
-    const fsTitle = 11
     const fsKPI = 13
     const lh = 12
 
     const ensure = (h) => {
-  if (y - h < bottom) newPage()
+      if (y - h < bottom) newPage()
     }
 
     const newPage = () => {
-  drawFooter()
+      drawFooter()
       pageIndex++
       if (pageIndex < pdfDoc.getPageCount()) page = pdfDoc.getPage(pageIndex)
       else page = pdfDoc.addPage([PW, PH])
@@ -154,6 +170,7 @@ async function exportToBasePdf() {
       })
     }
 
+    const fsTitle = 11
     const widthOf = (t, size = fsBase, f = font) => f.widthOfTextAtSize(String(t), size)
     const wrapText = (text, maxW, size = fsBase, f = font) => {
       const words = (text || "").toString().split(/\s+/)
@@ -171,28 +188,29 @@ async function exportToBasePdf() {
       return lines.length ? lines : [""]
     }
 
-    // Chip de sección (verde)
+    // Chip de sección (verde) — usa fontBold ya inicializada
     const section = (txt) => {
       const padY = 2,
         padX = 8
-      const w = widthOf(txt, fsTitle, fontBold) + padX * 2
+      const w = widthOf(txt, fsTitle, fontBold)
+      const boxW = w + padX * 2
       const h = fsTitle + padY * 1.2
       ensure(h + 8)
-      page.drawRectangle({ x: left, y: y - h, width: w, height: h, color: primeD, borderRadius: 6 })
+      page.drawRectangle({ x: left, y: y - h, width: boxW, height: h, color: primeD, borderRadius: 6 })
       page.drawText(txt, { x: left + padX, y: y - h + padY, size: fsTitle, font: fontBold, color: white })
-  // Línea verde tenue eliminada
       y -= h + 8
     }
+
     // Título superior negro, más arriba y compacto
     const sectionTopTitle = (txt) => {
       const h = fsTitle + 2
       const padY = 2
       ensure(h + 6)
       page.drawText(txt, {
-        x: left + contentWidth - widthOf(txt, fsTitle, fontBold),
+        x: left + contentWidth - widthOf(txt, fsTitle, font),
         y: y - h + padY,
         size: fsTitle,
-        font: fontBold,
+        font: font,
       })
       y -= h + 4
     }
@@ -551,7 +569,7 @@ async function exportToBasePdf() {
       let dataURL = null
       try {
         dataURL = c.toDataURL("image/png", 1)
-      } catch {}
+      } catch { }
 
       // 4) restaurar layout
       document.body.classList.remove("pdf-export")
@@ -940,8 +958,8 @@ async function exportToBasePdf() {
         borderWidth: 0.8,
       })
 
-      const labels = ["Sub Total", "IVA", "Total"]
-      const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
+  const labels = ["Subtotal", "IVA", "Total"]
+  const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)]
 
       const centerText = (x0, w, text, size, fnt) => x0 + (w - widthOf(text, size, fnt)) / 2
 
@@ -956,11 +974,11 @@ async function exportToBasePdf() {
           y: yRowTop - rowTH,
           width: labelW,
           height: rowTH,
-          color: isTotal ? rgb(1, 0.7, 0) : primeL,
+          color: isTotal ? rgb(0.933, 0.961, 0.153) : primeL, // #EEF527 para Total
           borderColor: primeD,
           borderWidth: 0.8,
         })
-        const lfSize = isTotal ? fsBase + 1 : fsBase
+  const lfSize = isTotal ? fsBase + 3 : fsBase
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
           y: yRowTop - 14,
@@ -976,22 +994,102 @@ async function exportToBasePdf() {
           y: yRowTop - rowTH,
           width: rightW - labelW,
           height: rowTH,
-          color: isTotal ? rgb(1, 0.7, 0) : white,
+          color: isTotal ? rgb(0.933, 0.961, 0.153) : white, // #EEF527 para Total
           borderColor: primeD,
           borderWidth: 0.8,
         })
         const vSize = isTotal ? fsBase + 1 : fsBase
         const txt = values[i]
         page.drawText(txt, {
-          x: centerText(vx, rightW - labelW, txt, vSize, fontBold),
+          x: centerText(vx, rightW - labelW, txt, vSize, isTotal ? fontBold : font),
           y: yRowTop - 14,
           size: vSize,
-          font: fontBold,
+          font: isTotal ? fontBold : font,
           color: ink,
         })
       }
 
       y -= Math.max(notesH, totalBoxH) + 10
+    }
+
+    // --- Función para dibujar la sección "Tu sistema solar" ---
+    async function drawSistemaSolarSection() {
+      // Configuración visual
+      const items = [
+        {
+          img: "panel.png",
+          value: datos.numeroModulosCard || "—",
+          title: "Paneles Solares",
+        },
+        {
+          img: "potencia.png",
+          value: datos.potenciaInstalada || "—",
+          title: "Potencia Total Inst.",
+        },
+        {
+          img: "porcentaje.png",
+          value: datos.porcentajeAhorro || "—",
+          title: "% de Ahorro",
+        },
+        {
+          img: "area.png",
+          value: (datos.areaAprox ? datos.areaAprox + " m2" : "— m2"),
+          title: "Área Requerida",
+        },
+      ];
+
+      const cols = items.length;
+      const gap = mm(6);
+      const colW = (contentWidth - gap * (cols - 1)) / cols;
+      const imgMM = 13; // tamaño imagen
+      const valueSize = fsKPI;
+      const titleSize = fsSmall + 1; // Un poco más grande para los títulos grises
+      const cardH = mm(imgMM) + 32;
+      ensure(cardH + 8);
+
+      // Altura de cada bloque
+      const blockH = mm(imgMM) + 18;
+      ensure(blockH + 8);
+      // Calcular el ancho total del bloque
+      const totalW = cols * colW + (cols - 1) * gap;
+      // Centrado visual: considerar el margen izquierdo y derecho
+      const startX = (PW - totalW) / 2;
+      const offset = mm(5); // Ajusta este valor si lo quieres más al centro
+      const finalStartX = startX + offset;
+      for (let i = 0; i < cols; i++) {
+        const x = finalStartX + i * (colW + gap);
+        // Imagen PNG
+        let iconW = mm(imgMM), iconH = mm(imgMM);
+        try {
+          const imgBytes = await fetch(`img/${items[i].img}`).then(r => r.arrayBuffer());
+          const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
+          page.drawImage(imgEmbed, {
+            x: x,
+            y: y - iconH,
+            width: iconW,
+            height: iconH,
+          });
+        } catch (e) { }
+        // Valor a la derecha de la imagen
+        const v = String(items[i].value ?? "—");
+        page.drawText(v, {
+          x: x + iconW + 6,
+          y: y - 8,
+          size: valueSize,
+          font: fontBold,
+          color: ink,
+        });
+        // Título abajo, centrado respecto al bloque
+        const tWidth = widthOf(items[i].title, titleSize, font);
+        page.drawText(items[i].title, {
+          x: x + (colW - tWidth) / 2,
+          y: y - iconH - 12,
+          size: titleSize,
+          font,
+          color: mute,
+        });
+      }
+      y -= blockH + 8;
     }
 
     // === 4) Composición ===
@@ -1002,9 +1100,9 @@ async function exportToBasePdf() {
     // Panel (involucrados)
     await drawInfoPanelWithIcons()
 
-  // Espacio extra entre panel de involucrados y DATOS DEL PROYECTO
-  y -= mm(5) // Puedes ajustar el valor si quieres más o menos espacio
-  // DATOS DEL PROYECTO (formato boceto)
+    // Espacio extra entre panel de involucrados y DATOS DEL PROYECTO
+    y -= mm(5) // Puedes ajustar el valor si quieres más o menos espacio
+    // DATOS DEL PROYECTO (formato boceto)
     // Helper para capitalizar
     function capitalizeFirst(str) {
       return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "—";
@@ -1034,7 +1132,7 @@ async function exportToBasePdf() {
     let tempY = datosY;
     datosProyecto.forEach(([label, value]) => {
   const labelW = widthOf(label, fsBase, fontBold);
-  const gap = mm(4); // Espacio pequeño entre título y valor
+  const gap = mm(1.2); // Junta más el título y la respuesta
   page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
   page.drawText(value, { x: datosX + labelW + gap, y: tempY, size: fsBase, font, color: ink });
   tempY -= lh;
@@ -1050,44 +1148,159 @@ async function exportToBasePdf() {
       const kpi = datosKPI[i];
       const baseX = kpiXStart + i * (kpiW + kpiGap);
       // Imagen en medio
-      let imgY = kpiYStart - mm(2) - kpiImgH/2;
-      let imgX = baseX + kpiW/2 - mm(6);
+      let imgY = kpiYStart - mm(2) - kpiImgH / 2;
+      let imgX = baseX + kpiW / 2 - mm(6);
       try {
         const imgBytes = await fetch(`img/${kpi.img}`).then(r => r.arrayBuffer());
         const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
         page.drawImage(imgEmbed, { x: imgX, y: imgY, width: mm(12), height: kpiImgH });
-      } catch {}
-      // Valor arriba, centrado respecto a la imagen
-      page.drawText(kpi.value, { x: baseX + kpiW/2 - widthOf(kpi.value, fsBase, fontBold)/2, y: imgY + kpiImgH + mm(2), size: fsBase, font: fontBold, color: ink });
+      } catch { }
+      // Valor arriba, centrado respecto a la imagen (más grande)
+      const kpiValueSize = 11; // Un poco más chicos
+      page.drawText(kpi.value, { x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2, y: imgY + kpiImgH + mm(2), size: kpiValueSize, font: fontBold, color: ink });
       // Nombre abajo, centrado respecto a la imagen
-      page.drawText(kpi.label, { x: baseX + kpiW/2 - widthOf(kpi.label, fsSmall, font)/2, y: imgY - mm(6), size: fsSmall, font, color: mute });
+      const kpiTitleSize = fsSmall + 1; // Igual que los títulos grises de 'Tu sistema solar'
+      page.drawText(kpi.label, { x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, font) / 2, y: imgY - mm(6), size: kpiTitleSize, font, color: mute });
     }
     // Ajusta y para el siguiente bloque
     y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
 
-    // TU SISTEMA SOLAR (formato boceto)
+    // Reducir aún más el espacio entre KPIs y 'TU SISTEMA SOLAR'
+    y += mm(4); // Sube el título para que quede más cerca de los KPIs
     section("TU SISTEMA SOLAR")
-    y -= mm(4)
+    y -= mm(3); // Sube el título para que quede más cerca de los KPIs
+    await drawSistemaSolarSection()
     let espacioPanelY = y;
-    const datosPaneles = [
-      ["Paneles solares:", datos.numeroModulosCard || "—"],
-      ["Potencia total inst.:", datos.potenciaInstalada || "—"],
-      ["% de Ahorro:", datos.porcentajeAhorro || "—"],
-      ["Área requerida:", `${datos.areaAprox || "—"} m²`],
-    ];
-    datosPaneles.forEach(([label, value]) => {
-      page.drawText(label, { x: left, y, size: fsBase, font: fontBold, color: ink });
-      page.drawText(value, { x: left + mm(40), y, size: fsBase, font, color: ink });
-      y -= lh;
-    });
-    y -= mm(8); // Espacio para imagen de paneles
-    // Aquí puedes agregar la imagen de paneles
-    // page.drawImage(...)
-    y = espacioPanelY - mm(30); // deja espacio para imagen
+    y = espacioPanelY - mm(3); // menos espacio antes de la gráfica
 
-    // Gráfica en la PRIMERA hoja (más chica)
-    await drawCanvasImageIfAny2("impactoChart", 145, 75)
+    // Gráfica justo después de 'TU SISTEMA SOLAR'
+    await drawCanvasImageIfAny2("impactoChart", 180, 85)
+
     newPage()
+    section("INVERSIÓN")
+    y -= mm(16)
+
+    // Configuración general
+    const invCircleR = mm(12)
+    const blockW = mm(54)   // ancho de cada bloque
+    const blockH = mm(40)   // alto de bloque
+    const gap = mm(10)      // separación entre bloques
+    const totalWidth = blockW * 3 + gap * 2
+    const startX = left + (contentWidth - totalWidth) / 2
+    const centerY = y - blockH / 2
+
+    // Utilidad: evita NaN en los textos
+    // Extrae solo el número del texto, muestra '0' si no hay valor
+    const extractNumber = (txt, fallback = "0") => {
+      if (!txt || txt === "-" || txt === "—") return fallback;
+      const match = String(txt).match(/[\d,.]+/);
+      return match ? match[0] : fallback;
+    }
+
+    // ================= ROI (bloque 1) =================
+    let x = startX
+    const roiCenterX = x + blockW / 2
+    const roiCenterY = centerY + blockH / 2
+
+    page.drawEllipse({
+      x: roiCenterX, // centro correcto
+      y: roiCenterY, // centro correcto
+      xScale: invCircleR,
+      yScale: invCircleR,
+      color: rgb(0.93, 0.98, 0.95),
+      borderColor: rgb(0.15, 0.72, 0.3),
+      borderWidth: 1.2,
+    })
+
+    const invValue = typeof _total === "number" ? fmtMXN(_total) : String(_total)
+  const invValueSize = 9 // tamaño reducido para valores grandes
+    const invValueW = widthOf(invValue, invValueSize, fontBold)
+    page.drawText(invValue, {
+      x: roiCenterX - invValueW / 2,
+      y: roiCenterY - invValueSize / 2,
+      size: invValueSize,
+      font: fontBold,
+      color: primeD,
+    })
+
+    // ROI texto a la derecha del círculo
+    const roiTextX = roiCenterX + invCircleR + mm(4)
+    page.drawText("ROI", {
+      x: roiTextX,
+      y: roiCenterY + fsBase + 2,
+      size: fsBase,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText(`${datos.roi || "—"} años`, {
+      x: roiTextX,
+      y: roiCenterY - fsBase,
+      size: fsBase,
+      font,
+      color: ink,
+    })
+
+    // ================= ÁRBOLES (bloque 2) =================
+    x += blockW + gap
+    const iconSize = mm(14)
+    const iconHalf = iconSize / 2
+    const iconY_arbol = centerY + blockH / 2 - iconHalf
+    const iconX_arbol = x + blockW / 2 - iconHalf
+
+    try {
+      const imgBytes = await fetch('img/arbol.png').then(r => r.arrayBuffer())
+      const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
+      page.drawImage(imgEmbed, { x: iconX_arbol, y: iconY_arbol, width: iconSize, height: iconSize })
+    } catch { }
+
+    const kpiValueSize = 11; // mismo tamaño que Consumo Anual
+    const arbolesValue = extractNumber(datos.arboles, "0");
+    const tituloArbol = `${arbolesValue} árboles`;
+    page.drawText(tituloArbol, {
+      x: x + (blockW - widthOf(tituloArbol, kpiValueSize, fontBold)) / 2,
+      y: iconY_arbol + iconSize + mm(2),
+      size: kpiValueSize,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText("Árboles equiv.", {
+      x: x + (blockW - widthOf("Árboles equiv.", fsSmall + 1, font)) / 2,
+      y: iconY_arbol - mm(6), // debajo del ícono
+      size: fsSmall + 1,
+      font,
+      color: mute,
+    })
+
+    // ================= CO2 (bloque 3) =================
+    x += blockW + gap
+    const iconY_co2 = centerY + blockH / 2 - iconHalf
+    const iconX_co2 = x + blockW / 2 - iconHalf
+
+    try {
+      const imgBytes = await fetch('img/co2.png').then(r => r.arrayBuffer())
+      const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes))
+      page.drawImage(imgEmbed, { x: iconX_co2, y: iconY_co2, width: iconSize, height: iconSize })
+    } catch { }
+
+    const co2Value = extractNumber(datos.ahorroCO2, "0");
+    const tituloCO2 = `${co2Value} t`;
+    page.drawText(tituloCO2, {
+      x: x + (blockW - widthOf(tituloCO2, kpiValueSize, fontBold)) / 2,
+      y: iconY_co2 + iconSize + mm(2),
+      size: kpiValueSize,
+      font: fontBold,
+      color: ink,
+    })
+    page.drawText("Ahorro CO2", {
+      x: x + (blockW - widthOf("Ahorro CO2", fsSmall + 1, font)) / 2,
+      y: iconY_co2 - mm(6), // debajo del ícono
+      size: fsSmall + 1,
+      font,
+      color: mute,
+    })
+
+    // ================= mover cursor =================
+    y = centerY - blockH / 2 + mm(18)
 
     // Tabla de cotización
     section("COTIZACIÓN")
@@ -1126,7 +1339,7 @@ async function obtenerBasePdfBytes() {
       if (!resp.ok) throw new Error("HTTP " + resp.status)
       basePdfBytes = await resp.arrayBuffer()
       return basePdfBytes
-    } catch (_) {}
+    } catch (_) { }
   }
   return new Promise((resolve, reject) => {
     const input = document.createElement("input")
