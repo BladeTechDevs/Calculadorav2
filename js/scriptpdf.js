@@ -138,7 +138,6 @@ async function exportToBasePdf() {
 
     const ensure = (h) => { if (y - h < bottom) newPage() }
     const newPage = () => {
-      drawFooter()
       pageIndex++
       if (pageIndex < pdfDoc.getPageCount()) page = pdfDoc.getPage(pageIndex)
       else page = pdfDoc.addPage([PW, PH])
