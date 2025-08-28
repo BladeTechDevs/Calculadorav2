@@ -615,7 +615,7 @@ body {
 @media (max-width: 768px) {
   .top-bar {
     padding: 0 0.8rem;
-    height: 55px; /* Aumentado más para evitar que se esconda contenido */
+    height: 60px; /* Aumentado para evitar que se esconda contenido */
   }
   .logo {
     font-size: 0.9rem;
@@ -631,12 +631,12 @@ body {
   }
   .form-panel {
     padding: 1rem;
-    padding-bottom: 1rem; /* Removed excessive padding-bottom to eliminate white space below buttons */
+    padding-bottom: 1rem;
   }
 
   /* Ajuste del contenedor principal para evitar que se esconda detrás del header */
   .main-container {
-    padding-top: 70px; /* Aumentado significativamente para compensar header */
+    padding-top: 80px; /* Aumentado para compensar header fijo en mobile/tablet */
   }
 
   /* SOLO logo en teléfono */
@@ -701,11 +701,11 @@ body {
 /* Ajustes específicos para móviles pequeños */
 @media (max-width: 480px) {
   .top-bar {
-    height: 55px; /* Consistente con el media query anterior */
+    height: 65px; /* Más alto para pantallas pequeñas */
     padding: 0 0.6rem;
   }
   .main-container {
-    padding-top: 70px; /* Consistente con el media query anterior */
+    padding-top: 90px; /* Más espacio para header fijo en móviles pequeños */
   }
   .consumo-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -713,8 +713,8 @@ body {
 
   /* Botones aún más ajustados para pantallas pequeñas */
   .calculate-btn {
-    min-height: 30px; /* Altura mínima mayor para pantallas pequeñas */
-    padding: 0.3rem 0.6rem; /* Consistente con el media query anterior */
+    min-height: 30px;
+    padding: 0.3rem 0.6rem;
   }
 }
 
