@@ -665,9 +665,12 @@
               const resultados = JSON.parse(datasistema)
               console.log("Resultados del sistema solar:", resultados)
             }
+
+            console.log("resultados:", resultados)
             let reoysinIva = base / resultados.consumoAnualDeEnergia;
             let roiConiva = total / resultados.consumoAnualDeEnergia;
-            
+            console.log("ReoysinIva:", reoysinIva);
+            console.log("RoiConIva:", roiConiva);
             // Guardar resultados en localStorage
             const datosParaGuardar = {
               conceptos,

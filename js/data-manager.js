@@ -250,8 +250,8 @@ recopilarDatosCotizacion() {
   } catch (_) {}
   if (!consumoAnualBase) consumoAnualBase = toNumber(this.data?.consumo?.importeTotal);
 
-  const roiSinIva = consumoAnualBase > 0 ? subtotal2 / consumoAnualBase : 0; // base sin IVA
-  const roiConIva = consumoAnualBase > 0 ? total / consumoAnualBase : 0;     // con IVA
+    const roiSinIva = consumoAnualBase > 0 ? subtotal2 / consumoAnualBase : 0; // base sin IVA
+    const roiConIva = total / consumoAnualBase ;     // con IVA
 
   // Guardar
   this.data.cotizacion = {
@@ -284,7 +284,7 @@ recopilarDatosCotizacion() {
 
     // ROI
     roiSinIva,
-    roiConIva,
+    roiConIva: roiConIva,
   };
 
   console.log(this.data.cotizacion);
@@ -327,7 +327,55 @@ recopilarDatosCotizacion() {
     const ahorroCO2 = (generacionAnual * 439.963) / 1000000
     const arboles = ahorroCO2 * 155
     const porcentajeAhorro = (generacionAnual / consumoAnual) * 100
+    const consumoAnulaDeEnegia = consumoAnual * tarifaPromedio;
+     let total = document.getElementById("totalDisplay").innerText; 
+     let total2 = parseFloat(total.replace(/[^0-9.]/g, ""));
+    console.log(total2);
+    function diasEnMes(mes, anio) {
+      // mes: 0 = enero, 11 = diciembre
+      return new Date(anio, mes + 1, 0).getDate();
+    }
+
+     const anioActual = new Date().getFullYear();
+
+    let produccion = [];
+    const irradiacion = JSON.parse(localStorage.getItem("irradiacionAnualInputs"))
+
+      const mesesOrdenados = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+
+    // 2) Convierte el objeto en un arreglo en orden
+    const irradiacionMensualArray = mesesOrdenados.map(m => Number(irradiacion[m] || 0));
+    console.log(irradiacion);
+    console.log(irradiacionMensualArray);
     
+     for (let i = 0; i < 12; i++) {
+      const dias = diasEnMes(i, anioActual);
+      produccion[i] =
+        irradiacionMensualArray[i] *
+        kwintsladaConEficiancia2  *
+        dias;
+    }
+    console.log(produccion);
+    
+    let promedioProduccion = produccion.reduce((a, b) => a + b, 0) / 12;
+    console.log(promedioProduccion);
+    let diferencia = consumoMensual - promedioProduccion;
+    const porcentajeGeneracion = (diferencia / consumoMensual) * 100;
+
+    const roi = (total2 / consumoAnulaDeEnegia).toFixed(1);
     this.data.resultados = {
       consumoAnual,
       consumoMensual,
@@ -345,7 +393,10 @@ recopilarDatosCotizacion() {
       porcentajeAhorro,
       generacionAnualAprox: generacionAnual,
       kwintsladaConEficiancia: potenciaInstalada * 0.76,
-      kwintsladaConEficiancia2 : kwintsladaConEficiancia2
+      kwintsladaConEficiancia2 : kwintsladaConEficiancia2,
+      consumoAnulaDeEnegia: consumoAnulaDeEnegia,
+      roi: roi,
+      porcentajeGeneracion: porcentajeGeneracion,
     }
 
     return this.data.resultados
@@ -434,6 +485,7 @@ recopilarDatosCotizacion() {
     console.log("Todos los datos eliminados del localStorage")
   }
 }
+
 
 // Crear instancia global
 window.dataManager = new DataManager()

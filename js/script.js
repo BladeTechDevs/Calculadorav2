@@ -595,163 +595,163 @@ function calcularSistemaSolar() {
   // Desactivar el botón
   document.getElementById("btnCalcular").disabled = true;
   
-  function validarCliente() {
-    const nombre = document.getElementById("nombreCliente")?.value.trim()
-    const direccion = document.getElementById("direccionCliente")?.value.trim()
-    const estado = document.getElementById("estadoCliente")?.value
-    const municipio = document.getElementById("municipioCliente")?.value.trim()
-    const telefono = document.getElementById("telefonoCliente")?.value.trim()
-    const correo = document.getElementById("correoCliente")?.value.trim()
+  // function validarCliente() {
+  //   const nombre = document.getElementById("nombreCliente")?.value.trim()
+  //   const direccion = document.getElementById("direccionCliente")?.value.trim()
+  //   const estado = document.getElementById("estadoCliente")?.value
+  //   const municipio = document.getElementById("municipioCliente")?.value.trim()
+  //   const telefono = document.getElementById("telefonoCliente")?.value.trim()
+  //   const correo = document.getElementById("correoCliente")?.value.trim()
 
-    // Nombre
-    if (!nombre) {
-      showToast("Falta llenar el nombre del cliente.", "warning")
-      return false
-    }
-    // Dirección
-    if (!direccion) {
-      showToast("Falta llenar la dirección del cliente.", "warning")
-      return false
-    }
-    // Teléfono (10 dígitos)
-    const soloNumeros = telefono.replace(/\D/g, "")
-    if (!soloNumeros || soloNumeros.length !== 10) {
-      showToast("El teléfono debe tener 10 dígitos.", "warning")
-      return false
-    }
-    // Correo (formato válido)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-    if (!correo || !emailRegex.test(correo)) {
-      showToast("El correo electrónico no es válido.", "warning")
-      return false
-    }
+  //   // Nombre
+  //   if (!nombre) {
+  //     showToast("Falta llenar el nombre del cliente.", "warning")
+  //     return false
+  //   }
+  //   // Dirección
+  //   if (!direccion) {
+  //     showToast("Falta llenar la dirección del cliente.", "warning")
+  //     return false
+  //   }
+  //   // Teléfono (10 dígitos)
+  //   const soloNumeros = telefono.replace(/\D/g, "")
+  //   if (!soloNumeros || soloNumeros.length !== 10) {
+  //     showToast("El teléfono debe tener 10 dígitos.", "warning")
+  //     return false
+  //   }
+  //   // Correo (formato válido)
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+  //   if (!correo || !emailRegex.test(correo)) {
+  //     showToast("El correo electrónico no es válido.", "warning")
+  //     return false
+  //   }
 
-    return true // ✅ todos los campos son válidos
-  }
+  //   return true // ✅ todos los campos son válidos
+  // }
 
-  if (!validarCliente()) {
-    document.getElementById("btnCalcular").disabled = false
-    return
-  }
+  // if (!validarCliente()) {
+  //   document.getElementById("btnCalcular").disabled = false
+  //   return
+  // }
 
-  function validarEjecutivo() {
-    const nombre = document.getElementById("nombreEjecutivo")?.value.trim()
-    const correo = document.getElementById("correoEjecutivo")?.value.trim()
-    const folio = document.getElementById("folioCotizacion")?.value.trim()
+  // function validarEjecutivo() {
+  //   const nombre = document.getElementById("nombreEjecutivo")?.value.trim()
+  //   const correo = document.getElementById("correoEjecutivo")?.value.trim()
+  //   const folio = document.getElementById("folioCotizacion")?.value.trim()
 
-    // Nombre
-    if (!nombre) {
-      showToast("Falta llenar el nombre del ejecutivo.", "warning")
-      return false
-    }
-    // Correo
-    if (!correo) {
-      showToast("Falta llenar el correo del ejecutivo.", "warning")
-      return false
-    }
-    // Folio
-    if (!folio) {
-      showToast("Falta llenar el folio de cotización.", "warning")
-      return false
-    }
+  //   // Nombre
+  //   if (!nombre) {
+  //     showToast("Falta llenar el nombre del ejecutivo.", "warning")
+  //     return false
+  //   }
+  //   // Correo
+  //   if (!correo) {
+  //     showToast("Falta llenar el correo del ejecutivo.", "warning")
+  //     return false
+  //   }
+  //   // Folio
+  //   if (!folio) {
+  //     showToast("Falta llenar el folio de cotización.", "warning")
+  //     return false
+  //   }
 
-    return true
-  }
+  //   return true
+  // }
 
-  if (!validarEjecutivo()) {
-    document.getElementById("btnCalcular").disabled = false
-    return
-  }
+  // if (!validarEjecutivo()) {
+  //   document.getElementById("btnCalcular").disabled = false
+  //   return
+  // }
 
-  function validarProyecto() {
-    // Antes de validar, poner 0 en los inputs de Cotización P.U. si están vacíos (excepto profit)
-    const cotizacionIds = [
-      "panel", "inversor", "mantenimiento", "estructura", "materiales",
-      "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor", "total"
-    ];
-    cotizacionIds.forEach(id => {
-      const input = document.getElementById(id);
-      if (input && (input.value === null || input.value === "")) {
-        input.value = 0;
-      }
-    });
-    // ...existing code...
-    const tipo = document.getElementById("tipoProyecto")?.value
-    const tarifa = document.getElementById("tipoTarifa")?.value
-    const estado = document.getElementById("estadoProyecto")?.value
-    const municipio = document.getElementById("municipioProyecto")?.value.trim()
-    const potencia = document.getElementById("potenciaPanel")?.value
-    const profit = document.getElementById("profit")?.value
+  // function validarProyecto() {
+  //   // Antes de validar, poner 0 en los inputs de Cotización P.U. si están vacíos (excepto profit)
+  //   const cotizacionIds = [
+  //     "panel", "inversor", "mantenimiento", "estructura", "materiales",
+  //     "instalacion", "carpeta", "flete", "interconexion", "uve", "uie", "medidor", "total"
+  //   ];
+  //   cotizacionIds.forEach(id => {
+  //     const input = document.getElementById(id);
+  //     if (input && (input.value === null || input.value === "")) {
+  //       input.value = 0;
+  //     }
+  //   });
+  //   // ...existing code...
+  //   const tipo = document.getElementById("tipoProyecto")?.value
+  //   const tarifa = document.getElementById("tipoTarifa")?.value
+  //   const estado = document.getElementById("estadoProyecto")?.value
+  //   const municipio = document.getElementById("municipioProyecto")?.value.trim()
+  //   const potencia = document.getElementById("potenciaPanel")?.value
+  //   const profit = document.getElementById("profit")?.value
 
-    if (!tipo) {
-      showToast("Selecciona el tipo de proyecto.", "warning")
-      return false
-    }
-    if (!tarifa) {
-      showToast("Selecciona el tipo de tarifa.", "warning")
-      return false
-    }
-    if (!estado) {
-      showToast("Selecciona el estado del proyecto.", "warning")
-      return false
-    }
-    if (!municipio) {
-      showToast("Falta llenar el municipio del proyecto.", "warning")
-      return false
-    }
-    if (!potencia || Number.parseFloat(potencia) <= 0) {
-      showToast("Ingresa la potencia del panel.", "warning")
-      return false
-    }
-    const areaAprox = document.getElementById("areaAprox")?.value
-    if (!areaAprox || Number.parseFloat(areaAprox) <= 0) {
-      showToast("Ingresa el área aproximada.", "warning")
-      return false
-    }
-    if (!profit || Number.parseFloat(profit) <= 0) {
-      showToast("Ingresa el profit (%).", "warning")
-      return false
-    }
+  //   if (!tipo) {
+  //     showToast("Selecciona el tipo de proyecto.", "warning")
+  //     return false
+  //   }
+  //   if (!tarifa) {
+  //     showToast("Selecciona el tipo de tarifa.", "warning")
+  //     return false
+  //   }
+  //   if (!estado) {
+  //     showToast("Selecciona el estado del proyecto.", "warning")
+  //     return false
+  //   }
+  //   if (!municipio) {
+  //     showToast("Falta llenar el municipio del proyecto.", "warning")
+  //     return false
+  //   }
+  //   if (!potencia || Number.parseFloat(potencia) <= 0) {
+  //     showToast("Ingresa la potencia del panel.", "warning")
+  //     return false
+  //   }
+  //   const areaAprox = document.getElementById("areaAprox")?.value
+  //   if (!areaAprox || Number.parseFloat(areaAprox) <= 0) {
+  //     showToast("Ingresa el área aproximada.", "warning")
+  //     return false
+  //   }
+  //   if (!profit || Number.parseFloat(profit) <= 0) {
+  //     showToast("Ingresa el profit (%).", "warning")
+  //     return false
+  //   }
 
-    return true
-  }
+  //   return true
+  // }
 
-  if (!validarProyecto()) {
-    document.getElementById("btnCalcular").disabled = false
-    return
-  }
+  // if (!validarProyecto()) {
+  //   document.getElementById("btnCalcular").disabled = false
+  //   return
+  // }
 
-  function validarConsumo() {
-    const tipoPeriodo = document.getElementById("tipoPeriodo")?.value || "bimestral"
-    const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
+  // function validarConsumo() {
+  //   const tipoPeriodo = document.getElementById("tipoPeriodo")?.value || "bimestral"
+  //   const numPeriodos = tipoPeriodo === "mensual" ? 12 : 6
 
-    let tieneConsumos = false
-    let tieneImportes = false
+  //   let tieneConsumos = false
+  //   let tieneImportes = false
 
-    for (let i = 0; i < numPeriodos; i++) {
-      const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
-      const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
+  //   for (let i = 0; i < numPeriodos; i++) {
+  //     const consumo = Number.parseFloat(document.getElementById(`consumo${i}`)?.value) || 0
+  //     const importe = Number.parseFloat(document.getElementById(`importe${i}`)?.value) || 0
 
-      if (consumo > 0) tieneConsumos = true
-      if (importe > 0) tieneImportes = true
-    }
+  //     if (consumo > 0) tieneConsumos = true
+  //     if (importe > 0) tieneImportes = true
+  //   }
 
-    if (!tieneConsumos) {
-      showToast("Ingresa al menos un valor de consumo.", "warning")
-      return false
-    }
-    if (!tieneImportes) {
-      showToast("Ingresa al menos un valor de importe.", "warning")
-      return false
-    }
+  //   if (!tieneConsumos) {
+  //     showToast("Ingresa al menos un valor de consumo.", "warning")
+  //     return false
+  //   }
+  //   if (!tieneImportes) {
+  //     showToast("Ingresa al menos un valor de importe.", "warning")
+  //     return false
+  //   }
 
-    return true
-  }
+  //   return true
+  // }
 
-  if (!validarConsumo()) {
-    document.getElementById("btnCalcular").disabled = false
-    return
-  } 
+  // if (!validarConsumo()) {
+  //   document.getElementById("btnCalcular").disabled = false
+  //   return
+  // } 
 
   try {
     const datos = window.dataManager.guardarEnLocalStorage();
@@ -805,10 +805,10 @@ function calcularSistemaSolar() {
     ).textContent = `${resultados.generacionAnual.toFixed(2)} KWh`;
     document.getElementById(
       "porcentajeGeneracion"
-    ).textContent = `${resultados.porcentajeAhorro.toFixed(2)}%`;
+    ).textContent = `${resultados.porcentajeGeneracion.toFixed(2)}%`;
     document.getElementById(
       "roi"
-    ).textContent = `${datos.cotizacion.roiConIva.toFixed(1)} años`;
+    ).textContent = `${datos.resultados.roi} años`;
 
     // Llenar tabla detallada y crear gráficas
     window.llenarTablaDetallada(
@@ -871,7 +871,11 @@ function calcularSistemaSolar() {
         kwintsladaConEficianciaa  *
         dias;
     }
-    console.log("mensulaes", datos.consumo.consumos, produccion);
+   promedioProduccion = produccion.reduce((a, b) => a + b, 0) / 12;
+    
+   
+   localStorage.setItem("promedioProduccion", promedioProduccion);
+    console.log("mensuales", datos.consumo.consumos, produccion);
     window.setupImpactoResponsive(mesesDisplay, consumosMensuales, produccion);
     // Mostrar botón de cotización móvil
     const btnCot = document.getElementById("btnCotizarMobile");
@@ -1751,3 +1755,5 @@ window.addEventListener("load", () => {
   localStorage.clear();
   console.log("LocalStorage limpiado al recargar la página");
 });
+
+

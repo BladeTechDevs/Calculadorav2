@@ -82,12 +82,12 @@ async function exportToBasePdf() {
     };
 
     const datas = JSON.parse(localStorage.getItem("cotizacionPU2") || "{}");
-     const datas2 = JSON.parse(localStorage.getItem("cotizacionPU") || "{}");
+    const datas2 = JSON.parse(localStorage.getItem("cotizacionPU") || "{}");
     const resultadoSistemaSolar = JSON.parse(
       localStorage.getItem("resultadosSistemaSolar") || "{}"
     );
-  console.log(datas);
-  
+    console.log(resultadoSistemaSolar);
+
     // Fallback por si subtotal/iva/total aún no se llenan
     const _subtotal = (datas.subtotal || 0) + (datas.profit || 0);
     const _iva = datas.iva ?? _subtotal * 0.16;
@@ -1488,14 +1488,18 @@ async function exportToBasePdf() {
       // Solo el número (grande), sin "años"
       // Número grande + "años" pequeño a la derecha
       {
-        const raw = datas2?.roiConIva;
-        const has = typeof raw === "number" && isFinite(raw);
+        const raw = resultadoSistemaSolar.roi;
+        const num = parseFloat(raw); // convierte string → número
+
+        const has = !isNaN(num) && isFinite(num);
         const roiNum = has
-          ? raw.toLocaleString("es-MX", {
+          ? num.toLocaleString("es-MX", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })
           : "—";
+
+        console.log(roiNum);
 
         const big = fsBase + 6; // tamaño del número
         const small = Math.max(6, fsBase - 1); // tamaño de "años"
@@ -1528,8 +1532,8 @@ async function exportToBasePdf() {
       }
 
       // ===== Árboles (bloque 2) =====
-  x += blockW + gap;
-  x += mm(7); // Recorre el bloque de árboles 5mm a la derecha
+      x += blockW + gap;
+      x += mm(7); // Recorre el bloque de árboles 5mm a la derecha
       const iconSize = mm(14),
         iconHalf = iconSize / 2;
       const iconY_arbol = centerY + blockH / 2 - iconHalf;
@@ -1567,8 +1571,8 @@ async function exportToBasePdf() {
       });
 
       // ===== CO2 (bloque 3) =====
-  x += blockW + gap;
-  x -= mm(4); // Recorre el bloque de CO2 4mm a la izquierda
+      x += blockW + gap;
+      x -= mm(4); // Recorre el bloque de CO2 4mm a la izquierda
       const iconY_co2 = centerY + blockH / 2 - iconHalf;
       const iconX_co2 = x + blockW / 2 - iconHalf;
       try {
