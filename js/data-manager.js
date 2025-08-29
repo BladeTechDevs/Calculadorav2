@@ -103,47 +103,194 @@ class DataManager {
   }
 
   // Recopilar datos de cotización
-  recopilarDatosCotizacion() {
-    const costos = {
-      panel: Number.parseFloat(document.getElementById("panel")?.value) || 0,
-      inversor: Number.parseFloat(document.getElementById("inversor")?.value) || 0,
-      mantenimiento: Number.parseFloat(document.getElementById("mantenimiento")?.value) || 0,
-      estructura: Number.parseFloat(document.getElementById("estructura")?.value) || 0,
-      materiales: Number.parseFloat(document.getElementById("materiales")?.value) || 0,
-      instalacion: Number.parseFloat(document.getElementById("instalacion")?.value) || 0,
-      carpeta: Number.parseFloat(document.getElementById("carpeta")?.value) || 0,
-      flete: Number.parseFloat(document.getElementById("flete")?.value) || 0,
-      interconexion: Number.parseFloat(document.getElementById("interconexion")?.value) || 0,
-      uve: Number.parseFloat(document.getElementById("uve")?.value) || 0,
-      uie: Number.parseFloat(document.getElementById("uie")?.value) || 0,
-      medidor: Number.parseFloat(document.getElementById("medidor")?.value) || 0,
-      profit: Number.parseFloat(document.getElementById("profit")?.value) || 0,
+  // recopilarDatosCotizacion() {
+  //   const costos = {
+  //     panel: Number.parseFloat(document.getElementById("panel")?.value) || 0,
+  //     inversor: Number.parseFloat(document.getElementById("inversor")?.value) || 0,
+  //     mantenimiento: Number.parseFloat(document.getElementById("monitoreo")?.value) || 0,
+  //     estructura: Number.parseFloat(document.getElementById("estructura")?.value) || 0,
+  //     materiales: Number.parseFloat(document.getElementById("materiales")?.value) || 0,
+  //     instalacion: Number.parseFloat(document.getElementById("instalacion")?.value) || 0,
+  //     carpeta: Number.parseFloat(document.getElementById("carpeta")?.value) || 0,
+  //     flete: Number.parseFloat(document.getElementById("flete")?.value) || 0,
+  //     interconexion: Number.parseFloat(document.getElementById("interconexion")?.value) || 0,
+  //     uve: Number.parseFloat(document.getElementById("uve")?.value) || 0,
+  //     uie: Number.parseFloat(document.getElementById("uie")?.value) || 0,
+  //     medidor: Number.parseFloat(document.getElementById("medidor")?.value) || 0,
+  //     profit: Number.parseFloat(document.getElementById("profit")?.value) || 0,
+  //   }
+
+  //   const subtotal = Object.values(costos).reduce((a, b, i) => {
+  //     // No sumar profit al subtotal
+  //     return i === Object.keys(costos).length - 1 ? a : a + b
+  //   }, 0)
+
+  //   const iva = subtotal * 0.16
+  //   const total = subtotal + iva
+
+  //   // Calcular ROI
+  //   const ahorroAnual = this.data.consumo.importeTotal || 0
+  //   const roiSinIva = ahorroAnual > 0 ? subtotal / ahorroAnual : 0
+  //   const roiConIva = ahorroAnual > 0 ? total / ahorroAnual : 0
+  
+  //   this.data.cotizacion = {
+  //     ...costos,
+  //     subtotal,
+  //     iva,
+  //     total,
+  //     roiSinIva,
+  //     roiConIva,
+  //   }
+  //  console.log(this.data.cotizacion)
+  //   return this.data.cotizacion
+  // }
+
+  // Recopilar datos de cotización (con multiplicadores por número de paneles y microinversor)
+// Recopilar datos de cotización (idéntico a la lógica del IIFE)
+// Recopilar datos de cotización (subtotal1, profit, subtotal2, IVA y total)
+recopilarDatosCotizacion() {
+  const IVA_RATE = 0.16;
+
+  // Helpers
+  const $ = (id) => document.getElementById(id);
+  const toNumber = (v) => {
+    if (v === null || v === undefined) return 0;
+    const s = String(v).replace(/[,$\s]/g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  };
+
+  // Número de módulos
+  const getNumeroDeModulos = () => {
+    if (this.data?.resultados && Number(this.data.resultados.numeroModulos) > 0) {
+      return Number(this.data.resultados.numeroModulos);
     }
+    const el = $('numeroModulos');
+    if (!el) return 1;
+    const txt = el.textContent?.trim() || el.value?.trim() || '0';
+    const num = toNumber(txt);
+    return num > 0 ? num : 1;
+  };
 
-    const subtotal = Object.values(costos).reduce((a, b, i) => {
-      // No sumar profit al subtotal
-      return i === Object.keys(costos).length - 1 ? a : a + b
-    }, 0)
+  // Costos unitarios UI
+  const costosUnit = {
+    panel:        toNumber($('panel')?.value),
+    inversor:     toNumber($('inversor')?.value),
+    materiales:   toNumber($('materiales')?.value),
+    estructura:   toNumber($('estructura')?.value),
+    instalacion:  toNumber($('instalacion')?.value),
+    carpeta:      toNumber($('carpeta')?.value),
+    flete:        toNumber($('flete')?.value),
+    interconexion:toNumber($('interconexion')?.value),
+    uve:          toNumber($('uve')?.value),
+    uie:          toNumber($('uie')?.value),
+    medidor:      toNumber($('medidor')?.value),
+    mantenimiento:toNumber($('monitoreo')?.value),
+    profitRaw:    toNumber($('profit')?.value),
+  };
 
-    const iva = subtotal * 0.16
-    const total = subtotal + iva
+  const numeroModulos = getNumeroDeModulos();
+  const inversorOmicro = (this.data?.resultados?.selectInversor ?? '').toString();
+  const esMicroinversor = inversorOmicro === 'Microinversor';
 
-    // Calcular ROI
-    const ahorroAnual = this.data.consumo.importeTotal || 0
-    const roiSinIva = ahorroAnual > 0 ? subtotal / ahorroAnual : 0
-    const roiConIva = ahorroAnual > 0 ? total / ahorroAnual : 0
+  // IDs que se multiplican por módulo
+  const idsSiemprePorModulo = new Set(['panel', 'materiales', 'estructura', 'instalacion']);
 
-    this.data.cotizacion = {
-      ...costos,
-      subtotal,
-      iva,
-      total,
-      roiSinIva,
-      roiConIva,
+  // Orden de partidas (como en tu tabla)
+  const IDS_COSTOS = [
+    ['panel', 'Panel'],
+    ['inversor', 'Inversor'],
+    ['materiales', 'Materiales'],
+    ['estructura', 'Estructura'],
+    ['instalacion', 'Instalación'],
+    ['carpeta', 'Carpeta (Pog)'],
+    ['flete', 'Flete'],
+    ['interconexion', 'Interconexión'],
+    ['uve', 'UVIE'],
+    ['uie', 'UIE'],
+    ['medidor', 'Medidor'],
+    ['monitoreo', 'Monitoreo'],
+  ];
+
+  // === SUBTOTAL 1: suma de todas las partidas (con multiplicadores) ===
+  let subtotal1 = 0;
+  const partidasTotales = {};
+
+  IDS_COSTOS.forEach(([id]) => {
+    let val = costosUnit[id] || 0;
+    const debeMultiplicarse =
+      idsSiemprePorModulo.has(id) || (id === 'inversor' && esMicroinversor);
+
+    if (debeMultiplicarse) val *= numeroModulos;
+
+    partidasTotales[id] = val;
+    subtotal1 += val;
+  });
+
+  // === PROFIT (igual que tu lógica): <=1 proporción, >1 porcentaje ===
+  const p = costosUnit.profitRaw;
+  const profitMonto = p ? (p <= 1 ? subtotal1 * p : subtotal1 * (p / 100)) : 0;
+  const profitEtiqueta = p
+    ? (p <= 1 ? (p * 100).toFixed(2) + '%' : p.toFixed(2) + '%')
+    : '—';
+
+  // === SUBTOTAL 2, IVA y TOTAL ===
+  const subtotal2 = subtotal1 + profitMonto;
+  const iva = subtotal2 * IVA_RATE;
+  const total = subtotal2 + iva;
+
+  // ROI (mismo denominador que tu IIFE: consumoAnualDeEnergia; fallback a importeTotal)
+  let consumoAnualBase = 0;
+  try {
+    const dataLS = localStorage.getItem('resultadosSistemaSolar');
+    if (dataLS) {
+      const res = JSON.parse(dataLS);
+      consumoAnualBase = toNumber(res?.consumoAnualDeEnergia);
     }
+  } catch (_) {}
+  if (!consumoAnualBase) consumoAnualBase = toNumber(this.data?.consumo?.importeTotal);
 
-    return this.data.cotizacion
-  }
+  const roiSinIva = consumoAnualBase > 0 ? subtotal2 / consumoAnualBase : 0; // base sin IVA
+  const roiConIva = consumoAnualBase > 0 ? total / consumoAnualBase : 0;     // con IVA
+
+  // Guardar
+  this.data.cotizacion = {
+    // unitarios
+    ...costosUnit,
+
+    // multiplicadores
+    numeroModulosUsado: numeroModulos,
+    esMicroinversor,
+
+    // partidas totales (ya multiplicadas donde corresponde)
+    panelTotal: partidasTotales.panel,
+    inversorTotal: partidasTotales.inversor,
+    materialesTotal: partidasTotales.materiales,
+    estructuraTotal: partidasTotales.estructura,
+    instalacionTotal: partidasTotales.instalacion,
+
+    // TOTALES CLAVE
+    subtotal1,            // ⟵ suma de partidas
+    profitMonto,          // ⟵ monto del profit
+    profitEtiqueta,       // ⟵ % mostrado
+    subtotal2,            // ⟵ subtotal1 + profit
+    iva,                  // ⟵ IVA sobre subtotal2
+    total,                // ⟵ subtotal2 + IVA
+
+    // Alias para compatibilidad con tu código existente
+    subtotal: subtotal1,  // "Subtotal 1"
+    base: subtotal2,      // "Subtotal 2"
+    IVA_RATE,
+
+    // ROI
+    roiSinIva,
+    roiConIva,
+  };
+
+  console.log(this.data.cotizacion);
+  return this.data.cotizacion;
+}
+
 
   // Calcular resultados del sistema
   calcularSistema() {

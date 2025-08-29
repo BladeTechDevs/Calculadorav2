@@ -667,6 +667,7 @@
             }
             let reoysinIva = base / resultados.consumoAnualDeEnergia;
             let roiConiva = total / resultados.consumoAnualDeEnergia;
+            
             // Guardar resultados en localStorage
             const datosParaGuardar = {
               conceptos,
@@ -677,10 +678,12 @@
               total,
               pricePerWatt: pricePerWatt || 0,
               numeroModulos: numeroModulos,
-              reoysinIva: reoysinIva || 0,
-              roiConiva: roiConiva || 0
+              reoysinIva: reoysinIva ,
+              roiConiva: roiConiva 
             };
-            localStorage.setItem("cotizacionPU", JSON.stringify(datosParaGuardar));
+
+            console.log(datosParaGuardar)
+             localStorage.setItem("cotizacionPU2", JSON.stringify(datosParaGuardar));
             console.log("Cotización P.U. guardada en localStorage:", datosParaGuardar);
 
             const cardStyle = `

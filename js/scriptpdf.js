@@ -75,17 +75,19 @@ async function exportToBasePdf() {
       numModulosInput: getVal("numeroModulos"),
       subtotalForm: toNum(getVal("subtotal", "0")),
       ivaForm: toNum(getVal("iva", "0")),
-      totalForm: toNum(getVal("total", "0")),
+      totalForm: toNum(getVal("totalDisplay", "0")),
       subtotalDisplay: getVal("subtotalDisplay", "0"),
       ivaDisplay: getVal("ivaDisplay", "0"),
       totalDisplay: getVal("totalDisplay", "0"),
     };
 
-    const datas = JSON.parse(localStorage.getItem("cotizacionPU") || "{}");
+    const datas = JSON.parse(localStorage.getItem("cotizacionPU2") || "{}");
+     const datas2 = JSON.parse(localStorage.getItem("cotizacionPU") || "{}");
     const resultadoSistemaSolar = JSON.parse(
       localStorage.getItem("resultadosSistemaSolar") || "{}"
     );
-
+  console.log(datas);
+  
     // Fallback por si subtotal/iva/total aún no se llenan
     const _subtotal = (datas.subtotal || 0) + (datas.profit || 0);
     const _iva = datas.iva ?? _subtotal * 0.16;
@@ -1508,13 +1510,47 @@ async function exportToBasePdf() {
       });
 
       // "X años" debajo, un poquito más separado
-      page.drawText(`${datos.roi || "—"} años`, {
-        x: labelX,
-        y: roiCenterY - mm(2), // 🔹 le damos un pequeño espacio extra
-        size: fsBase,
-        font,
-        color: rgb(0.1, 0.1, 0.1),
-      });
+      // Solo el número (grande), sin "años"
+      // Número grande + "años" pequeño a la derecha
+      {
+        const raw = datas2?.roiConIva;
+        const has = typeof raw === "number" && isFinite(raw);
+        const roiNum = has
+          ? raw.toLocaleString("es-MX", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          : "—";
+
+        const big = fsBase + 6; // tamaño del número
+        const small = Math.max(6, fsBase - 1); // tamaño de "años"
+        const yNum = roiCenterY - mm(2); // base del número
+
+        // Número (grande)
+        page.drawText(roiNum, {
+          x: labelX,
+          y: yNum,
+          size: big,
+          font: fontBold,
+          color: rgb(0.1, 0.1, 0.1),
+        });
+
+        // Calcular ancho del número para colocar "años" a la derecha
+        const gap = mm(1.2);
+        const numW = widthOf(roiNum, big, fontBold);
+
+        // Ajuste vertical para centrar visualmente "años" con el número
+        const yYears = yNum + (big - small) * 0.25;
+
+        // "años" (pequeño)
+        page.drawText("años", {
+          x: labelX + numW + gap,
+          y: yYears,
+          size: small,
+          font,
+          color: rgb(0.1, 0.1, 0.1),
+        });
+      }
 
       // ===== Árboles (bloque 2) =====
       x += blockW + gap;
