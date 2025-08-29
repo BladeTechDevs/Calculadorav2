@@ -180,7 +180,7 @@ class DataManager {
     const ahorroCO2 = (generacionAnual * 439.963) / 1000000
     const arboles = ahorroCO2 * 155
     const porcentajeAhorro = (generacionAnual / consumoAnual) * 100
-
+    
     this.data.resultados = {
       consumoAnual,
       consumoMensual,
