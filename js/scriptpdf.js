@@ -191,43 +191,18 @@ async function exportToBasePdf() {
 
     // Chip de sección (Acephimere Bold)
     const section = (txt) => {
-      const padY = 2,
-        padX = 8;
-      const w = widthOf(txt, fsTitle, fontBold);
-      const boxW = w + padX * 2;
-      const h = fsTitle + padY * 1.2;
+      const padY = 2;
+      const sectionSize = fsTitle + 2; // Más grande para mayor grosor
+      const h = sectionSize + padY * 1.2;
       ensure(h + 8);
 
-      // Rectángulo base
-      page.drawRectangle({
-        x: left,
-        y: y - h,
-        width: boxW,
-        height: h,
-        color: primeD,
-        borderRadius: 6,
-      });
-
-      // Triángulo de "cuchilla" en el extremo derecho
-      const tip = mm(6); // cuánto sobresale la punta
-      const triX = left + boxW;
-      const triY = y - h;
-      page.drawPolygon?.(
-        [
-          { x: triX, y: triY }, // esquina inferior derecha del rectángulo
-          { x: triX, y: triY + h }, // esquina superior derecha
-          { x: triX + tip, y: triY + h / 2 }, // punta (mitad)
-        ],
-        { color: primeD }
-      );
-
-      // Texto encima
+      // Texto alineado a la izquierda, color verde y más grueso
       page.drawText(txt, {
-        x: left + padX,
+        x: left,
         y: y - h + padY,
-        size: fsTitle,
+        size: sectionSize,
         font: fontBold,
-        color: white,
+        color: primeD,
       });
 
       y -= h + 8;
@@ -1364,7 +1339,7 @@ async function exportToBasePdf() {
     let espacioPanelY = y;
     y = espacioPanelY - mm(3);
 
-    await drawCanvasImageIfAny2("impactoChart", 180, 78);
+    await drawCanvasImageIfAny2("impactoChart", 180, 74);
 
     newPage();
     section("INVERSIÓN");
