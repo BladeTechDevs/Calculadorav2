@@ -594,7 +594,7 @@ const generacionAnualAprox = 0;
 function calcularSistemaSolar() {
   // Desactivar el botón
   document.getElementById("btnCalcular").disabled = true;
-  
+  /*
   function validarCliente() {
     const nombre = document.getElementById("nombreCliente")?.value.trim()
     const direccion = document.getElementById("direccionCliente")?.value.trim()
@@ -752,7 +752,7 @@ function calcularSistemaSolar() {
     document.getElementById("btnCalcular").disabled = false
     return
   } 
-
+  */
   try {
     const datos = window.dataManager.guardarEnLocalStorage();
     const resultados = datos.resultados;

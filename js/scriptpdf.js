@@ -218,7 +218,7 @@ async function exportToBasePdf() {
       const padY = 2;
       ensure(h + 6);
       page.drawText(txt, {
-        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font),
+        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font) - mm(5),
         y: y - h + padY + extraY,
         size,
         font: useBold ? fontBold : font,
@@ -1211,12 +1211,11 @@ async function exportToBasePdf() {
 
     // === 4) Composición ===
     const folioFontSize = Math.max(10, fsTitle - 4);
-    sectionTopTitle(`COTIZACIÓN PRELIMINAR`, true, fsTitle, mm(1));
     sectionTopTitle(
-      `FOLIO:  SFVI-${datos.folio || "—"}`,
+      `COTIZACIÓN PRELIMINAR  -  SFVI-${datos.folio || "—"}`,
       true,
       folioFontSize,
-      0
+      mm(6)
     );
     y -= mm(2);
 
