@@ -1700,18 +1700,18 @@ function crearGraficaImpactoResponsive(opts) {
   ctx.font = `${Math.max(11, baseFontPx - 1)}px Arial`;
   ctx.textAlign = "left";
   ctx.fillStyle = "#333";
-  drawLegendBox(legendLeft, legendTop, 16, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
-  ctx.fillText("Consumo", legendLeft + 22, legendTop + 10);
+  drawLegendBox(legendLeft + 40, legendTop, 15, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
+  ctx.fillText("Consumo", legendLeft + 60, legendTop + 10);
   drawLegendBox(
-    legendLeft + 90,
+    legendLeft + 145,
     legendTop,
-    16,
+    15,
     12,
     "#73b248",
     "#106e3a",
     "#106e3a"
   );
-  ctx.fillText("Producción", legendLeft + 112, legendTop + 10);
+  ctx.fillText("Producción", legendLeft + 165, legendTop + 10);
 }
 
 function niceCeil(x) {
