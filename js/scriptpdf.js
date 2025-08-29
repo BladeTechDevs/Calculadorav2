@@ -1528,7 +1528,8 @@ async function exportToBasePdf() {
       }
 
       // ===== Árboles (bloque 2) =====
-      x += blockW + gap;
+  x += blockW + gap;
+  x += mm(7); // Recorre el bloque de árboles 5mm a la derecha
       const iconSize = mm(14),
         iconHalf = iconSize / 2;
       const iconY_arbol = centerY + blockH / 2 - iconHalf;
@@ -1566,7 +1567,8 @@ async function exportToBasePdf() {
       });
 
       // ===== CO2 (bloque 3) =====
-      x += blockW + gap;
+  x += blockW + gap;
+  x -= mm(4); // Recorre el bloque de CO2 4mm a la izquierda
       const iconY_co2 = centerY + blockH / 2 - iconHalf;
       const iconX_co2 = x + blockW / 2 - iconHalf;
       try {
