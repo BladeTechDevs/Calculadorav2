@@ -17,8 +17,7 @@ async function exportToBasePdf() {
     // === 1) Recolección de datos ===
     const $ = (id) => document.getElementById(id);
     const getVal = (id, fb = "") => ($(id)?.value ?? fb).toString().trim();
-    const getTxt = (id, fb = "") =>
-      ($(id)?.textContent ?? fb).toString().trim();
+    const getTxt = (id, fb = "") => ($(id)?.textContent ?? fb).toString().trim();
     const toNum = (v) => {
       if (typeof v === "number") return v;
       if (!v) return 0;
@@ -69,6 +68,8 @@ async function exportToBasePdf() {
       arboles: getTxt("arboles", "0"),
       potenciaPanel: getVal("potenciaPanel", "—"),
       areaAprox: getVal("areaAprox", "—"),
+      notaProyecto: getVal("notaProyecto", "—"),
+      requerimientosProyecto: getVal("requerimientosProyecto", "—"),
       inversorPanel: getVal("inversorPanel", "—"),
       folio: getVal("folioCotizacion", "—"),
       // Cotización
@@ -86,7 +87,6 @@ async function exportToBasePdf() {
     const resultadoSistemaSolar = JSON.parse(
       localStorage.getItem("resultadosSistemaSolar") || "{}"
     );
-    console.log(resultadoSistemaSolar);
 
     // Fallback por si subtotal/iva/total aún no se llenan
     const _subtotal = (datas.subtotal || 0) + (datas.profit || 0);
@@ -113,10 +113,9 @@ async function exportToBasePdf() {
       return pdfDoc.embedFont(new Uint8Array(bytes), { subset: true });
     };
 
-    // 👇 Ajusta si usas más estilos
-    const font = await loadOTF("Acephimere/Acephimere.otf"); // Regular
-    const fontBold = await loadOTF("Acephimere/Acephimere Bold.otf"); // Bold
-    // const fontItalic = await loadOTF("Acephimere/Acephimere Italic.otf")  // Opcional
+    // 👇 Fuentes
+    const font = await loadOTF("Acephimere/Acephimere.otf");
+    const fontBold = await loadOTF("Acephimere/Acephimere Bold.otf");
 
     // === 3) Layout y paleta ===
     const mm = (v) => v * 2.834645669;
@@ -147,16 +146,13 @@ async function exportToBasePdf() {
     const fsTitle = 11;
     const lh = 12;
 
-    const ensure = (h) => {
-      if (y - h < bottom) newPage();
-    };
+    const ensure = (h) => { if (y - h < bottom) newPage(); };
     const newPage = () => {
       pageIndex++;
       if (pageIndex < pdfDoc.getPageCount()) page = pdfDoc.getPage(pageIndex);
       else page = pdfDoc.addPage([PW, PH]);
       const size = page.getSize();
-      PW = size.width;
-      PH = size.height;
+      PW = size.width; PH = size.height;
       contentWidth = PW - left - right;
       y = PH - nextTop;
     };
@@ -171,8 +167,7 @@ async function exportToBasePdf() {
       });
     };
 
-    const widthOf = (t, size = fsBase, f = font) =>
-      f.widthOfTextAtSize(String(t), size);
+    const widthOf = (t, size = fsBase, f = font) => f.widthOfTextAtSize(String(t), size);
     const wrapText = (text, maxW, size = fsBase, f = font) => {
       const words = (text || "").toString().split(/\s+/);
       const lines = [];
@@ -180,50 +175,10 @@ async function exportToBasePdf() {
       for (const w of words) {
         const tryLine = line ? line + " " + w : w;
         if (widthOf(tryLine, size, f) <= maxW) line = tryLine;
-        else {
-          if (line) lines.push(line);
-          line = w;
-        }
+        else { if (line) lines.push(line); line = w; }
       }
       if (line) lines.push(line);
       return lines.length ? lines : [""];
-    };
-
-    // Chip de sección (Acephimere Bold)
-    const section = (txt) => {
-      const padY = 2;
-      const sectionSize = fsTitle + 2; // Más grande para mayor grosor
-      const h = sectionSize + padY * 1.2;
-      ensure(h + 8);
-
-      // Texto alineado a la izquierda, color verde y más grueso
-      page.drawText(txt, {
-        x: left,
-        y: y - h + padY,
-        size: sectionSize,
-        font: fontBold,
-        color: primeD,
-      });
-
-      y -= h + 8;
-    };
-    // Título superior alineado a derecha
-    const sectionTopTitle = (
-      txt,
-      useBold = false,
-      size = fsTitle,
-      extraY = 0
-    ) => {
-      const h = size + 2;
-      const padY = 2;
-      ensure(h + 6);
-      page.drawText(txt, {
-        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font) - mm(5),
-        y: y - h + padY + extraY,
-        size,
-        font: useBold ? fontBold : font,
-      });
-      y -= h + 4;
     };
 
     // ========= PANEL Información de los involucrados =========
@@ -233,14 +188,9 @@ async function exportToBasePdf() {
       const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
       const svgUrl = URL.createObjectURL(svgBlob);
       const img = new Image();
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = svgUrl;
-      });
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = svgUrl; });
       const canvas = document.createElement("canvas");
-      canvas.width = wPx;
-      canvas.height = hPx;
+      canvas.width = wPx; canvas.height = hPx;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, wPx, hPx);
       URL.revokeObjectURL(svgUrl);
@@ -260,68 +210,29 @@ async function exportToBasePdf() {
     }
 
     async function drawInfoPanelWithIcons() {
-      const padX = 14,
-        padY = 12;
-      const titleH = 18;
-      const radius = 10;
-      const midGap = mm(6);
-
+      const padX = 14, padY = 12, titleH = 18, radius = 10, midGap = mm(6);
       const gridW = contentWidth - padX * 2 - midGap;
-  // Calcula primero la posición de la línea y luego el ancho de la columna
-  const sepOffset = mm(8); // mismo valor que restaste a sepX
-  const tempColW_L = gridW * 0.68;
-  const sepX = left + padX + tempColW_L + midGap / 2 - sepOffset;
-  const colW_L = sepX - (left + padX);
-  const colW_R = gridW - colW_L;
+      const sepOffset = mm(8);
+      const tempColW_L = gridW * 0.68;
+      const sepX = left + padX + tempColW_L + midGap / 2 - sepOffset;
+      const colW_L = sepX - (left + padX);
+      const colW_R = gridW - colW_L;
 
-      const rowLH_first = 11;
-      const rowLH_wrap = 10;
-      const gapSingle = 5;
-      const gapMulti = 4;
+      const rowLH_first = 11, rowLH_wrap = 10, gapSingle = 5, gapMulti = 4;
 
-      const iconMM = 3.6;
-      const iconPad = 5;
-      const iconYOffset = 4;
+      const iconMM = 3.6, iconPad = 5, iconYOffset = 4;
       const labelColor = rgb(0.18, 0.18, 0.18);
 
       const leftRows = [
-        {
-          icon: "nombreCliente.svg",
-          label: "Cliente",
-          value: datos.nombreCliente || "—",
-        },
-        {
-          icon: "direccion.svg",
-          label: "Ubicación",
-          value: `${datos.direccionCliente || "—"}`,
-        },
-        {
-          icon: "telefono.svg",
-          label: "Teléfono",
-          value: datos.telefonoCliente || "—",
-        },
-        {
-          icon: "correo.svg",
-          label: "Correo",
-          value: datos.correoCliente || "—",
-        },
+        { icon: "nombreCliente.svg", label: "Cliente", value: datos.nombreCliente || "—" },
+        { icon: "direccion.svg", label: "Ubicación", value: `${datos.direccionCliente || "—"}` },
+        { icon: "telefono.svg", label: "Teléfono", value: datos.telefonoCliente || "—" },
+        { icon: "correo.svg", label: "Correo", value: datos.correoCliente || "—" },
       ];
       const rightRows = [
-        {
-          icon: "nombreEjecutivo.svg",
-          label: "Ejecutivo",
-          value: datos.nombreEjecutivo || "—",
-        },
-        {
-          icon: "correo.svg",
-          label: "Correo",
-          value: datos.correoEjecutivo || "—",
-        },
-        {
-          icon: "whatsapp.svg",
-          label: "Contacto",
-          value: datos.whatsappEjecutivo || "—",
-        },
+        { icon: "nombreEjecutivo.svg", label: "Ejecutivo", value: datos.nombreEjecutivo || "—" },
+        { icon: "correo.svg", label: "Correo", value: datos.correoEjecutivo || "—" },
+        { icon: "whatsapp.svg", label: "Contacto", value: datos.whatsappEjecutivo || "—" },
       ];
 
       const measureRowsHeight = (rows, colW) => {
@@ -332,8 +243,7 @@ async function exportToBasePdf() {
           const lblW = widthOf(lbl, fsBase, fontBold);
           const textW = colW - iconW - lblW;
           const lines = wrapText(String(r.value || "—"), textW, fsBase, font);
-          const cellH =
-            rowLH_first + (Math.max(1, lines.length) - 1) * rowLH_wrap;
+          const cellH = rowLH_first + (Math.max(1, lines.length) - 1) * rowLH_wrap;
           const gap = lines.length > 1 ? gapMulti : gapSingle;
           total += cellH + gap;
         });
@@ -357,31 +267,17 @@ async function exportToBasePdf() {
 
       // contenedor
       page.drawRectangle({
-        x: left,
-        y: y - H,
-        width: contentWidth,
-        height: H,
-        color: white,
-        borderColor: primeD,
-        borderWidth: 1,
-        borderRadius: radius,
+        x: left, y: y - H, width: contentWidth, height: H,
+        color: white, borderColor: primeD, borderWidth: 1, borderRadius: radius,
       });
 
       // encabezado
       page.drawRectangle({
-        x: left,
-        y: y - titleH,
-        width: contentWidth,
-        height: titleH,
-        color: primeD,
-        borderRadius: radius,
+        x: left, y: y - titleH, width: contentWidth, height: titleH,
+        color: primeD, borderRadius: radius,
       });
       page.drawText("Información de los involucrados", {
-        x: left + 8,
-        y: y - 14,
-        size: fsBase,
-        font: fontBold,
-        color: white,
+        x: left + 8, y: y - 14, size: fsBase, font: fontBold, color: white,
       });
 
       // separador vertical
@@ -396,8 +292,7 @@ async function exportToBasePdf() {
         let yy = y - titleH - 14;
         for (const r of rows) {
           const icon = await getIconEmbedded(r.icon, iconMM);
-          const iconW = mm(iconMM),
-            iconH = mm(iconMM);
+          const iconW = mm(iconMM), iconH = mm(iconMM);
 
           const lbl = r.label + ": ";
           const lblW = widthOf(lbl, fsBase, fontBold);
@@ -409,32 +304,20 @@ async function exportToBasePdf() {
           page.drawImage(icon, {
             x: baseX,
             y: rowTop - iconH + (rowLH_first - fsBase) / 2 + 1 + iconYOffset,
-            width: iconW,
-            height: iconH,
+            width: iconW, height: iconH,
           });
           page.drawText(lbl, {
-            x: baseX + iconW + iconPad,
-            y: rowTop - 1,
-            size: fsBase,
-            font: fontBold,
-            color: labelColor,
+            x: baseX + iconW + iconPad, y: rowTop - 1,
+            size: fsBase, font: fontBold, color: labelColor,
           });
           page.drawText(lines[0] || "", {
-            x: textStartX,
-            y: rowTop - 1,
-            size: fsBase,
-            font,
-            color: ink,
+            x: textStartX, y: rowTop - 1, size: fsBase, font, color: ink,
           });
 
           let innerY = rowTop - rowLH_first;
           for (let i = 1; i < lines.length; i++) {
             page.drawText(lines[i], {
-              x: textStartX,
-              y: innerY - 1,
-              size: fsBase,
-              font,
-              color: ink,
+              x: textStartX, y: innerY - 1, size: fsBase, font, color: ink,
             });
             innerY -= rowLH_wrap;
           }
@@ -443,30 +326,21 @@ async function exportToBasePdf() {
         }
       };
 
-await drawColumn(leftRows, left + padX - mm(2), colW_L);
-  await drawColumn(rightRows, left + padX + colW_L + midGap - mm(3), colW_R);
+      await drawColumn(leftRows, left + padX - mm(2), colW_L);
+      await drawColumn(rightRows, left + padX + colW_L + midGap - mm(3), colW_R);
 
       y -= H + 6;
     }
 
-    // 2-3 columnas compactas (ancho igual)
+    // 2-3 columnas compactas (helper)
     const drawCols = (pairs, colsOverride = 2) => {
       const gap = mm(5);
       const cols = Math.min(colsOverride, pairs.length);
       const colW = (contentWidth - gap * (cols - 1)) / cols;
 
-      const headerH = 14,
-        bodyPad = 6,
-        lhCompact = 10,
-        radius = 6;
-
+      const headerH = 14, bodyPad = 6, lhCompact = 10, radius = 6;
       const heights = pairs.map(([label, value]) => {
-        const lines = wrapText(
-          String(value ?? "—"),
-          colW - bodyPad * 2,
-          fsBase,
-          font
-        );
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
         return headerH + bodyPad * 2 + lhCompact * lines.length;
       });
       const H = Math.max(...heights);
@@ -475,51 +349,27 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const drawCard = (x, label, value) => {
         const yTop = y;
         page.drawRectangle({
-          x,
-          y: yTop - H,
-          width: colW,
-          height: H,
-          color: white,
-          borderColor: prime,
-          borderWidth: 0.35,
-          borderRadius: radius,
+          x, y: yTop - H, width: colW, height: H,
+          color: white, borderColor: prime, borderWidth: 0.35, borderRadius: radius,
         });
         page.drawRectangle({
-          x,
-          y: yTop - headerH,
-          width: colW,
-          height: headerH,
-          color: primeL,
-          borderRadius: radius,
+          x, y: yTop - headerH, width: colW, height: headerH,
+          color: primeL, borderRadius: radius,
         });
 
         page.drawText(label, {
-          x: x + bodyPad,
-          y: yTop - headerH + (headerH - fsBase) / 2,
-          size: fsBase,
-          font: fontBold,
-          color: primeD,
+          x: x + bodyPad, y: yTop - headerH + (headerH - fsBase) / 2,
+          size: fsBase, font: fontBold, color: primeD,
         });
 
-        const lines = wrapText(
-          String(value ?? "—"),
-          colW - bodyPad * 2,
-          fsBase,
-          font
-        );
+        const lines = wrapText(String(value ?? "—"), colW - bodyPad * 2, fsBase, font);
         const textH = lhCompact * lines.length;
         const availableH = H - headerH;
         const valuePadTop = 6.5;
         let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
 
         lines.forEach((line) => {
-          page.drawText(line, {
-            x: x + bodyPad,
-            y: yy,
-            size: fsBase,
-            font,
-            color: ink,
-          });
+          page.drawText(line, { x: x + bodyPad, y: yy, size: fsBase, font, color: ink });
           yy -= lhCompact;
         });
       };
@@ -532,163 +382,13 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       y -= H + 4;
     };
 
-    // Columnas compactas con pesos
-    const drawColsWeighted = (pairs, weights) => {
-      const gap = mm(5);
-      const totalW = weights.reduce((a, b) => a + b, 0);
-      const cols = Math.min(pairs.length, weights.length);
-      const widths = weights
-        .slice(0, cols)
-        .map((w) => (contentWidth - gap * (cols - 1)) * (w / totalW));
-
-      const headerH = 14,
-        bodyPad = 6,
-        lhCompact = 10,
-        radius = 6;
-
-      const heights = pairs.slice(0, cols).map(([label, value], i) => {
-        const colW = widths[i];
-        const lines = wrapText(
-          String(value ?? "—"),
-          colW - bodyPad * 2,
-          fsBase,
-          font
-        );
-        return headerH + bodyPad * 2 + lhCompact * lines.length;
-      });
-      const H = Math.max(...heights);
-      ensure(H + 4);
-
-      let x = left;
-      pairs.slice(0, cols).forEach(([label, value], i) => {
-        const colW = widths[i];
-        const yTop = y;
-
-        page.drawRectangle({
-          x,
-          y: yTop - H,
-          width: colW,
-          height: H,
-          color: white,
-          borderColor: prime,
-          borderWidth: 0.35,
-          borderRadius: radius,
-        });
-        page.drawRectangle({
-          x,
-          y: yTop - headerH,
-          width: colW,
-          height: headerH,
-          color: primeL,
-          borderRadius: radius,
-        });
-
-        page.drawText(label, {
-          x: x + bodyPad,
-          y: yTop - headerH + (headerH - fsBase) / 2,
-          size: fsBase,
-          font: fontBold,
-          color: primeD,
-        });
-
-        const lines = wrapText(
-          String(value ?? "—"),
-          colW - bodyPad * 2,
-          fsBase,
-          font
-        );
-        const textH = lhCompact * lines.length;
-        const availableH = H - headerH;
-        const valuePadTop = 6.5;
-        let yy = yTop - headerH - (availableH - textH) / 2 - valuePadTop;
-
-        lines.forEach((line) => {
-          page.drawText(line, {
-            x: x + bodyPad,
-            y: yy,
-            size: fsBase,
-            font,
-            color: ink,
-          });
-          yy -= lhCompact;
-        });
-
-        x += colW + gap;
-      });
-
-      y -= H + 4;
-    };
-
-    // ========= kpiRow =========
-    const kpiRow = (items, colsOverride) => {
-      const gap = mm(5);
-      const cols = Math.max(1, colsOverride || items.length);
-      const colW = (contentWidth - gap * (cols - 1)) / cols;
-      const H = 40;
-      ensure(H + 6);
-      items.slice(0, cols).forEach(([label, value], idx) => {
-        const x = left + idx * (colW + gap);
-        page.drawRectangle({
-          x,
-          y: y - H,
-          width: colW,
-          height: H,
-          color: white,
-          borderColor: primeD,
-          borderWidth: 0.5,
-          borderRadius: 10,
-        });
-        const v = String(value ?? "—");
-        const vWidth = widthOf(v, fsKPI, fontBold);
-        page.drawText(v, {
-          x: x + (colW - vWidth) / 2,
-          y: y - 20,
-          size: fsKPI,
-          font: fontBold,
-          color: ink,
-        });
-        const lWidth = widthOf(label, fsSmall, font);
-        page.drawText(label, {
-          x: x + (colW - lWidth) / 2,
-          y: y - 34,
-          size: fsSmall,
-          font,
-          color: mute,
-        });
-      });
-      y -= H + 4;
-    };
-
-    const field = (label, value) => {
-      const maxW = contentWidth;
-      const lines = wrapText(String(value ?? "—"), maxW, fsBase, font);
-      const H = lh * (1 + lines.length) + 2;
-      ensure(H);
-      page.drawText(label, {
-        x: left,
-        y,
-        size: fsBase,
-        font: fontBold,
-        color: mute,
-      });
-      y -= lh;
-      lines.forEach((line) => {
-        page.drawText(line, { x: left, y, size: fsBase, font, color: ink });
-        y -= lh;
-      });
-      y -= 1;
-    };
-
     // === Gráficas (canvas → PNG) ===
     const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     async function withTempCanvasSize(canvas, wPx, hPx, fn) {
-      const prevW = canvas.style.width,
-        prevH = canvas.style.height;
+      const prevW = canvas.style.width, prevH = canvas.style.height;
       canvas.style.width = wPx + "px";
       canvas.style.height = hPx + "px";
-      await new Promise((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(r))
-      );
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       if (typeof canvas.__impactoRedraw === "function") {
         canvas.__impactoRedraw();
         await delay(30);
@@ -696,16 +396,10 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const out = await fn();
       canvas.style.width = prevW;
       canvas.style.height = prevH;
-      if (typeof canvas.__impactoRedraw === "function")
-        canvas.__impactoRedraw();
+      if (typeof canvas.__impactoRedraw === "function") canvas.__impactoRedraw();
       return out;
     }
-    const drawCanvasImageIfAny2 = async (
-      canvasId,
-      widthMM,
-      heightMM,
-      dpi = 300
-    ) => {
+    const drawCanvasImageIfAny2 = async (canvasId, widthMM, heightMM, dpi = 300) => {
       const src = document.getElementById(canvasId);
       if (!src) return;
       const pxPerMM = dpi / 25.4;
@@ -718,8 +412,7 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
         const srcChart = Chart.getChart(src);
         if (srcChart) {
           const off = document.createElement("canvas");
-          off.width = outW;
-          off.height = outH;
+          off.width = outW; off.height = outH;
           const cfg = JSON.parse(JSON.stringify(srcChart.config));
           cfg.options = cfg.options || {};
           cfg.options.animation = false;
@@ -734,9 +427,7 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
         }
       }
       if (!dataUrl && canvasId === "impactoChart") {
-        dataUrl = await withTempCanvasSize(src, 1100, 360, async () =>
-          src.toDataURL("image/png", 1)
-        );
+        dataUrl = await withTempCanvasSize(src, 1100, 360, async () => src.toDataURL("image/png", 1));
       }
       if (!dataUrl) {
         dataUrl = await withTempCanvasSize(src, 1200, 360, async () => {
@@ -752,8 +443,7 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
 
       const png = await pdfDoc.embedPng(arr);
-      const w = mm(widthMM),
-        h = mm(heightMM);
+      const w = mm(widthMM), h = mm(heightMM);
       ensure(h + 6);
       const xCentered = left + (contentWidth - w) / 2;
       page.drawImage(png, { x: xCentered, y: y - h, width: w, height: h });
@@ -774,51 +464,31 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
         "Para generar la orden se requiere el 70% del pago de la cotización.",
         "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo.",
       ];
-      const fsTiny = 7,
-        lhTiny = 10,
-        pad = 8;
+      const fsTiny = 7, lhTiny = 10, pad = 8;
+      const maxW = contentWidth - pad * 2;
       const titleH = 16;
       const folioText = `Folio: SFVI-${datos.folio || "—"}`;
       ensure(titleH + 8);
 
       const folioW = widthOf(folioText, fsBase, fontBold) + 20;
       page.drawRectangle({
-        x: left,
-        y: y - titleH,
-        width: folioW,
-        height: titleH,
-        color: rgb(1, 0.7, 0),
+        x: left, y: y - titleH, width: folioW, height: titleH, color: rgb(1, 0.7, 0),
       });
       page.drawText(folioText, {
-        x: left + 6,
-        y: y - 12,
-        size: fsBase,
-        font: fontBold,
-        color: rgb(0, 0, 0),
+        x: left + 6, y: y - 12, size: fsBase, font: fontBold, color: rgb(0, 0, 0),
       });
 
       const title = "TÉRMINOS Y CONDICIONES";
       const titleX = left + folioW + 4;
       const titleW = contentWidth - folioW - 4;
-      page.drawRectangle({
-        x: titleX,
-        y: y - titleH,
-        width: titleW,
-        height: titleH,
-        color: primeD,
-      });
+      page.drawRectangle({ x: titleX, y: y - titleH, width: titleW, height: titleH, color: primeD });
       const tw = widthOf(title, fsBase, fontBold);
       page.drawText(title, {
-        x: titleX + (titleW - tw) / 2,
-        y: y - 12,
-        size: fsBase,
-        font: fontBold,
-        color: white,
+        x: titleX + (titleW - tw) / 2, y: y - 12, size: fsBase, font: fontBold, color: white,
       });
 
       y -= titleH + 4;
 
-      const maxW = contentWidth - pad * 2;
       let totalLines = 0;
       const wrapped = items.map((t, i) => {
         const prefix = `${i + 1}. `;
@@ -829,37 +499,82 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const boxH = pad + totalLines * lhTiny + pad;
       ensure(boxH);
       page.drawRectangle({
-        x: left,
-        y: y - boxH,
-        width: contentWidth,
-        height: boxH,
-        color: rgb(0.94, 0.98, 0.96),
-        borderColor: prime,
-        borderWidth: 0.4,
-        borderRadius: 6,
+        x: left, y: y - boxH, width: contentWidth, height: boxH,
+        color: rgb(0.94, 0.98, 0.96), borderColor: prime, borderWidth: 0.4, borderRadius: 6,
       });
+
+      // 🔧 yy se declara ANTES de usarse
       let yy = y - pad - fsTiny;
+
       wrapped.forEach((lines) => {
         lines.forEach((line) => {
-          page.drawText(line, {
-            x: left + pad,
-            y: yy,
-            size: fsTiny,
-            font,
-            color: ink,
-          });
+          page.drawText(line, { x: left + pad, y: yy, size: fsTiny, font, color: ink });
           yy -= lhTiny;
         });
       });
       y -= boxH;
+
+      // --- Notas y Requerimientos ---
+      const nota = datos.notaProyecto || "—";
+      const requerimientos = datos.requerimientosProyecto || "—";
+
+      const notaLabel = "Notas:";
+      const notaLabelW = widthOf(notaLabel, fsTiny, fontBold);
+      const notaLines = wrapText(nota, maxW - notaLabelW - 6, fsTiny, font);
+      yy = y - pad - fsTiny;
+      page.drawText(notaLabel, {
+        x: left + pad,
+        y: yy,
+        size: fsTiny,
+        font: fontBold,
+        color: ink,
+      });
+      let notaX = left + pad + notaLabelW + 6;
+      let notaY = yy;
+      notaLines.forEach((line) => {
+        page.drawText(line, {
+          x: notaX,
+          y: notaY,
+          size: fsTiny,
+          font: font,
+          color: ink,
+        });
+        notaX = left + pad;
+        notaY -= lhTiny - 2;
+      });
+      yy = notaY - 4;
+
+      const reqLabel = "Requerimientos:";
+      const reqLabelW = widthOf(reqLabel, fsTiny, fontBold);
+      const reqLines = wrapText(requerimientos, maxW - reqLabelW - 6, fsTiny, font);
+      page.drawText(reqLabel, {
+        x: left + pad,
+        y: yy,
+        size: fsTiny,
+        font: fontBold,
+        color: ink,
+      });
+      let reqX = left + pad + reqLabelW + 6;
+      let reqY = yy;
+      reqLines.forEach((line) => {
+        page.drawText(line, {
+          x: reqX,
+          y: reqY,
+          size: fsTiny,
+          font: font,
+          color: ink,
+        });
+        reqX = left + pad;
+        reqY -= lhTiny - 2;
+      });
+      y = reqY - pad;
     }
 
     // === Tabla Cotización (centrada) ===
     function drawCotizacionMantenimiento() {
       const fmt = (n) =>
         `$${(Number(n) || 0).toLocaleString("es-MX", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+          minimumFractionDigits: 2, maximumFractionDigits: 2,
         })}`;
       const centerX = (x0, wCol, txt, size = fsBase, fnt = font) =>
         x0 + (wCol - widthOf(txt, size, fnt)) / 2;
@@ -871,9 +586,7 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const ivaPU = _iva;
       const totalPU = _total;
 
-      const headH = 20,
-        rowH = 22,
-        gapBelow = 12;
+      const headH = 20, rowH = 22, gapBelow = 12;
       const W = contentWidth;
       const col = {
         partida: Math.round(W * 0.1),
@@ -893,171 +606,70 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
 
       // Header
       page.drawRectangle({
-        x: left,
-        y: y - headH,
-        width: W,
-        height: headH,
-        color: primeD,
-        borderColor: primeD,
-        borderWidth: 1.2,
+        x: left, y: y - headH, width: W, height: headH,
+        color: primeD, borderColor: primeD, borderWidth: 1.2,
       });
       const thY = y - 14;
-      page.drawText("Partida", {
-        x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold),
-        y: thY,
-        size: fsBase,
-        font: fontBold,
-        color: white,
-      });
-      page.drawText("Descripción", {
-        x: centerX(X.desc, col.desc, "Descripción", fsBase, fontBold),
-        y: thY,
-        size: fsBase,
-        font: fontBold,
-        color: white,
-      });
-      page.drawText("Cantidad", {
-        x: centerX(X.cant, col.cant, "Cantidad", fsBase, fontBold),
-        y: thY,
-        size: fsBase,
-        font: fontBold,
-        color: white,
-      });
-      page.drawText("P.U.", {
-        x: centerX(X.pu, col.pu, "P.U.", fsBase, fontBold),
-        y: thY,
-        size: fsBase,
-        font: fontBold,
-        color: white,
-      });
-      page.drawText("Importe", {
-        x: centerX(X.imp, col.imp, "Importe", fsBase, fontBold),
-        y: thY,
-        size: fsBase,
-        font: fontBold,
-        color: white,
-      });
+      page.drawText("Partida", { x: centerX(X.partida, col.partida, "Partida", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white });
+      page.drawText("Descripción", { x: centerX(X.desc, col.desc, "Descripción", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white });
+      page.drawText("Cantidad", { x: centerX(X.cant, col.cant, "Cantidad", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white });
+      page.drawText("P.U.", { x: centerX(X.pu, col.pu, "P.U.", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white });
+      page.drawText("Importe", { x: centerX(X.imp, col.imp, "Importe", fsBase, fontBold), y: thY, size: fsBase, font: fontBold, color: white });
 
-      // Column lines
       ["partida", "desc", "cant", "pu", "imp", "end"].forEach((k) => {
         page.drawLine({
           start: { x: X[k], y: y - headH },
           end: { x: X[k], y: y - headH - rowH },
-          thickness: 1.2,
-          color: primeD,
+          thickness: 1.2, color: primeD,
         });
       });
       y -= headH;
 
       // Row
       page.drawRectangle({
-        x: left,
-        y: y - rowH,
-        width: W,
-        height: rowH,
-        color: white,
-        borderColor: primeD,
-        borderWidth: 0.8,
+        x: left, y: y - rowH, width: W, height: rowH,
+        color: white, borderColor: primeD, borderWidth: 0.8,
       });
       ["partida", "desc", "cant", "pu", "imp", "end"].forEach((k) => {
         page.drawLine({
           start: { x: X[k], y },
           end: { x: X[k], y: y - rowH },
-          thickness: 0.8,
-          color: primeD,
+          thickness: 0.8, color: primeD,
         });
       });
 
-      const desc = `Instalación ${numModulos || "—"} MFV de ${
-        potenciaPanel || "—"
-      } W`;
+      const desc = `Instalación ${numModulos || "—"} MFV de ${potenciaPanel || "—"} W`;
       const yy = y - 14;
-      page.drawText("1", {
-        x: centerX(X.partida, col.partida, "1", fsBase, font),
-        y: yy,
-        size: fsBase,
-        font,
-        color: ink,
-      });
-      page.drawText(desc, {
-        x: centerX(X.desc, col.desc, desc, fsBase, font),
-        y: yy,
-        size: fsBase,
-        font,
-        color: ink,
-      });
-      page.drawText("1", {
-        x: centerX(X.cant, col.cant, "1", fsBase, font),
-        y: yy,
-        size: fsBase,
-        font,
-        color: ink,
-      });
+      page.drawText("1", { x: centerX(X.partida, col.partida, "1", fsBase, font), y: yy, size: fsBase, font, color: ink });
+      page.drawText(desc, { x: centerX(X.desc, col.desc, desc, fsBase, font), y: yy, size: fsBase, font, color: ink });
+      page.drawText("1", { x: centerX(X.cant, col.cant, "1", fsBase, font), y: yy, size: fsBase, font, color: ink });
       const puTxt = fmt(subtotalPU);
       const impTxt = fmt(subtotalPU);
-      page.drawText(puTxt, {
-        x: centerX(X.pu, col.pu, puTxt, fsBase, font),
-        y: yy,
-        size: fsBase,
-        font,
-        color: ink,
-      });
-      page.drawText(impTxt, {
-        x: centerX(X.imp, col.imp, impTxt, fsBase, font),
-        y: yy,
-        size: fsBase,
-        font,
-        color: ink,
-      });
+      page.drawText(puTxt, { x: centerX(X.pu, col.pu, puTxt, fsBase, font), y: yy, size: fsBase, font, color: ink });
+      page.drawText(impTxt, { x: centerX(X.imp, col.imp, impTxt, fsBase, font), y: yy, size: fsBase, font, color: ink });
 
       y -= rowH + gapBelow;
 
-      // Notas + Totales
+      // Totales (derecha)
       const gapX = mm(6);
       const leftW = Math.round(W * 0.58);
       const rightW = W - leftW - gapX;
-
-      const notesH = 30;
-      page.drawRectangle({
-        x: left,
-        y: y - notesH,
-        width: leftW,
-        height: notesH,
-        color: white,
-        borderColor: primeD,
-        borderWidth: 0.8,
-      });
-      page.drawText("*Cotización válida por 7 días naturales.", {
-        x: left + 8,
-        y: y - 12,
-        size: fsBase,
-        font,
-        color: ink,
-      });
-      page.drawText("*Fecha de inicio de trabajos por definir con cliente.", {
-        x: left + 8,
-        y: y - 24,
-        size: fsBase,
-        font,
-        color: ink,
-      });
 
       const rightX = left + leftW + gapX;
       const rowTH = 20;
       const totalBoxH = rowTH * 3;
 
       page.drawRectangle({
-        x: rightX,
-        y: y - totalBoxH,
-        width: rightW,
-        height: totalBoxH,
-        color: white,
-        borderColor: primeD,
-        borderWidth: 0.8,
+        x: rightX, y: y - totalBoxH, width: rightW, height: totalBoxH,
+        color: white, borderColor: primeD, borderWidth: 0.8,
       });
 
       const labels = ["Subtotal", "IVA", "Total"];
-      const values = [fmt(subtotalPU), fmt(ivaPU), fmt(totalPU)];
+      const values = [
+        `$${(Number(_subtotal) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        `$${(Number(_iva) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        `$${(Number(_total) || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      ];
       const centerText = (x0, w, text, size, fnt) =>
         x0 + (w - widthOf(text, size, fnt)) / 2;
 
@@ -1066,7 +678,6 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
         const labelW = Math.round(rightW * 0.55);
         const isTotal = i === 2;
 
-        // Label
         let labelColor, labelTextColor, valueColor, valueTextColor;
         if (isTotal) {
           labelColor = rgb(0.933, 0.961, 0.153);
@@ -1074,88 +685,42 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
           valueColor = rgb(0.933, 0.961, 0.153);
           valueTextColor = ink;
         } else {
-          labelColor = white;
-          labelTextColor = ink;
-          valueColor = white;
-          valueTextColor = ink;
+          labelColor = white; labelTextColor = ink; valueColor = white; valueTextColor = ink;
         }
         page.drawRectangle({
-          x: rightX,
-          y: yRowTop - rowTH,
-          width: labelW,
-          height: rowTH,
-          color: labelColor,
-          borderColor: primeD,
-          borderWidth: 0.8,
+          x: rightX, y: yRowTop - rowTH, width: labelW, height: rowTH,
+          color: labelColor, borderColor: primeD, borderWidth: 0.8,
         });
         const lfSize = isTotal ? fsBase + 3 : fsBase;
         page.drawText(labels[i], {
           x: centerText(rightX, labelW, labels[i], lfSize, fontBold),
-          y: yRowTop - 14,
-          size: lfSize,
-          font: fontBold,
-          color: labelTextColor,
+          y: yRowTop - 14, size: lfSize, font: fontBold, color: labelTextColor,
         });
 
-        // Valor
         const vx = rightX + labelW;
         page.drawRectangle({
-          x: vx,
-          y: yRowTop - rowTH,
-          width: rightW - labelW,
-          height: rowTH,
-          color: valueColor,
-          borderColor: primeD,
-          borderWidth: 0.8,
+          x: vx, y: yRowTop - rowTH, width: rightW - labelW, height: rowTH,
+          color: valueColor, borderColor: primeD, borderWidth: 0.8,
         });
         const vSize = isTotal ? fsBase + 1 : fsBase;
         const txt = values[i];
         page.drawText(txt, {
-          x: centerText(
-            vx,
-            rightW - labelW,
-            txt,
-            vSize,
-            isTotal ? fontBold : font
-          ),
-          y: yRowTop - 14,
-          size: vSize,
-          font: isTotal ? fontBold : font,
-          color: valueTextColor,
+          x: centerText(vx, rightW - labelW, txt, vSize, isTotal ? fontBold : font),
+          y: yRowTop - 14, size: vSize, font: isTotal ? fontBold : font, color: valueTextColor,
         });
       }
 
-      y -= Math.max(notesH, totalBoxH) + 10;
+      y -= Math.max(30, totalBoxH) + 10;
     }
 
     // --- Tarjetas "Tu sistema solar" ---
     async function drawSistemaSolarSection() {
       const items = [
-        {
-          img: "panel.png",
-          value: datos.numeroModulosCard || "—",
-          title: "Paneles Solares",
-        },
-        {
-          img: "potencia.png",
-          value: datos.potenciaInstalada || "—",
-          title: "Potencia Total Instalada",
-        },
-        {
-          img: "porcentaje.png",
-          value: datos.porcentajeAhorro || "—",
-          title: "de Ahorro",
-        },
-        {
-          img: "area.png",
-          value: datos.areaAprox ? datos.areaAprox + " m2" : "— m2",
-          title: "Área Requerida",
-        },
+        { img: "panel.png", value: datos.numeroModulosCard || "—", title: "Paneles Solares" },
+        { img: "potencia.png", value: datos.potenciaInstalada || "—", title: "Potencia Total Instalada" },
+        { img: "porcentaje.png", value: datos.porcentajeAhorro || "—", title: "de Ahorro" },
+        { img: "area.png", value: datos.areaAprox ? datos.areaAprox + " m2" : "— m2", title: "Área Requerida" },
       ];
-
-  // ...centrado y renderizado de ítems se realiza en el bloque siguiente...
-
-  // ...centrado y renderizado de ítems se realiza en el bloque siguiente...
 
       const cols = items.length;
       const gap = mm(6);
@@ -1163,59 +728,173 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const imgMM = 13;
       const valueSize = fsKPI;
       const titleSize = fsSmall + 1;
-      const cardH = mm(imgMM) + 32;
-      ensure(cardH + 8);
-
       const blockH = mm(imgMM) + 32;
       ensure(blockH + 8);
-      // Centrado perfecto entre los márgenes izquierdo y derecho
       const startX = left;
 
       for (let i = 0; i < cols; i++) {
         const x = startX + i * (colW + gap);
-        let iconW = mm(imgMM),
-          iconH = mm(imgMM);
-        // Centrar cada tarjeta verticalmente
-        const cardTopY = y;
-        const cardCenterX = x + colW / 2;
-        // Imagen arriba
+        const iconW = mm(imgMM), iconH = mm(imgMM);
+        const cardTopY = y, cardCenterX = x + colW / 2;
+
         try {
-          const imgBytes = await fetch(`img/${items[i].img}`).then((r) =>
-            r.arrayBuffer()
-          );
+          const imgBytes = await fetch(`img/${items[i].img}`).then((r) => r.arrayBuffer());
           const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
-          page.drawImage(imgEmbed, {
-            x: cardCenterX - iconW / 2,
-            y: cardTopY - iconH,
-            width: iconW,
-            height: iconH,
-          });
-        } catch {}
-        // Valor centrado debajo de la imagen
+          page.drawImage(imgEmbed, { x: cardCenterX - iconW / 2, y: cardTopY - iconH, width: iconW, height: iconH });
+        } catch { }
         const v = String(items[i].value ?? "—");
         const vWidth = widthOf(v, valueSize, fontBold);
+        page.drawText(v, { x: cardCenterX - vWidth / 2, y: cardTopY - iconH - 16, size: valueSize, font: fontBold, color: ink });
+        const tWidth = widthOf(items[i].title, titleSize, fontBold);
+        page.drawText(items[i].title, { x: cardCenterX - tWidth / 2, y: cardTopY - iconH - 10 - valueSize - 8, size: titleSize, font: fontBold, color: ink });
+      }
+      y -= blockH + 8;
+    }
+
+    // === NUEVA SECCIÓN INVERSIÓN: 4 cards iguales (más compactas) y línea central ===
+    async function drawInvestSplitKPIs() {
+      async function embedAny(path, sizeMM) {
+        if (path.toLowerCase().endsWith(".svg")) {
+          const px = Math.round(sizeMM * 4) * 2;
+          const bytes = await loadSvgAsPngBytes(`img/${path}`, px, px);
+          return pdfDoc.embedPng(bytes);
+        } else {
+          const bytes = await fetch(`img/${path}`).then((r) => r.arrayBuffer());
+          return pdfDoc.embedPng(new Uint8Array(bytes));
+        }
+      }
+
+      // Estilos compactos
+      const imgMM = 13;              // mismo tamaño de icono
+      const valueSize = fsKPI;       // mismo tamaño de valor
+      const titleSize = fsSmall + 1; // mismo tamaño de título
+
+      // Más compactas (menos altas y menos anchas) y títulos más cercanos
+      const pad = 6;
+      const iconToValue = 16;
+      const valueToTitle = 6;
+
+      // Grid con 4 columnas iguales, pero limitamos el ancho de cada card
+      const gap = mm(8);
+      const colW = (contentWidth - gap * 3) / 4;
+      const cardW = Math.min(colW, mm(38));
+      const gridW = cardW * 4 + gap * 3;
+      const startX = left + (contentWidth - gridW) / 2;
+
+      // Línea central más gruesa
+      const dividerX = left + contentWidth / 2;
+      const barW = mm(1.8);
+
+      const cardH =
+        pad + mm(imgMM) + iconToValue + valueSize + valueToTitle + titleSize + pad;
+      ensure(cardH + 8);
+
+      // Valores
+      const subtotalStr = fmtMXN(_subtotal);
+      const roiNum = parseFloat((window.resultadoSistemaSolar?.roi ?? resultadoSistemaSolar?.roi));
+      const roiVal = Number.isFinite(roiNum)
+        ? `${roiNum.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} años`
+        : "—";
+      const arbolesNum = (String(datos.arboles ?? "0").match(/[\d,.]+/) || ["0"])[0];
+      const co2Num = (String(datos.ahorroCO2 ?? "0").match(/[\d,.]+/) || ["0"])[0];
+
+      const items = [
+        { img: "cochi.png", value: subtotalStr, title: "Inversión" },
+        { img: "retorno.svg", value: roiVal, title: "ROI" },
+        { img: "arbol.png", value: `${arbolesNum} árboles`, title: "Árboles equivalentes" },
+        { img: "co2.png", value: `${co2Num} t`, title: "Ahorro CO2" },
+      ];
+
+      // Línea central (cae justo entre la 2ª y 3ª card)
+      page.drawRectangle({
+        x: dividerX - barW / 2,
+        y: y - cardH + 4,
+        width: barW,
+        height: cardH - 8,
+        color: primeL,
+      });
+
+      // Render de 4 cards
+      for (let i = 0; i < 4; i++) {
+        const x = startX + i * (cardW + gap);
+        const yTop = y;
+        const cx = x + cardW / 2;
+
+        // card con borde y barra superior
+        page.drawRectangle({
+          x: x + 1, y: yTop - cardH - 1, width: cardW, height: cardH,
+          color: primeD, opacity: 0.05, borderOpacity: 0, borderRadius: 10,
+        });
+        page.drawRectangle({
+          x, y: yTop - cardH, width: cardW, height: cardH,
+          color: white, borderColor: primeD, borderWidth: 0.8, borderRadius: 10,
+        });
+        page.drawRectangle({
+          x, y: yTop - 3, width: cardW, height: 3,
+          color: primeL, borderRadius: 10,
+        });
+
+        // icono
+        try {
+          const icon = await embedAny(items[i].img, imgMM);
+          const iw = mm(imgMM), ih = mm(imgMM);
+          page.drawImage(icon, { x: cx - iw / 2, y: yTop - pad - ih, width: iw, height: ih });
+        } catch { }
+
+        // valor
+        const v = String(items[i].value ?? "—");
+        const vW = fontBold.widthOfTextAtSize(v, valueSize);
         page.drawText(v, {
-          x: cardCenterX - vWidth / 2,
-          y: cardTopY - iconH - 16,
+          x: cx - vW / 2,
+          y: yTop - pad - mm(imgMM) - iconToValue,
           size: valueSize,
           font: fontBold,
           color: ink,
         });
-        // Título centrado abajo
-        const tWidth = widthOf(items[i].title, titleSize, fontBold);
+
+        // título más cercano al valor
+        const tW = fontBold.widthOfTextAtSize(items[i].title, titleSize);
         page.drawText(items[i].title, {
-          x: cardCenterX - tWidth / 2,
-          y: cardTopY - iconH - 10 - valueSize - 8,
+          x: cx - tW / 2,
+          y: yTop - pad - mm(imgMM) - iconToValue - valueSize - valueToTitle,
           size: titleSize,
           font: fontBold,
           color: ink,
         });
       }
-      y -= blockH + 8;
+
+      y -= cardH + mm(10);
     }
 
     // === 4) Composición ===
     const folioFontSize = Math.max(10, fsTitle - 4);
+    const sectionTopTitle = (txt, useBold = false, size = fsTitle, extraY = 0) => {
+      const h = size + 2;
+      const padY = 2;
+      ensure(h + 6);
+      page.drawText(txt, {
+        x: left + contentWidth - widthOf(txt, size, useBold ? fontBold : font) - mm(5),
+        y: y - h + padY + extraY,
+        size,
+        font: useBold ? fontBold : font,
+      });
+      y -= h + 4;
+    };
+    const section = (txt) => {
+      const padY = 2;
+      const sectionSize = fsTitle + 2;
+      const h = sectionSize + padY * 1.2;
+      ensure(h + 8);
+      page.drawText(txt, {
+        x: left,
+        y: y - h + padY,
+        size: sectionSize,
+        font: fontBold,
+        color: primeD,
+      });
+      y -= h + 8;
+    };
+
     sectionTopTitle(
       `COTIZACIÓN PRELIMINAR  -  SFVI-${datos.folio || "—"}`,
       true,
@@ -1233,35 +912,10 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
     y -= mm(4);
 
     const datosProyecto = [
-      [
-        "Ubicación:",
-        `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`,
-      ],
+      ["Ubicación:", `${datos.municipioProyecto || "—"}, ${datos.estadoProyecto || "—"}`],
       ["Clasificación:", capitalizeFirst(datos.tipoProyecto)],
       ["Tarifa:", datos.tipoTarifa || "—"],
       ["Región CFE:", capitalizeFirst(datos.regionTarifariaCFE)],
-    ];
-
-    const datosKPI = [
-      {
-        label: "Consumo Anual",
-        value: datos.consumoAnual,
-        img: "consumoAnual.png",
-      },
-      {
-        label: "Gasto Anual",
-        value:
-          "$" +
-          (typeof datos.importeTotal === "string"
-            ? datos.importeTotal.replace(/[^\d.]/g, "")
-            : datos.importeTotal),
-        img: "gastoAnual.png",
-      },
-      {
-        label: "Tarifa Promedio",
-        value: datos.tarifaPromedio,
-        img: "tarifaPromedio.png",
-      },
     ];
 
     const datosX = left;
@@ -1274,67 +928,74 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       const displayValue = label.trim().toLowerCase().startsWith("tarifa")
         ? String(value).toUpperCase()
         : value;
-      page.drawText(label, {
-        x: datosX,
-        y: tempY,
-        size: fsBase,
-        font: fontBold,
-        color: ink,
-      });
-      page.drawText(displayValue, {
-        x: datosX + labelW + gapSingle,
-        y: tempY,
-        size: fsBase,
-        font,
-        color: ink,
-      });
+      page.drawText(label, { x: datosX, y: tempY, size: fsBase, font: fontBold, color: ink });
+      page.drawText(displayValue, { x: datosX + labelW + gapSingle, y: tempY, size: fsBase, font, color: ink });
       tempY -= rowLH_first;
     });
 
-    let kpiW = mm(22),
-      kpiGap = mm(20),
-      kpiImgH = mm(10);
-    const kpiXStart = left + mm(75);
-    let kpiYStart = datosY - mm(3.9);
-    const totalKPIWidth =
-      datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
-    const areaWidth = mm(80);
+    // KPI “Datos del proyecto”
+    const datosKPI = [
+      { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
+      { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
+      { label: "Tarifa Promedio", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
+    ];
+
+    let kpiW = mm(22), kpiGap = mm(45);
+    const imgMM_KPI = 13, kpiValueSize = fsKPI, kpiTitleSize = fsSmall + 1;
+
+    const kpiXStart = left + mm(85);
+    const areaWidth = mm(105);
+    let totalKPIWidth = datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+    if (totalKPIWidth > areaWidth) {
+      const minGap = mm(6);
+      if (datosKPI.length > 1) {
+        const over = totalKPIWidth - areaWidth;
+        const reducible = Math.max(0, kpiGap - minGap);
+        const reducePerGap = Math.min(reducible, over / (datosKPI.length - 1));
+        kpiGap -= reducePerGap;
+      }
+      totalKPIWidth = datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+      if (totalKPIWidth > areaWidth) {
+        const scale = areaWidth / totalKPIWidth;
+        kpiW *= scale;
+        totalKPIWidth = datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+      }
+    }
     const offsetX = kpiXStart + (areaWidth - totalKPIWidth) / 2;
+
+    const lastDatoBaselineY = datosY - rowLH_first * (datosProyecto.length - 1);
+    const blockBottomFromTop = mm(imgMM_KPI) + (10 + kpiValueSize + 8);
+    let kpiYStart = lastDatoBaselineY + blockBottomFromTop;
+    const blockH_KPI = blockBottomFromTop;
+    ensure(blockH_KPI + 8);
+
     for (let i = 0; i < datosKPI.length; i++) {
       const kpi = datosKPI[i];
       const baseX = offsetX + i * (kpiW + kpiGap);
-      let imgY = kpiYStart - mm(2) - kpiImgH / 2;
-      let imgX = baseX + kpiW / 2 - mm(6);
+      const cardTopY = kpiYStart;
+      const centerX = baseX + kpiW / 2;
+
       try {
-        const imgBytes = await fetch(`img/${kpi.img}`).then((r) =>
-          r.arrayBuffer()
-        );
+        const imgBytes = await fetch(`img/${kpi.img}`).then((r) => r.arrayBuffer());
         const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
-        page.drawImage(imgEmbed, {
-          x: imgX,
-          y: imgY,
-          width: mm(12),
-          height: kpiImgH,
-        });
-      } catch {}
-      const kpiValueSize = 11;
-      page.drawText(kpi.value, {
-        x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2,
-        y: imgY + kpiImgH + mm(2),
-        size: kpiValueSize,
-        font: fontBold,
-        color: ink,
-      });
-      const kpiTitleSize = fsSmall + 1;
+        const iconW = mm(imgMM_KPI), iconH = mm(imgMM_KPI);
+        page.drawImage(imgEmbed, { x: centerX - iconW / 2, y: cardTopY - iconH, width: iconW, height: iconH });
+      } catch { }
+
+      const v = String(kpi.value ?? "—");
+      const vW = widthOf(v, kpiValueSize, fontBold);
+      page.drawText(v, { x: centerX - vW / 2, y: cardTopY - mm(imgMM_KPI) - 16, size: kpiValueSize, font: fontBold, color: ink });
+
+      const tW = widthOf(kpi.label, kpiTitleSize, fontBold);
       page.drawText(kpi.label, {
-        x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2,
-        y: imgY - mm(6),
-        size: kpiTitleSize,
-        font: fontBold,
-        color: ink,
+        x: centerX - tW / 2,
+        y: cardTopY - mm(imgMM_KPI) - 10 - kpiValueSize - 8,
+        size: kpiTitleSize, font: fontBold, color: ink,
       });
     }
-    y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
+
+    const kpiBottomY = kpiYStart - blockBottomFromTop;
+    y = Math.min(tempY, kpiBottomY - mm(8));
 
     y += mm(4);
     section("TU SISTEMA SOLAR");
@@ -1343,274 +1004,16 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
     let espacioPanelY = y;
     y = espacioPanelY - mm(3);
 
-    await drawCanvasImageIfAny2("impactoChart", 180, 74);
+    await drawCanvasImageIfAny2("impactoChart", 180, 85);
 
+    // ===== Página 2 =====
     newPage();
+    // súbela ~9 mm
+    y += mm(9);
     section("INVERSIÓN");
-    y -= mm(16);
+    y -= mm(1);
 
-    // === Bloques ROI / Árboles / CO2 (rediseño ROI llamativo con flecha de retorno) ===
-    {
-      const invCircleR = mm(12);
-      const blockW = mm(54);
-      const blockH = mm(40);
-      const gap = mm(10);
-      const totalWidth = blockW * 3 + gap * 2;
-      const startX = left + (contentWidth - totalWidth) / 2;
-      const centerY = y - blockH / 2;
-
-      const extractNumber = (txt, fallback = "0") => {
-        if (!txt || txt === "-" || txt === "—") return fallback;
-        const match = String(txt).match(/[\d,.]+/);
-        return match ? match[0] : fallback;
-      };
-
-      // ===== ROI (bloque 1) =====
-      let x = startX;
-      const roiCenterX = x + blockW / 2;
-      const roiCenterY = centerY + blockH / 2;
-
-      // HALO suave
-      page.drawEllipse({
-        x: roiCenterX,
-        y: roiCenterY,
-        xScale: invCircleR * 1.35,
-        yScale: invCircleR * 1.35,
-        color: primeL,
-        opacity: 0.35,
-        borderOpacity: 0,
-      });
-
-      // ANILLO EXTERIOR (borde ancho claro)
-      page.drawEllipse({
-        x: roiCenterX,
-        y: roiCenterY,
-        xScale: invCircleR * 1.12,
-        yScale: invCircleR * 1.12,
-        color: rgb(1, 1, 1),
-        borderColor: rgb(0.78, 0.9, 0.82),
-        borderWidth: 3.2,
-      });
-
-      // ANILLO INTERIOR (borde verde intenso)
-      page.drawEllipse({
-        x: roiCenterX,
-        y: roiCenterY,
-        xScale: invCircleR * 0.98,
-        yScale: invCircleR * 0.98,
-        color: rgb(1, 1, 1),
-        borderColor: rgb(0.15, 0.72, 0.3),
-        borderWidth: 1.8,
-      });
-
-      // CARA (relleno blanco con brillo)
-      page.drawEllipse({
-        x: roiCenterX,
-        y: roiCenterY,
-        xScale: invCircleR * 0.86,
-        yScale: invCircleR * 0.86,
-        color: rgb(1, 1, 1),
-        borderColor: rgb(1, 1, 1),
-        borderWidth: 0.5,
-      });
-      // BRILLO superior izquierdo
-      page.drawEllipse({
-        x: roiCenterX - mm(3.2),
-        y: roiCenterY + mm(4),
-        xScale: invCircleR * 0.45,
-        yScale: invCircleR * 0.2,
-        color: rgb(1, 1, 1),
-        opacity: 0.65,
-        borderOpacity: 0,
-      });
-
-      // Importe centrado
-      const invValue =
-        typeof _total === "number" ? fmtMXN(_total) : String(_total);
-      const invValueSize = 10;
-      const invValueW = widthOf(invValue, invValueSize, fontBold);
-      page.drawText(invValue, {
-        x: roiCenterX - invValueW / 2,
-        y: roiCenterY + 2,
-        size: invValueSize,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-
-      // Texto IVA
-      const ivaText = "";
-      const ivaTextSize = 6;
-      const ivaTextW = widthOf(ivaText, ivaTextSize, font);
-      page.drawText(ivaText, {
-        x: roiCenterX - ivaTextW / 2,
-        y: roiCenterY - 8,
-        size: ivaTextSize,
-        font,
-        color: rgb(0.5, 0.5, 0.5),
-      });
-      // ===== Flecha de retorno (mucho más a la izquierda y más abajo dentro del ROI) =====
-      await (async () => {
-        try {
-          const sizeMM = 10; // 🔹 más pequeña para que se vea mejor dentro
-          const px = Math.round(sizeMM * 4) * 2;
-
-          const bytes = await loadSvgAsPngBytes("img/retorno.svg", px, px);
-          const retornoImg = await pdfDoc.embedPng(bytes);
-
-          const w = mm(sizeMM);
-          const h = mm(sizeMM);
-
-          page.drawImage(retornoImg, {
-            x: roiCenterX + invCircleR - mm(6), // 🔹 mucho más a la izquierda (invade ROI)
-            y: roiCenterY - h / 2 - mm(5), // 🔹 bastante más abajo
-            width: w,
-            height: h,
-          });
-        } catch (e) {
-          console.warn(
-            "No se pudo cargar img/retorno.svg; usando fallback:",
-            e
-          );
-        }
-      })();
-      // ===== Fin flecha de retorno =====
-
-      // Etiquetas ROI (más a la izquierda, pegadas al círculo)
-      // Etiquetas ROI (más juntas y más pegadas al círculo)
-      const labelX = roiCenterX + invCircleR + mm(6); // pegado al círculo
-
-      // "ROI" arriba
-      page.drawText("ROI", {
-        x: labelX,
-        y: roiCenterY + fsBase,
-        size: fsBase,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-
-      // "X años" debajo, un poquito más separado
-      // Solo el número (grande), sin "años"
-      // Número grande + "años" pequeño a la derecha
-      {
-        const raw = resultadoSistemaSolar.roi;
-        const num = parseFloat(raw); // convierte string → número
-
-        const has = !isNaN(num) && isFinite(num);
-        const roiNum = has
-          ? num.toLocaleString("es-MX", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })
-          : "—";
-
-        console.log(roiNum);
-
-        const big = fsBase + 6; // tamaño del número
-        const small = Math.max(6, fsBase - 1); // tamaño de "años"
-        const yNum = roiCenterY - mm(2); // base del número
-
-        // Número (grande)
-        page.drawText(roiNum, {
-          x: labelX,
-          y: yNum,
-          size: big,
-          font: fontBold,
-          color: rgb(0.1, 0.1, 0.1),
-        });
-
-        // Calcular ancho del número para colocar "años" a la derecha
-        const gap = mm(1.2);
-        const numW = widthOf(roiNum, big, fontBold);
-
-        // Ajuste vertical para centrar visualmente "años" con el número
-        const yYears = yNum + (big - small) * 0.25;
-
-        // "años" (pequeño)
-        page.drawText("años", {
-          x: labelX + numW + gap,
-          y: yYears,
-          size: small,
-          font,
-          color: rgb(0.1, 0.1, 0.1),
-        });
-      }
-
-      // ===== Árboles (bloque 2) =====
-      x += blockW + gap;
-      x += mm(7); // Recorre el bloque de árboles 5mm a la derecha
-      const iconSize = mm(14),
-        iconHalf = iconSize / 2;
-      const iconY_arbol = centerY + blockH / 2 - iconHalf;
-      const iconX_arbol = x + blockW / 2 - iconHalf;
-      try {
-        const imgBytes = await fetch("img/arbol.png").then((r) =>
-          r.arrayBuffer()
-        );
-        const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
-        page.drawImage(imgEmbed, {
-          x: iconX_arbol,
-          y: iconY_arbol,
-          width: iconSize,
-          height: iconSize,
-        });
-      } catch {}
-      const kpiValueSize = 11;
-      const arbolesValue = extractNumber(datos.arboles, "0");
-      const tituloArbol = `${arbolesValue} árboles`;
-      page.drawText(tituloArbol, {
-        x: x + (blockW - widthOf(tituloArbol, kpiValueSize, fontBold)) / 2,
-        y: iconY_arbol + iconSize + mm(2),
-        size: kpiValueSize,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-      page.drawText("Árboles equivalentes", {
-        x:
-          x +
-          (blockW - widthOf("Árboles equivalentes", fsSmall + 1, fontBold)) / 2,
-        y: iconY_arbol - mm(6),
-        size: fsSmall + 1,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-
-      // ===== CO2 (bloque 3) =====
-      x += blockW + gap;
-      x -= mm(4); // Recorre el bloque de CO2 4mm a la izquierda
-      const iconY_co2 = centerY + blockH / 2 - iconHalf;
-      const iconX_co2 = x + blockW / 2 - iconHalf;
-      try {
-        const imgBytes = await fetch("img/co2.png").then((r) =>
-          r.arrayBuffer()
-        );
-        const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
-        page.drawImage(imgEmbed, {
-          x: iconX_co2,
-          y: iconY_co2,
-          width: iconSize,
-          height: iconSize,
-        });
-      } catch {}
-      const co2Value = extractNumber(datos.ahorroCO2, "0");
-      const tituloCO2 = `${co2Value} t`;
-      page.drawText(tituloCO2, {
-        x: x + (blockW - widthOf(tituloCO2, kpiValueSize, fontBold)) / 2,
-        y: iconY_co2 + iconSize + mm(2),
-        size: kpiValueSize,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-      page.drawText("Ahorro CO2", {
-        x: x + (blockW - widthOf("Ahorro CO2", fsSmall + 1, fontBold)) / 2,
-        y: iconY_co2 - mm(6),
-        size: fsSmall + 1,
-        font: fontBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-
-      // Cursor para siguientes secciones
-      y = centerY - blockH / 2 + mm(18);
-    }
+    await drawInvestSplitKPIs();
 
     // Tabla de cotización
     section("COTIZACIÓN");
@@ -1618,7 +1021,6 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
 
     // Términos
     drawTerms();
-    drawFooter();
 
     // === 5) Guardar y descargar ===
     const pdfBytes = await pdfDoc.save();
@@ -1626,18 +1028,14 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `HexaSolar_Cotizacion_${(
-      datos.nombreCliente || "Cliente"
-    ).replace(/\s+/g, "_")}.pdf`;
+    a.download = `HexaSolar_Cotizacion_${(datos.nombreCliente || "Cliente").replace(/\s+/g, "_")}.pdf`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
   } catch (err) {
     console.error("Error generando PDF base:", err);
-    alert(
-      "No se pudo generar el PDF. Revisa que 'Base.pdf' exista y que fontkit esté cargado."
-    );
+    alert("No se pudo generar el PDF. Revisa que 'Base.pdf' exista y que fontkit esté cargado.");
   } finally {
     if (loading) loading.style.display = "none";
   }
@@ -1653,7 +1051,7 @@ async function obtenerBasePdfBytes() {
       if (!resp.ok) throw new Error("HTTP " + resp.status);
       basePdfBytes = await resp.arrayBuffer();
       return basePdfBytes;
-    } catch (_) {}
+    } catch (_) { }
   }
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -1663,10 +1061,7 @@ async function obtenerBasePdfBytes() {
       const file = input.files?.[0];
       if (!file) return reject(new Error("No se seleccionó archivo"));
       const reader = new FileReader();
-      reader.onload = () => {
-        basePdfBytes = reader.result;
-        resolve(basePdfBytes);
-      };
+      reader.onload = () => { basePdfBytes = reader.result; resolve(basePdfBytes); };
       reader.onerror = () => reject(reader.error);
       reader.readAsArrayBuffer(file);
     };
@@ -1674,7 +1069,7 @@ async function obtenerBasePdfBytes() {
   });
 }
 
-/** Etiqueta "Promedio anual" para Chart.js (solo afecta el canvas, no el PDF) */
+/** Etiqueta "Promedio anual" para Chart.js (solo canvas) */
 function shiftAverageLabelDown(canvas) {
   const Chart = window.Chart;
   if (!Chart || !Chart.getChart) return;
@@ -1684,10 +1079,7 @@ function shiftAverageLabelDown(canvas) {
   const pad = chart.options.layout?.padding;
   if (typeof pad === "number") {
     chart.options.layout.padding = {
-      top: pad,
-      right: pad,
-      bottom: Math.max(28, pad),
-      left: pad,
+      top: pad, right: pad, bottom: Math.max(28, pad), left: pad,
     };
   } else {
     chart.options.layout = chart.options.layout || {};
@@ -1700,8 +1092,7 @@ function shiftAverageLabelDown(canvas) {
   const avg = data.length
     ? data.reduce((a, b) => a + (Number(b) || 0), 0) / data.length
     : null;
-  const text =
-    avg != null ? `Promedio anual: ${avg.toFixed(3)} kWh/m²/día` : "";
+  const text = avg != null ? `Promedio anual: ${avg.toFixed(3)} kWh/m²/día` : "";
 
   const plugin = {
     id: "avgLabelPDF",
@@ -1713,11 +1104,7 @@ function shiftAverageLabelDown(canvas) {
       ctx.font = "12px Helvetica";
       ctx.fillStyle = "rgba(0,0,0,0.75)";
       ctx.textAlign = "center";
-      ctx.fillText(
-        text,
-        (chartArea.left + chartArea.right) / 2,
-        chartArea.bottom + 16
-      );
+      ctx.fillText(text, (chartArea.left + chartArea.right) / 2, chartArea.bottom + 16);
       ctx.restore();
     },
   };
