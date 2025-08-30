@@ -12,7 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.js"></script>
+  <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.js"></script>
 
   <!-- 🔧 Split bar (empieza a la mitad y permite pasarla) + consumo responsivo -->
   <style>
@@ -681,12 +681,12 @@
               total,
               pricePerWatt: pricePerWatt || 0,
               numeroModulos: numeroModulos,
-              reoysinIva: reoysinIva ,
-              roiConiva: roiConiva 
+              reoysinIva: reoysinIva,
+              roiConiva: roiConiva
             };
 
             console.log(datosParaGuardar)
-             localStorage.setItem("cotizacionPU2", JSON.stringify(datosParaGuardar));
+            localStorage.setItem("cotizacionPU2", JSON.stringify(datosParaGuardar));
             console.log("Cotización P.U. guardada en localStorage:", datosParaGuardar);
 
             const cardStyle = `
@@ -1313,10 +1313,11 @@
         tablaHost.id = 'tablaConsumoContainer';
         consumoContainer.appendChild(tablaHost);
       }
-      // Oculta los grids (solo aspecto, no rompes otros selectores)
-      kwhRow.parentElement.style.display = 'none';
-      pagoRow.parentElement.style.display = 'none';
-      tarifaRow.parentElement.style.display = 'none';
+
+      // Oculta los grids (solo aspecto)
+      if (kwhRow.parentElement) kwhRow.parentElement.style.display = 'none';
+      if (pagoRow.parentElement) pagoRow.parentElement.style.display = 'none';
+      if (tarifaRow.parentElement) tarifaRow.parentElement.style.display = 'none';
 
       // Etiquetas por período
       const periodosMensuales = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -1326,63 +1327,95 @@
       // ===== Helpers =====
       const toNum = (v) => {
         if (v === null || v === undefined) return NaN;
-        const x = parseFloat(String(v).trim());
+        const x = parseFloat(String(v).replace(/,/g, '').trim());
         return Number.isFinite(x) ? x : NaN;
       };
       const hasNum = (v) => !Number.isNaN(toNum(v));
-      const fix2 = (x) => (Math.round((x + Number.EPSILON) * 100) / 100).toFixed(2);
+      const fixN = (x, n = 2) => (Math.round((x + Number.EPSILON) * 10 ** n) / 10 ** n).toFixed(n);
+
+      // Estados por fila
+      const lastEdited = new Map();  // i -> 'tarifa' | 'importe'
+      const isUpdating = new Map();  // i -> boolean (para evitar bucles)
 
       const actualizarPie = () => {
-        let sTarifa = 0, sConsumo = 0, sImporte = 0, cT = 0, cK = 0, cP = 0;
+        let sT = 0, sK = 0, sP = 0, cT = 0, cK = 0, cP = 0;
         for (let i = 1; i <= n; i++) {
-          const k = document.getElementById(`consumo${i}`),
-            p = document.getElementById(`importe${i}`),
-            t = document.getElementById(`tarifa${i}`);
-          const consumo = toNum(k?.value), importe = toNum(p?.value), tarifa = toNum(t?.value);
-          if (hasNum(tarifa)) { sTarifa += tarifa; cT++; }
-          if (hasNum(consumo)) { sConsumo += consumo; cK++; }
-          if (hasNum(importe)) { sImporte += importe; cP++; }
+          const k = document.getElementById(`consumo${i}`);
+          const p = document.getElementById(`importe${i}`);
+          const t = document.getElementById(`tarifa${i}`);
+          const K = toNum(k?.value), P = toNum(p?.value), T = toNum(t?.value);
+          if (hasNum(T)) { sT += T; cT++; }
+          if (hasNum(K)) { sK += K; cK++; }
+          if (hasNum(P)) { sP += P; cP++; }
         }
-        document.getElementById('sumaConsumo').textContent = fix2(sConsumo);
-        document.getElementById('sumaImporte').textContent = fix2(sImporte);
-        document.getElementById('promTarifa').textContent = cT ? fix2(sTarifa / cT) : '0.00';
-        document.getElementById('promConsumo').textContent = cK ? fix2(sConsumo / cK) : '0.00';
-        document.getElementById('promImporte').textContent = cP ? fix2(sImporte / cP) : '0.00';
+        const $ = (id) => document.getElementById(id);
+        $('#sumaConsumo') && ($('#sumaConsumo').textContent = fixN(sK, 2));
+        $('#sumaImporte') && ($('#sumaImporte').textContent = fixN(sP, 2));
+        $('#promTarifa') && ($('#promTarifa').textContent = cT ? fixN(sT / cT, 3) : '0.000');
+        $('#promConsumo') && ($('#promConsumo').textContent = cK ? fixN(sK / cK, 2) : '0.00');
+        $('#promImporte') && ($('#promImporte').textContent = cP ? fixN(sP / cP, 2) : '0.00');
       };
 
       const recalcular = (i, source) => {
+        if (isUpdating.get(i)) return; // evita bucles
+        isUpdating.set(i, true);
+
         const k = document.getElementById(`consumo${i}`);
         const p = document.getElementById(`importe${i}`);
         const t = document.getElementById(`tarifa${i}`);
 
-        const consumo = toNum(k.value);
-        const importe = toNum(p.value);
-        const tarifa = toNum(t.value);
+        const K = toNum(k.value);
+        const P = toNum(p.value);
+        const T = toNum(t.value);
 
-        if (source === 'importe') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(importe)) {
-            t.value = fix2(importe / consumo);
+        // setters con formato (ej: tarifa 3 decimales, importe 2-3 decimales)
+        const setTarifa = (val) => { t.value = fixN(val, 3); };
+        const setImporte = (val) => { p.value = fixN(val, 3); };
+
+        // 1) El usuario acaba de editar "tarifa"
+        if (source === 'tarifa') {
+          lastEdited.set(i, 'tarifa');
+          if (hasNum(K) && K > 0 && hasNum(T)) {
+            setImporte(T * K);
           }
-        } else if (source === 'tarifa') {
-          if (hasNum(consumo) && consumo > 0 && hasNum(tarifa)) {
-            p.value = fix2(tarifa * consumo);
+        }
+
+        // 2) El usuario acaba de editar "importe"
+        else if (source === 'importe') {
+          lastEdited.set(i, 'importe');
+          if (hasNum(K) && K > 0 && hasNum(P)) {
+            setTarifa(P / K);
           }
-        } else if (source === 'consumo') {
-          if (hasNum(consumo) && consumo > 0) {
-            if (hasNum(importe) && importe > 0) {
-              t.value = fix2(importe / consumo);
-            } else if ((!hasNum(importe) || importe === 0) && hasNum(tarifa) && tarifa > 0) {
-              p.value = fix2(tarifa * consumo);
+        }
+
+        // 3) El usuario acaba de editar "consumo"
+        else if (source === 'consumo') {
+          if (hasNum(K) && K > 0) {
+            const last = lastEdited.get(i);
+            // Si el último que tocó el usuario fue tarifa → recalcula importe
+            if (last === 'tarifa' && hasNum(T)) {
+              setImporte(T * K);
+            }
+            // Si el último fue importe → recalcula tarifa
+            else if (last === 'importe' && hasNum(P)) {
+              setTarifa(P / K);
+            } else {
+              // fallback: si hay tarifa válida, calcula importe; si no, si hay importe válido, calcula tarifa
+              if (hasNum(T)) setImporte(T * K);
+              else if (hasNum(P)) setTarifa(P / K);
             }
           }
         }
 
+        // Actualizar totales externos
         actualizarPie();
         window.actualizarTotales?.();
         window.actualizarTotalesConsumo?.();
+
+        isUpdating.set(i, false);
       };
 
-      // ===== Construir tabla con columna "Periodo" =====
+      // ===== Tabla =====
       const table = document.createElement('table');
       table.className = 'tabla-consumo';
       table.innerHTML = `
@@ -1396,59 +1429,56 @@
     </thead>
     <tbody id="tablaConsumoBody"></tbody>
     <tfoot>
-      <tr class="sum" style="display:none">
-        <td class="label">Suma</td>
-        <td></td>
-        <td><span id="sumaConsumo">0.00</span></td>
-        <td><span id="sumaImporte">0.00</span></td>
+      <tr class="sum">
+        
       </tr>
-      <tr class="avg" style="display:none">
-        <td class="label">Promedio</td>
-        <td><span id="promTarifa">0.00</span></td>
-        <td><span id="promConsumo">0.00</span></td>
-        <td><span id="promImporte">0.00</span></td>
-      </tr>
-      <tr class="avg" style="display:none">
-        <td></td><td></td><td></td><td></td>
-      </tr>
+   
     </tfoot>
   `;
       const tbody = table.querySelector('#tablaConsumoBody');
 
-      // Render filas con Periodo + T/K/P
       for (let i = 1; i <= n; i++) {
         const tr = document.createElement('tr');
 
-        // Periodo visible
+        // Periodo
         const tdPeriodo = document.createElement('td');
         const badge = document.createElement('span');
         badge.className = 'periodo-etq';
         badge.textContent = periodos[i - 1] || `Periodo ${i}`;
         tdPeriodo.appendChild(badge);
 
+        // Tarifa
         const tdT = document.createElement('td');
         const t = document.createElement('input');
-        t.type = 'number'; // ahora son numéricos sin comas
+        t.type = 'number';
         t.step = 'any';
-        t.className = 'consumo-input'; t.id = `tarifa${i}`;
-        t.placeholder = '0'; t.title = periodos[i - 1] || `Periodo ${i}`;
-        t.addEventListener('input', () => { recalcular(i, 'tarifa'); });
+        t.className = 'consumo-input';
+        t.id = `tarifa${i}`;
+        t.placeholder = '0';
+        t.title = badge.textContent;
+        t.addEventListener('input', () => recalcular(i, 'tarifa'));
 
+        // Consumo
         const tdK = document.createElement('td');
         const k = document.createElement('input');
         k.type = 'number';
         k.step = 'any';
-        k.className = 'consumo-input'; k.id = `consumo${i}`;
-        k.placeholder = '0'; k.title = periodos[i - 1] || `Periodo ${i}`;
-        k.addEventListener('input', () => { recalcular(i, 'consumo'); });
+        k.className = 'consumo-input';
+        k.id = `consumo${i}`;
+        k.placeholder = '0';
+        k.title = badge.textContent;
+        k.addEventListener('input', () => recalcular(i, 'consumo'));
 
+        // Importe
         const tdP = document.createElement('td');
         const p = document.createElement('input');
         p.type = 'number';
         p.step = 'any';
-        p.className = 'consumo-input'; p.id = `importe${i}`;
-        p.placeholder = '0'; p.title = periodos[i - 1] || `Periodo ${i}`;
-        p.addEventListener('input', () => { recalcular(i, 'importe'); });
+        p.className = 'consumo-input';
+        p.id = `importe${i}`;
+        p.placeholder = '0';
+        p.title = badge.textContent;
+        p.addEventListener('input', () => recalcular(i, 'importe'));
 
         tdT.appendChild(t);
         tdK.appendChild(k);
@@ -1459,13 +1489,17 @@
         tr.appendChild(tdK);
         tr.appendChild(tdP);
         tbody.appendChild(tr);
+
+        // init flags
+        lastEdited.set(i, undefined);
+        isUpdating.set(i, false);
       }
 
-      // Montar en el host
+      // Montar
       tablaHost.innerHTML = '';
       tablaHost.appendChild(table);
 
-      // Inicializar pie y totales externos
+      // Totales iniciales
       actualizarPie();
       window.actualizarTotales?.();
       window.actualizarTotalesConsumo?.();
