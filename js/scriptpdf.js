@@ -799,7 +799,7 @@ async function exportToBasePdf() {
       const co2Num = (String(datos.ahorroCO2 ?? "0").match(/[\d,.]+/) || ["0"])[0];
 
       const items = [
-        { img: "cochi.png", value: subtotalStr, title: "Inversión" },
+        { img: "cochi.png", value: subtotalStr, title: "Inversión (+ IVA)" },
         { img: "retorno.svg", value: roiVal, title: "ROI" },
         { img: "arbol.png", value: `${arbolesNum} árboles`, title: "Árboles equivalentes" },
         { img: "co2.png", value: `${co2Num} t`, title: "Ahorro CO2" },
