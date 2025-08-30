@@ -1153,6 +1153,10 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
         },
       ];
 
+  // ...centrado y renderizado de ítems se realiza en el bloque siguiente...
+
+  // ...centrado y renderizado de ítems se realiza en el bloque siguiente...
+
       const cols = items.length;
       const gap = mm(6);
       const colW = (contentWidth - gap * (cols - 1)) / cols;
@@ -1164,15 +1168,11 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
 
       const blockH = mm(imgMM) + 32;
       ensure(blockH + 8);
-      const totalW = cols * colW + (cols - 1) * gap;
-
-      // 🔧 CORREGIDO: centrar dentro de contentWidth (respetando márgenes)
-      const startX = left + (contentWidth - totalW) / 2;
-      const offset = mm(5);
-      const finalStartX = startX + offset;
+      // Centrado perfecto entre los márgenes izquierdo y derecho
+      const startX = left;
 
       for (let i = 0; i < cols; i++) {
-        const x = finalStartX + i * (colW + gap);
+        const x = startX + i * (colW + gap);
         let iconW = mm(imgMM),
           iconH = mm(imgMM);
         // Centrar cada tarjeta verticalmente
