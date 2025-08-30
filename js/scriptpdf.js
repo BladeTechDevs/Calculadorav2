@@ -123,8 +123,8 @@ async function exportToBasePdf() {
     const firstTop = mm(48);
     const nextTop = mm(25);
     const bottom = mm(18);
-    const left = mm(20);
-    const right = mm(20);
+    const left = mm(12);
+    const right = mm(12);
 
     let pageIndex = 0;
     let page = pdfDoc.getPage(pageIndex);
@@ -267,8 +267,12 @@ async function exportToBasePdf() {
       const midGap = mm(6);
 
       const gridW = contentWidth - padX * 2 - midGap;
-      const colW_L = gridW * 0.68;
-      const colW_R = gridW - colW_L;
+  // Calcula primero la posición de la línea y luego el ancho de la columna
+  const sepOffset = mm(8); // mismo valor que restaste a sepX
+  const tempColW_L = gridW * 0.68;
+  const sepX = left + padX + tempColW_L + midGap / 2 - sepOffset;
+  const colW_L = sepX - (left + padX);
+  const colW_R = gridW - colW_L;
 
       const rowLH_first = 11;
       const rowLH_wrap = 10;
@@ -381,7 +385,6 @@ async function exportToBasePdf() {
       });
 
       // separador vertical
-      const sepX = left + padX + colW_L + midGap / 2;
       page.drawLine({
         start: { x: sepX, y: y - titleH - 2 },
         end: { x: sepX, y: y - H + padY + 2 },
@@ -440,8 +443,8 @@ async function exportToBasePdf() {
         }
       };
 
-      await drawColumn(leftRows, left + padX, colW_L);
-      await drawColumn(rightRows, left + padX + colW_L + midGap, colW_R);
+await drawColumn(leftRows, left + padX - mm(2), colW_L);
+  await drawColumn(rightRows, left + padX + colW_L + midGap - mm(3), colW_R);
 
       y -= H + 6;
     }
@@ -1162,7 +1165,9 @@ async function exportToBasePdf() {
       const blockH = mm(imgMM) + 32;
       ensure(blockH + 8);
       const totalW = cols * colW + (cols - 1) * gap;
-      const startX = (PW - totalW) / 2;
+
+      // 🔧 CORREGIDO: centrar dentro de contentWidth (respetando márgenes)
+      const startX = left + (contentWidth - totalW) / 2;
       const offset = mm(5);
       const finalStartX = startX + offset;
 
