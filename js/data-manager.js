@@ -373,7 +373,7 @@ recopilarDatosCotizacion() {
     let promedioProduccion = produccion.reduce((a, b) => a + b, 0) / 12;
     console.log(promedioProduccion);
     let diferencia = consumoMensual - promedioProduccion;
-    const porcentajeGeneracion = (diferencia / consumoMensual) * 100;
+    const porcentajeGeneracion = (1-(diferencia / consumoMensual))*100; ;
 
     const roi = (total2 / consumoAnulaDeEnegia).toFixed(1);
     this.data.resultados = {
@@ -397,6 +397,7 @@ recopilarDatosCotizacion() {
       consumoAnulaDeEnegia: consumoAnulaDeEnegia,
       roi: roi,
       porcentajeGeneracion: porcentajeGeneracion,
+      diferencia: diferencia,
     }
 
     return this.data.resultados

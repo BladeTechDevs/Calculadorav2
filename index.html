@@ -154,6 +154,11 @@
         <i class="fas fa-globe"></i>
         <a href="https://hexasolar.com.mx" class="contact-link" target="_blank">hexasolar.com.mx</a>
       </div>
+      <div class="contact-item">
+        <i class="fas fa-question-circle"></i>
+        <button id="btnAyuda" class="help-btn" type="button">Info</button>
+      </div>
+
     </div>
   </div>
 
@@ -547,194 +552,194 @@
         // Profit (%) lo dejamos normal (porcentaje), no con comas
       </script>
 
-<script>
-;(() => {
-  const IVA_RATE = 0.16
-  const IDS_COSTOS = [
-    ['panel', 'Panel'],
-    ['inversor', 'Inversor'],
-    ['materiales', 'Materiales'],
-    ['estructura', 'Estructura'],
-    ['instalacion', 'Instalación'],
-    ['carpeta', 'Carpeta (Pog)'],
-    ['flete', 'Flete'],
-    ['interconexion', 'Interconexión'],
-    ['uve', 'UVIE'],
-    ['uie', 'UIE'],
-    ['medidor', 'Medidor'],
-    ['monitoreo', 'Monitoreo']
-  ]
+      <script>
+        ; (() => {
+          const IVA_RATE = 0.16
+          const IDS_COSTOS = [
+            ['panel', 'Panel'],
+            ['inversor', 'Inversor'],
+            ['materiales', 'Materiales'],
+            ['estructura', 'Estructura'],
+            ['instalacion', 'Instalación'],
+            ['carpeta', 'Carpeta (Pog)'],
+            ['flete', 'Flete'],
+            ['interconexion', 'Interconexión'],
+            ['uve', 'UVIE'],
+            ['uie', 'UIE'],
+            ['medidor', 'Medidor'],
+            ['monitoreo', 'Monitoreo']
+          ]
 
-  // ===== Helpers base =====
-  const $ = (id) => document.getElementById(id)
-  const toNumber = (v) => {
-    if (v === null || v === undefined) return 0
-    const s = String(v).replace(/[,$\s]/g, '').replace(',', '.')
-    const n = parseFloat(s)
-    return isNaN(n) ? 0 : n
-  }
-  const fmt = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 })
-  const parseJSONSafe = (txt) => { try { return JSON.parse(txt) } catch { return null } }
+          // ===== Helpers base =====
+          const $ = (id) => document.getElementById(id)
+          const toNumber = (v) => {
+            if (v === null || v === undefined) return 0
+            const s = String(v).replace(/[,$\s]/g, '').replace(',', '.')
+            const n = parseFloat(s)
+            return isNaN(n) ? 0 : n
+          }
+          const fmt = (n) => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 2 })
+          const parseJSONSafe = (txt) => { try { return JSON.parse(txt) } catch { return null } }
 
-  // ===== Espera a que resultadosSistemaSolar exista =====
-  function waitForLocalStorageKey(key, { interval = 200, timeout = 10000 } = {}) {
-    return new Promise((resolve) => {
-      const t0 = Date.now()
-      const tick = () => {
-        const raw = localStorage.getItem(key)
-        const obj = parseJSONSafe(raw)
-        if (obj && Object.keys(obj).length) return resolve(obj)
-        if (Date.now() - t0 >= timeout) return resolve({}) // continúa sin bloquear si no llega
-        setTimeout(tick, interval)
-      }
-      tick()
-    })
-  }
+          // ===== Espera a que resultadosSistemaSolar exista =====
+          function waitForLocalStorageKey(key, { interval = 200, timeout = 10000 } = {}) {
+            return new Promise((resolve) => {
+              const t0 = Date.now()
+              const tick = () => {
+                const raw = localStorage.getItem(key)
+                const obj = parseJSONSafe(raw)
+                if (obj && Object.keys(obj).length) return resolve(obj)
+                if (Date.now() - t0 >= timeout) return resolve({}) // continúa sin bloquear si no llega
+                setTimeout(tick, interval)
+              }
+              tick()
+            })
+          }
 
-  // ===== Estado (se re-lee en cada render) =====
-  let resultados = {}
+          // ===== Estado (se re-lee en cada render) =====
+          let resultados = {}
 
-  // ===== Detección "Microinversor" en vivo =====
-  function isMicroinversorSelected() {
-    // 1) Select (preferente)
-    const sel = $('inversorPanel')
-    if (sel && typeof sel.value === 'string') {
-      if (sel.value.trim().toLowerCase() === 'microinversor') return true
-    }
-    // 2) Checkbox alternativo
-    const chk = $('microinversor')
-    if (chk && chk.checked) return true
-    // 3) Fallback a localStorage (último snapshot)
-    const fallback = (resultados?.selectInversor || '').toString().toLowerCase()
-    return fallback === 'microinversor'
-  }
+          // ===== Detección "Microinversor" en vivo =====
+          function isMicroinversorSelected() {
+            // 1) Select (preferente)
+            const sel = $('inversorPanel')
+            if (sel && typeof sel.value === 'string') {
+              if (sel.value.trim().toLowerCase() === 'microinversor') return true
+            }
+            // 2) Checkbox alternativo
+            const chk = $('microinversor')
+            if (chk && chk.checked) return true
+            // 3) Fallback a localStorage (último snapshot)
+            const fallback = (resultados?.selectInversor || '').toString().toLowerCase()
+            return fallback === 'microinversor'
+          }
 
-  const getPotenciaW = () => {
-    const el = $('potenciaInstalada')
-    if (!el) return null
-    const kw = toNumber(el.textContent)
-    return kw > 0 ? kw * 1000 : null
-  }
+          const getPotenciaW = () => {
+            const el = $('potenciaInstalada')
+            if (!el) return null
+            const kw = toNumber(el.textContent)
+            return kw > 0 ? kw * 1000 : null
+          }
 
-  const getNumeroDeModulos = () => {
-    // Prioriza lo calculado guardado:
-    if (resultados && Number(resultados.numeroModulos) > 0) return Number(resultados.numeroModulos)
-    // Fallback a la tarjeta de resultados
-    const el = $('numeroModulos')
-    if (!el) return null
-    const num = toNumber(el.textContent)
-    return num > 0 ? num : null
-  }
+          const getNumeroDeModulos = () => {
+            // Prioriza lo calculado guardado:
+            if (resultados && Number(resultados.numeroModulos) > 0) return Number(resultados.numeroModulos)
+            // Fallback a la tarjeta de resultados
+            const el = $('numeroModulos')
+            if (!el) return null
+            const num = toNumber(el.textContent)
+            return num > 0 ? num : null
+          }
 
-  const calcularProfit = (subtotal) => {
-    const raw = $('profit')?.value
-    const p = toNumber(raw)
-    if (!p) return { monto: 0, etiqueta: '—' }
-    if (p <= 1) {
-      return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' }
-    }
-    return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' }
-  }
+          const calcularProfit = (subtotal) => {
+            const raw = $('profit')?.value
+            const p = toNumber(raw)
+            if (!p) return { monto: 0, etiqueta: '—' }
+            if (p <= 1) {
+              return { monto: subtotal * p, etiqueta: (p * 100).toFixed(2) + '%' }
+            }
+            return { monto: subtotal * (p / 100), etiqueta: p.toFixed(2) + '%' }
+          }
 
-  const renderTabla = () => {
-    // 🔁 Releer resultados en cada render (por si cambiaron después de iniciar)
-    const latest = parseJSONSafe(localStorage.getItem("resultadosSistemaSolar"))
-    if (latest && Object.keys(latest).length) resultados = latest
+          const renderTabla = () => {
+            // 🔁 Releer resultados en cada render (por si cambiaron después de iniciar)
+            const latest = parseJSONSafe(localStorage.getItem("resultadosSistemaSolar"))
+            if (latest && Object.keys(latest).length) resultados = latest
 
-    const conceptos = []
-    let subtotal = 0
+            const conceptos = []
+            let subtotal = 0
 
-    const numeroModulos = getNumeroDeModulos() || 1
+            const numeroModulos = getNumeroDeModulos() || 1
 
-    // ids que siempre se multiplican por N
-    const idsSiemprePorModulo = new Set(['panel', 'materiales', 'estructura', 'instalacion'])
+            // ids que siempre se multiplican por N
+            const idsSiemprePorModulo = new Set(['panel', 'materiales', 'estructura', 'instalacion'])
 
-    // Evaluar Microinversor EN CADA RENDER (en vivo)
-    const multiplicarInversor = isMicroinversorSelected()
-    console.log('Microinversor activo:', multiplicarInversor)
+            // Evaluar Microinversor EN CADA RENDER (en vivo)
+            const multiplicarInversor = isMicroinversorSelected()
+            console.log('Microinversor activo:', multiplicarInversor)
 
-    IDS_COSTOS.forEach(([id, nombre]) => {
-      let val = toNumber($(id)?.value)
-      let etiqueta = nombre
+            IDS_COSTOS.forEach(([id, nombre]) => {
+              let val = toNumber($(id)?.value)
+              let etiqueta = nombre
 
-      const debeMultiplicarse =
-        idsSiemprePorModulo.has(id) || (id === 'inversor' && multiplicarInversor)
+              const debeMultiplicarse =
+                idsSiemprePorModulo.has(id) || (id === 'inversor' && multiplicarInversor)
 
-      if (debeMultiplicarse) {
-        val = val * numeroModulos
-        etiqueta = `${nombre} (x${numeroModulos})`
-      }
+              if (debeMultiplicarse) {
+                val = val * numeroModulos
+                etiqueta = `${nombre} (x${numeroModulos})`
+              }
 
-      conceptos.push({ nombre: etiqueta, val })
-      subtotal += val
-    })
+              conceptos.push({ nombre: etiqueta, val })
+              subtotal += val
+            })
 
-    const { monto: profit, etiqueta: etiquetaProfit } = calcularProfit(subtotal)
-    const base = subtotal + profit
-    const iva = base * IVA_RATE
-    const total = base + iva
+            const { monto: profit, etiqueta: etiquetaProfit } = calcularProfit(subtotal)
+            const base = subtotal + profit
+            const iva = base * IVA_RATE
+            const total = base + iva
 
-    const potenciaW = getPotenciaW()
+            const potenciaW = getPotenciaW()
 
-    // $/W con y sin IVA (incluyen profit)
-    let pricePerWattSinIva = null
-    let pricePerWattConIva = null
-    if (potenciaW) {
-      pricePerWattSinIva = base / potenciaW
-      pricePerWattConIva = (base * (1 + IVA_RATE)) / potenciaW
-    }
+            // $/W con y sin IVA (incluyen profit)
+            let pricePerWattSinIva = null
+            let pricePerWattConIva = null
+            if (potenciaW) {
+              pricePerWattSinIva = base / potenciaW
+              pricePerWattConIva = (base * (1 + IVA_RATE)) / potenciaW
+            }
 
-    const results = $('resultsContent')
-    if (!results) return
+            const results = $('resultsContent')
+            if (!results) return
 
-    let cont = document.getElementById('cont-desglose-cotizacion-pu')
-    if (!cont) {
-      cont = document.createElement('section')
-      cont.id = 'cont-desglose-cotizacion-pu'
-      cont.style.marginTop = '1.5rem'
-      results.appendChild(cont)
-    }
+            let cont = document.getElementById('cont-desglose-cotizacion-pu')
+            if (!cont) {
+              cont = document.createElement('section')
+              cont.id = 'cont-desglose-cotizacion-pu'
+              cont.style.marginTop = '1.5rem'
+              results.appendChild(cont)
+            }
 
-    const consumoEnergia = resultados?.consumoAnualDeEnergia || 1
-    const reoysinIva = base / consumoEnergia
-    const roiConiva = total / consumoEnergia
+            const consumoEnergia = resultados?.consumoAnualDeEnergia || 1
+            const reoysinIva = base / consumoEnergia
+            const roiConiva = total / consumoEnergia
 
-    const datosParaGuardar = {
-      conceptos,
-      subtotal,
-      profit,
-      base,
-      iva,
-      total,
-      pricePerWattSinIva: pricePerWattSinIva || 0,
-      pricePerWattConIva: pricePerWattConIva || 0,
-      numeroModulos: numeroModulos,
-      reoysinIva,
-      roiConiva
-    }
+            const datosParaGuardar = {
+              conceptos,
+              subtotal,
+              profit,
+              base,
+              iva,
+              total,
+              pricePerWattSinIva: pricePerWattSinIva || 0,
+              pricePerWattConIva: pricePerWattConIva || 0,
+              numeroModulos: numeroModulos,
+              reoysinIva,
+              roiConiva
+            }
 
-    localStorage.setItem("cotizacionPU2", JSON.stringify(datosParaGuardar))
+            localStorage.setItem("cotizacionPU2", JSON.stringify(datosParaGuardar))
 
-    const cardStyle = `
+            const cardStyle = `
       background:#fff;border:1px solid #e2e8f0;border-radius:12px;
       padding:16px;box-shadow:0 4px 10px rgba(17,24,39,.06);overflow:auto
     `
-    const titleStyle = `font-weight:600;font-size:1rem;margin:0 0 .6rem 0;display:flex;gap:.5rem;align-items:center`
-    const tableStyle = `width:100%;border-collapse:collapse;font-size:.95rem`
-    const thtd = `padding:.6rem .7rem;border-bottom:1px solid #edf2f7;text-align:right`
-    const thLeft = `text-align:left`
+            const titleStyle = `font-weight:600;font-size:1rem;margin:0 0 .6rem 0;display:flex;gap:.5rem;align-items:center`
+            const tableStyle = `width:100%;border-collapse:collapse;font-size:.95rem`
+            const thtd = `padding:.6rem .7rem;border-bottom:1px solid #edf2f7;text-align:right`
+            const thLeft = `text-align:left`
 
-    const filasConceptos = conceptos
-      .filter(c => c.val && c.val !== 0)
-      .map(c => `
+            const filasConceptos = conceptos
+              .filter(c => c.val && c.val !== 0)
+              .map(c => `
         <tr>
           <td style="${thtd};${thLeft}">${c.nombre}</td>
           <td style="${thtd}">${fmt(c.val)}</td>
         </tr>
       `).join('')
 
-    // Render (SIN CAMBIAR DISEÑO)
-    document.getElementById('cont-desglose-cotizacion-pu').innerHTML = `
+            // Render (SIN CAMBIAR DISEÑO)
+            document.getElementById('cont-desglose-cotizacion-pu').innerHTML = `
       <div style="${cardStyle}">
         <h3 style="${titleStyle}"><i class="fas fa-file-invoice-dollar"></i>Desglose de Cotización P.U.</h3>
         <table style="${tableStyle}">
@@ -784,85 +789,88 @@
           * La fila <em>$/Watt</em> aparece cuando la tarjeta <strong>Potencia Instalada (kW)</strong> ya tiene valor.
         </div>
         <div style="margin-top:.6rem;font-size:.85rem;color:#64748b">
-          * La fila <em>$/Watt</em> aparece cuando la tarjeta <strong>Potencia Instalada (kW)</strong> ya tiene valor.
+          * Aprox 1.7 <strong>KWH</strong> en <strong>USD.</strong>
+        </div>
+         <div style="margin-top:.6rem;font-size:.85rem;color:#64748b">
+          * Aprox 34 <strong>KWH</strong> en <strong>MXN.</strong>
         </div>
       </div>
     `
-  }
+          }
 
-  const attach = async () => {
-    // ⏳ Espera a que resultadosSistemaSolar exista (hasta 10s; ajustable)
-    resultados = await waitForLocalStorageKey("resultadosSistemaSolar", {
-      interval: 200,
-      timeout: 10000
-    })
-    // Aun si no llegó nada, seguimos; renderTabla leerá localStorage cada vez.
+          const attach = async () => {
+            // ⏳ Espera a que resultadosSistemaSolar exista (hasta 10s; ajustable)
+            resultados = await waitForLocalStorageKey("resultadosSistemaSolar", {
+              interval: 200,
+              timeout: 10000
+            })
+            // Aun si no llegó nada, seguimos; renderTabla leerá localStorage cada vez.
 
-    // 1) Escuchar TODOS los inputs de costos + profit
-    const ids = IDS_COSTOS.map(([id]) => id).concat(['profit'])
-    ids.forEach(id => {
-      const el = $(id)
-      if (el) el.addEventListener('input', renderTabla)
-    })
+            // 1) Escuchar TODOS los inputs de costos + profit
+            const ids = IDS_COSTOS.map(([id]) => id).concat(['profit'])
+            ids.forEach(id => {
+              const el = $(id)
+              if (el) el.addEventListener('input', renderTabla)
+            })
 
-    // 2) Reaccionar a cambios en Potencia Instalada (kW)
-    const pot = $('potenciaInstalada')
-    if (pot) {
-      const moPot = new MutationObserver(renderTabla)
-      moPot.observe(pot, { childList: true, characterData: true, subtree: true })
-    }
+            // 2) Reaccionar a cambios en Potencia Instalada (kW)
+            const pot = $('potenciaInstalada')
+            if (pot) {
+              const moPot = new MutationObserver(renderTabla)
+              moPot.observe(pot, { childList: true, characterData: true, subtree: true })
+            }
 
-    // 3) Reaccionar si cambia el Número de Módulos
-    const numMods = $('numeroModulos')
-    if (numMods) {
-      const moMods = new MutationObserver(renderTabla)
-      moMods.observe(numMods, { childList: true, characterData: true, subtree: true })
-    }
+            // 3) Reaccionar si cambia el Número de Módulos
+            const numMods = $('numeroModulos')
+            if (numMods) {
+              const moMods = new MutationObserver(renderTabla)
+              moMods.observe(numMods, { childList: true, characterData: true, subtree: true })
+            }
 
-    // 4) Reaccionar a cambios de selección Microinversor EN VIVO
-    const selInv = $('inversorPanel')
-    if (selInv) {
-      selInv.addEventListener('change', renderTabla)
-      selInv.addEventListener('input', renderTabla)
-      const moSel = new MutationObserver(renderTabla)
-      moSel.observe(selInv, { attributes: true, childList: true, characterData: true, subtree: true })
-    }
-    const chkMicro = $('microinversor')
-    if (chkMicro) {
-      chkMicro.addEventListener('change', renderTabla)
-      chkMicro.addEventListener('input', renderTabla)
-      const moChk = new MutationObserver(renderTabla)
-      moChk.observe(chkMicro, { attributes: true })
-    }
+            // 4) Reaccionar a cambios de selección Microinversor EN VIVO
+            const selInv = $('inversorPanel')
+            if (selInv) {
+              selInv.addEventListener('change', renderTabla)
+              selInv.addEventListener('input', renderTabla)
+              const moSel = new MutationObserver(renderTabla)
+              moSel.observe(selInv, { attributes: true, childList: true, characterData: true, subtree: true })
+            }
+            const chkMicro = $('microinversor')
+            if (chkMicro) {
+              chkMicro.addEventListener('change', renderTabla)
+              chkMicro.addEventListener('input', renderTabla)
+              const moChk = new MutationObserver(renderTabla)
+              moChk.observe(chkMicro, { attributes: true })
+            }
 
-    // 5) Delegación por si agregas más inputs dinámicos
-    const costoContainer = document.querySelector('#resultsContent') || document.body
-    if (costoContainer) {
-      costoContainer.addEventListener('input', (e) => {
-        const id = (e.target && e.target.id) || ''
-        if (ids.includes(id) || id === 'inversorPanel' || id === 'microinversor') {
-          renderTabla()
-        }
-      })
-      costoContainer.addEventListener('change', (e) => {
-        const id = (e.target && e.target.id) || ''
-        if (id === 'inversorPanel' || id === 'microinversor') {
-          renderTabla()
-        }
-      })
-    }
+            // 5) Delegación por si agregas más inputs dinámicos
+            const costoContainer = document.querySelector('#resultsContent') || document.body
+            if (costoContainer) {
+              costoContainer.addEventListener('input', (e) => {
+                const id = (e.target && e.target.id) || ''
+                if (ids.includes(id) || id === 'inversorPanel' || id === 'microinversor') {
+                  renderTabla()
+                }
+              })
+              costoContainer.addEventListener('change', (e) => {
+                const id = (e.target && e.target.id) || ''
+                if (id === 'inversorPanel' || id === 'microinversor') {
+                  renderTabla()
+                }
+              })
+            }
 
-    // Pintado inicial
-    renderTabla()
-  }
+            // Pintado inicial
+            renderTabla()
+          }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attach)
-  } else {
-    attach()
-  }
-})()
-</script>
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attach)
+          } else {
+            attach()
+          }
+        })()
+      </script>
 
       <script>
           (() => {
@@ -2079,6 +2087,93 @@
     })();
   </script>
 
+  <!-- Modal de Ayuda -->
+  <div id="ayudaModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-dialog" role="document" aria-labelledby="ayudaTitulo">
+      <button class="modal-close" aria-label="Cerrar ayuda">&times;</button>
+      <h2 id="ayudaTitulo">Centro de ayuda</h2>
+
+      <div class="modal-content">
+        <section class="modal-section">
+          <h3>Cambios</h3>
+          <ul>
+            <li>
+              Si después de presionar el botón <strong>Calcular</strong>, modificas
+              información en los apartados de <strong>Datos del cliente</strong> o
+              <strong>Datos del ejecutivo</strong>, <u>no es necesario volver a dar en Calcular</u>.
+              Estos cambios se guardan y muestran automáticamente en la propuesta.
+            </li>
+          </ul>
+        </section>
+
+        <section class="modal-section">
+          <h3>Consejos rápidos</h3>
+          <ul>
+            <li>
+              Al editar <strong>tarifa</strong> y <strong>consumo</strong>, se calcula el
+              <strong>importe</strong> automáticamente; si editas el importe, se recalcula la tarifa.
+            </li>
+            <li>
+              Si seleccionas <strong>Microinversor</strong>, el costo de inversor se multiplica por el número de
+              módulos.
+            </li>
+            <li>
+              El <strong>$/Watt</strong> y el <strong>ROI</strong> se actualizan en tiempo real cuando cambias costos o
+              profit.
+            </li>
+          </ul>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="help-btn" id="cerrarAyudaBtn" type="button">Entendido</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const $ = (s, r = document) => r.querySelector(s)
+      const overlay = $('#ayudaModal')
+      const btnOpen = $('#btnAyuda')
+      const btnClose = $('.modal-close', overlay)
+      const btnOK = $('#cerrarAyudaBtn')
+      let lastFocused = null
+
+      const openModal = () => {
+        lastFocused = document.activeElement
+        overlay.style.display = 'flex'
+        overlay.setAttribute('aria-hidden', 'false')
+        // foco accesible
+        const title = $('#ayudaTitulo', overlay)
+        title && title.focus ? title.focus() : overlay.focus()
+        // bloquear scroll del body
+        document.documentElement.style.overflow = 'hidden'
+      }
+
+      const closeModal = () => {
+        overlay.style.display = 'none'
+        overlay.setAttribute('aria-hidden', 'true')
+        document.documentElement.style.overflow = ''
+        if (lastFocused && lastFocused.focus) lastFocused.focus()
+      }
+
+      // abrir
+      btnOpen?.addEventListener('click', openModal)
+
+      // cerrar (botones)
+      btnClose?.addEventListener('click', closeModal)
+      btnOK?.addEventListener('click', closeModal)
+
+      // cerrar clic fuera del diálogo
+      overlay?.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal()
+      })
+
+      // cerrar con ESC
+      document.addEventListener('keydown', (e) => {
+        if (overlay.style.display === 'flex' && e.key === 'Escape') closeModal()
+      })
+    })();
+  </script>
 
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

@@ -593,7 +593,7 @@ const kwintsladaConEficiancia = 0;
 const generacionAnualAprox = 0;
 function calcularSistemaSolar() {
   // Desactivar el botón
-  document.getElementById("btnCalcular").disabled = true;
+  // document.getElementById("btnCalcular").disabled = true;
   /*
   function validarCliente() {
     const nombre = document.getElementById("nombreCliente")?.value.trim()
@@ -1553,14 +1553,8 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Dimensiones (en CSS px, ya transformados con DPR)
   const cs = getComputedStyle(canvas);
-  const W = Math.max(
-    50,
-    Math.floor(parseFloat(cs.width) || canvas.width || 600)
-  );
-  const H = Math.max(
-    50,
-    Math.floor(parseFloat(cs.height) || canvas.height || 320)
-  );
+  const W = Math.max(50, Math.floor(parseFloat(cs.width) || canvas.width || 600));
+  const H = Math.max(50, Math.floor(parseFloat(cs.height) || canvas.height || 320));
 
   const padding = paddingPx;
 
@@ -1576,7 +1570,7 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Escala Y
   const maxData = Math.max(...consumo, ...prod, 0);
-  const niceMax = niceCeil(maxData); // escalar a “bonito” (e.g. múltiplos)
+  const niceMax = niceCeil(maxData); // escalar “bonito”
   const maxValue = niceMax > 0 ? niceMax : 1;
   const ticks = 5;
 
@@ -1625,7 +1619,7 @@ function crearGraficaImpactoResponsive(opts) {
 
   // Barras (dos por grupo)
   const groupWidth = chartWidth / Math.max(1, L);
-  const barWidth = Math.max(6, Math.min(24, groupWidth * 0.35)); // límites para pantallas chicas
+  const barWidth = Math.max(6, Math.min(24, groupWidth * 0.35));
   const gapBars = Math.min(8, groupWidth * 0.08);
 
   for (let i = 0; i < L; i++) {
@@ -1639,56 +1633,66 @@ function crearGraficaImpactoResponsive(opts) {
     const yC = H - padding - hC;
     const yP = H - padding - hP;
 
-    // Consumo
-    const gradC = ctx.createLinearGradient(0, yC, 0, yC + hC);
-    gradC.addColorStop(0, "#7a8aa0");
-    gradC.addColorStop(1, "#3a4a60");
+    const esPromedio = (i === L - 1); // última columna es "Promedio"
+
+    // ---------- Consumo ----------
+    let gradC;
+    if (esPromedio) {
+      // rojo -> naranja
+      gradC = ctx.createLinearGradient(0, yC, 0, yC + hC);
+      gradC.addColorStop(0, "#ef4444"); // rojo
+      gradC.addColorStop(1, "#f97316"); // naranja
+      ctx.strokeStyle = "#b91c1c"; // borde rojizo
+    } else {
+      // TU color original (gris azulado)
+      gradC = ctx.createLinearGradient(0, yC, 0, yC + hC);
+      gradC.addColorStop(0, "#7a8aa0");
+      gradC.addColorStop(1, "#3a4a60");
+      ctx.strokeStyle = "#2f3a48";
+    }
     ctx.fillStyle = gradC;
     ctx.fillRect(xConsumo, yC, barWidth, hC);
-    ctx.strokeStyle = "#2f3a48";
     ctx.lineWidth = 1;
     ctx.strokeRect(xConsumo, yC, barWidth, hC);
 
-    // Producción
-    const gradP = ctx.createLinearGradient(0, yP, 0, yP + hP);
-    gradP.addColorStop(0, "#73b248");
-    gradP.addColorStop(1, "#106e3a");
+    // ---------- Producción ----------
+    let gradP;
+    if (esPromedio) {
+      // amarillo -> dorado
+      gradP = ctx.createLinearGradient(0, yP, 0, yP + hP);
+      gradP.addColorStop(0, "#facc15"); // amarillo
+      gradP.addColorStop(1, "#eab308"); // dorado
+      ctx.strokeStyle = "#a16207"; // borde dorado/ámbar
+    } else {
+      // TU color original (verde)
+      gradP = ctx.createLinearGradient(0, yP, 0, yP + hP);
+      gradP.addColorStop(0, "#73b248");
+      gradP.addColorStop(1, "#106e3a");
+      ctx.strokeStyle = "#106e3a";
+    }
     ctx.fillStyle = gradP;
     ctx.fillRect(xProducc, yP, barWidth, hP);
-    ctx.strokeStyle = "#106e3a";
     ctx.strokeRect(xProducc, yP, barWidth, hP);
 
-    // Valores encima (ocultarlos si hay muy poco espacio)
+    // Valores encima (solo si hay espacio)
     if (chartHeight > 140) {
       ctx.fillStyle = "#333";
       ctx.font = font(Math.max(9, baseFontPx - 4));
       ctx.textAlign = "center";
-      ctx.fillText(
-        String(Math.round(consumo[i])),
-        xConsumo + barWidth / 2,
-        Math.max(yC - 8, padding - 8)
-      );
-      ctx.fillText(
-        String(Math.round(prod[i])),
-        xProducc + barWidth / 2,
-        Math.max(yP - 8, padding - 8)
-      );
+      ctx.fillText(String(Math.round(consumo[i])), xConsumo + barWidth / 2, Math.max(yC - 8, padding - 8));
+      ctx.fillText(String(Math.round(prod[i])), xProducc + barWidth / 2, Math.max(yP - 8, padding - 8));
     }
   }
 
-  // Títulos
+  // Títulos (sin cambios)
   ctx.fillStyle = "#333";
   ctx.textAlign = "center";
   ctx.font = `bold ${Math.max(14, baseFontPx)}px Arial`;
-  ctx.fillText(
-    "Impacto de la Generación en el Consumo",
-    W / 2,
-    Math.max(24, padding * 0.45)
-  );
+  ctx.fillText("Impacto de la Generación en el Consumo", W / 2, Math.max(24, padding * 0.45));
   ctx.font = `${Math.max(12, baseFontPx - 2)}px Arial`;
   ctx.fillText("(kWh por mes)", W / 2, Math.max(44, padding * 0.65));
 
-  // Leyenda compacta
+  // Leyenda (sin cambios)
   const legendTop = padding * 0.6;
   const legendLeft = Math.min(W - padding - 160, W / 2 + 120);
   const drawLegendBox = (x, y, w, h, c1, c2, stroke) => {
@@ -1704,20 +1708,11 @@ function crearGraficaImpactoResponsive(opts) {
   ctx.font = `${Math.max(11, baseFontPx - 1)}px Arial`;
   ctx.textAlign = "left";
   ctx.fillStyle = "#333";
-  drawLegendBox(legendLeft + 40, legendTop, 15, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
-  ctx.fillText("Consumo", legendLeft + 60, legendTop + 10);
-  drawLegendBox(
-    legendLeft + 145,
-    legendTop,
-    15,
-    12,
-    "#73b248",
-    "#106e3a",
-    "#106e3a"
-  );
+  drawLegendBox(legendLeft + 40,  legendTop, 15, 12, "#7a8aa0", "#3a4a60", "#2f3a48");
+  ctx.fillText("Consumo",   legendLeft + 60,  legendTop + 10);
+  drawLegendBox(legendLeft + 145, legendTop, 15, 12, "#73b248", "#106e3a", "#106e3a");
   ctx.fillText("Producción", legendLeft + 165, legendTop + 10);
 }
-
 function niceCeil(x) {
   if (x <= 0) return 1;
   const exp = Math.floor(Math.log10(x));
