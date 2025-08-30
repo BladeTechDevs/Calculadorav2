@@ -752,7 +752,7 @@ function calcularSistemaSolar() {
     document.getElementById("btnCalcular").disabled = false
     return
   } 
-  */
+  
   try {
     const datos = window.dataManager.guardarEnLocalStorage();
     const resultados = datos.resultados;
