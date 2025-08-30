@@ -68,6 +68,8 @@ async function exportToBasePdf() {
       arboles: getTxt("arboles", "0"),
       potenciaPanel: getVal("potenciaPanel", "—"),
       areaAprox: getVal("areaAprox", "—"),
+      notaProyecto: getVal("notaProyecto", "—"),
+      requerimientosProyecto: getVal("requerimientosProyecto", "—"),
       inversorPanel: getVal("inversorPanel", "—"),
       folio: getVal("folioCotizacion", "—"),
       // Cotización
@@ -463,6 +465,7 @@ async function exportToBasePdf() {
         "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo.",
       ];
       const fsTiny = 7, lhTiny = 10, pad = 8;
+      const maxW = contentWidth - pad * 2;
       const titleH = 16;
       const folioText = `Folio: SFVI-${datos.folio || "—"}`;
       ensure(titleH + 8);
@@ -486,7 +489,6 @@ async function exportToBasePdf() {
 
       y -= titleH + 4;
 
-      const maxW = contentWidth - pad * 2;
       let totalLines = 0;
       const wrapped = items.map((t, i) => {
         const prefix = `${i + 1}. `;
@@ -500,7 +502,10 @@ async function exportToBasePdf() {
         x: left, y: y - boxH, width: contentWidth, height: boxH,
         color: rgb(0.94, 0.98, 0.96), borderColor: prime, borderWidth: 0.4, borderRadius: 6,
       });
+
+      // 🔧 yy se declara ANTES de usarse
       let yy = y - pad - fsTiny;
+
       wrapped.forEach((lines) => {
         lines.forEach((line) => {
           page.drawText(line, { x: left + pad, y: yy, size: fsTiny, font, color: ink });
@@ -508,6 +513,61 @@ async function exportToBasePdf() {
         });
       });
       y -= boxH;
+
+      // --- Notas y Requerimientos ---
+      const nota = datos.notaProyecto || "—";
+      const requerimientos = datos.requerimientosProyecto || "—";
+
+      const notaLabel = "Notas:";
+      const notaLabelW = widthOf(notaLabel, fsTiny, fontBold);
+      const notaLines = wrapText(nota, maxW - notaLabelW - 6, fsTiny, font);
+      yy = y - pad - fsTiny;
+      page.drawText(notaLabel, {
+        x: left + pad,
+        y: yy,
+        size: fsTiny,
+        font: fontBold,
+        color: ink,
+      });
+      let notaX = left + pad + notaLabelW + 6;
+      let notaY = yy;
+      notaLines.forEach((line) => {
+        page.drawText(line, {
+          x: notaX,
+          y: notaY,
+          size: fsTiny,
+          font: font,
+          color: ink,
+        });
+        notaX = left + pad;
+        notaY -= lhTiny - 2;
+      });
+      yy = notaY - 4;
+
+      const reqLabel = "Requerimientos:";
+      const reqLabelW = widthOf(reqLabel, fsTiny, fontBold);
+      const reqLines = wrapText(requerimientos, maxW - reqLabelW - 6, fsTiny, font);
+      page.drawText(reqLabel, {
+        x: left + pad,
+        y: yy,
+        size: fsTiny,
+        font: fontBold,
+        color: ink,
+      });
+      let reqX = left + pad + reqLabelW + 6;
+      let reqY = yy;
+      reqLines.forEach((line) => {
+        page.drawText(line, {
+          x: reqX,
+          y: reqY,
+          size: fsTiny,
+          font: font,
+          color: ink,
+        });
+        reqX = left + pad;
+        reqY -= lhTiny - 2;
+      });
+      y = reqY - pad;
     }
 
     // === Tabla Cotización (centrada) ===
@@ -590,12 +650,10 @@ async function exportToBasePdf() {
 
       y -= rowH + gapBelow;
 
-      // Notas + Totales
+      // Totales (derecha)
       const gapX = mm(6);
       const leftW = Math.round(W * 0.58);
       const rightW = W - leftW - gapX;
-
-      const notesH = 30;
 
       const rightX = left + leftW + gapX;
       const rowTH = 20;
@@ -652,7 +710,7 @@ async function exportToBasePdf() {
         });
       }
 
-      y -= Math.max(notesH, totalBoxH) + 10;
+      y -= Math.max(30, totalBoxH) + 10;
     }
 
     // --- Tarjetas "Tu sistema solar" ---
@@ -713,13 +771,13 @@ async function exportToBasePdf() {
 
       // Más compactas (menos altas y menos anchas) y títulos más cercanos
       const pad = 6;
-      const iconToValue = 16;   // antes 16
-      const valueToTitle = 6;   // antes 10
+      const iconToValue = 16;
+      const valueToTitle = 6;
 
       // Grid con 4 columnas iguales, pero limitamos el ancho de cada card
       const gap = mm(8);
       const colW = (contentWidth - gap * 3) / 4;
-      const cardW = Math.min(colW, mm(38)); // 👉 más angostas
+      const cardW = Math.min(colW, mm(38));
       const gridW = cardW * 4 + gap * 3;
       const startX = left + (contentWidth - gridW) / 2;
 
@@ -783,7 +841,7 @@ async function exportToBasePdf() {
           page.drawImage(icon, { x: cx - iw / 2, y: yTop - pad - ih, width: iw, height: ih });
         } catch { }
 
-        // valor (sin pill, todos iguales)
+        // valor
         const v = String(items[i].value ?? "—");
         const vW = fontBold.widthOfTextAtSize(v, valueSize);
         page.drawText(v, {
@@ -875,7 +933,7 @@ async function exportToBasePdf() {
       tempY -= rowLH_first;
     });
 
-    // KPI “Datos del proyecto” (mini-icons a la derecha)
+    // KPI “Datos del proyecto”
     const datosKPI = [
       { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
       { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
@@ -950,7 +1008,7 @@ async function exportToBasePdf() {
 
     // ===== Página 2 =====
     newPage();
-    // súbela ~12 mm (ajusta a tu gusto: 8, 10, 14…)
+    // súbela ~9 mm
     y += mm(9);
     section("INVERSIÓN");
     y -= mm(1);
@@ -958,7 +1016,6 @@ async function exportToBasePdf() {
     await drawInvestSplitKPIs();
 
     // Tabla de cotización
-
     section("COTIZACIÓN");
     drawCotizacionMantenimiento();
 
