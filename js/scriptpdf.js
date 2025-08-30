@@ -1291,50 +1291,97 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
       tempY -= rowLH_first;
     });
 
+    // ======== KPI (imagen → valor → título) con mismos tamaños que drawSistemaSolarSection ========
     let kpiW = mm(22),
-      kpiGap = mm(20),
-      kpiImgH = mm(10);
-    const kpiXStart = left + mm(75);
-    let kpiYStart = datosY - mm(3.9);
-    const totalKPIWidth =
+      kpiGap = mm(45);
+    const imgMM_KPI = 13;               // mismo tamaño de imagen
+    const kpiValueSize = fsKPI;         // mismo tamaño de valor
+    const kpiTitleSize = fsSmall + 1;   // mismo tamaño de título
+
+    // Área horizontal (entre líneas naranjas) y centrado
+    const kpiXStart = left + mm(85);
+    const areaWidth = mm(105);
+
+    // Asegura que los 3 KPI quepan y queden centrados en el área
+    let totalKPIWidth =
       datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
-    const areaWidth = mm(80);
+    if (totalKPIWidth > areaWidth) {
+      const minGap = mm(6);
+      if (datosKPI.length > 1) {
+        const over = totalKPIWidth - areaWidth;
+        const reducible = Math.max(0, kpiGap - minGap);
+        const reducePerGap = Math.min(reducible, over / (datosKPI.length - 1));
+        kpiGap -= reducePerGap;
+      }
+      totalKPIWidth =
+        datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+      if (totalKPIWidth > areaWidth) {
+        const scale = areaWidth / totalKPIWidth;
+        kpiW *= scale; // solo la "celda" invisible; la imagen mantiene 13mm
+        totalKPIWidth =
+          datosKPI.length * kpiW + (datosKPI.length - 1) * kpiGap;
+      }
+    }
     const offsetX = kpiXStart + (areaWidth - totalKPIWidth) / 2;
+
+    // Alineación vertical: NO pasar la línea morada (base del último dato)
+    const lastDatoBaselineY =
+      datosY - rowLH_first * (datosProyecto.length - 1); // línea morada
+    const blockBottomFromTop =
+      mm(imgMM_KPI) + (10 + kpiValueSize + 8); // top → base del título
+    let kpiYStart = lastDatoBaselineY + blockBottomFromTop; // base = morada
+
+    // Altura de bloque (para ensure y para calcular siguiente y)
+    const blockH_KPI = blockBottomFromTop;
+    ensure(blockH_KPI + 8);
+
     for (let i = 0; i < datosKPI.length; i++) {
       const kpi = datosKPI[i];
       const baseX = offsetX + i * (kpiW + kpiGap);
-      let imgY = kpiYStart - mm(2) - kpiImgH / 2;
-      let imgX = baseX + kpiW / 2 - mm(6);
+      const cardTopY = kpiYStart; // parte superior del "card"
+      const centerX = baseX + kpiW / 2;
+
+      // IMAGEN (arriba)
       try {
         const imgBytes = await fetch(`img/${kpi.img}`).then((r) =>
           r.arrayBuffer()
         );
         const imgEmbed = await pdfDoc.embedPng(new Uint8Array(imgBytes));
+        const iconW = mm(imgMM_KPI);
+        const iconH = mm(imgMM_KPI);
         page.drawImage(imgEmbed, {
-          x: imgX,
-          y: imgY,
-          width: mm(12),
-          height: kpiImgH,
+          x: centerX - iconW / 2,
+          y: cardTopY - iconH,
+          width: iconW,
+          height: iconH,
         });
       } catch {}
-      const kpiValueSize = 11;
-      page.drawText(kpi.value, {
-        x: baseX + kpiW / 2 - widthOf(kpi.value, kpiValueSize, fontBold) / 2,
-        y: imgY + kpiImgH + mm(2),
+
+      // VALOR (debajo de la imagen)
+      const v = String(kpi.value ?? "—");
+      const vW = widthOf(v, kpiValueSize, fontBold);
+      page.drawText(v, {
+        x: centerX - vW / 2,
+        y: cardTopY - mm(imgMM_KPI) - 16,
         size: kpiValueSize,
         font: fontBold,
         color: ink,
       });
-      const kpiTitleSize = fsSmall + 1;
+
+      // TÍTULO (debajo del valor)
+      const tW = widthOf(kpi.label, kpiTitleSize, fontBold);
       page.drawText(kpi.label, {
-        x: baseX + kpiW / 2 - widthOf(kpi.label, kpiTitleSize, fontBold) / 2,
-        y: imgY - mm(6),
+        x: centerX - tW / 2,
+        y: cardTopY - mm(imgMM_KPI) - 10 - kpiValueSize - 8,
         size: kpiTitleSize,
         font: fontBold,
         color: ink,
       });
     }
-    y = Math.min(tempY, kpiYStart - lh * datosProyecto.length - mm(8));
+
+    // Base real del bloque KPI (coincide con línea morada); deja margen inferior
+    const kpiBottomY = kpiYStart - blockBottomFromTop;
+    y = Math.min(tempY, kpiBottomY - mm(8));
 
     y += mm(4);
     section("TU SISTEMA SOLAR");
