@@ -1390,7 +1390,7 @@ await drawColumn(leftRows, left + padX - mm(2), colW_L);
     let espacioPanelY = y;
     y = espacioPanelY - mm(3);
 
-    await drawCanvasImageIfAny2("impactoChart", 180, 74);
+    await drawCanvasImageIfAny2("impactoChart", 180, 85);
 
     newPage();
     section("INVERSIÓN");
