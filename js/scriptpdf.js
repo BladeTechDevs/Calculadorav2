@@ -458,11 +458,11 @@ async function exportToBasePdf() {
         "Facturación: 70% de anticipo de trabajos y 30% antes de concluir operaciones.",
         "En caso de cancelación de servicio ya pagado, existe penalización del 35%.",
         "No incluye: modificaciones en sitio, impermeabilización, evaluación de estructura, reubicación de instalaciones previas, gestiones adicionales con CFE, aumentos de carga, modificación de tarifa, transformador y adecuación de instalación eléctrica.",
-        "Incluye: módulos fotovoltaicos, microinversores, estructura, material eléctrico del sistema hasta 16 m al punto de interconexión, tuberías, cableado, protecciones, gabinetes y conectores, sistema de monitoreo, gestión con CFE (tarifa doméstica), carpeta de proyecto, mano de obra e instalación, arreglo FV, ingeniería básica y a detalle.",
-        "Precios sujetos a cambios sin previo aviso por posibles incrementos de aranceles (hasta 25%).",
-        "La presente considera estructura simple de aluminio, sin refuerzos ni seguros por siniestros o eventualidades naturales (p. ej., huracanes).",
-        "Para generar la orden se requiere el 70% del pago de la cotización.",
-        "Adicionales pueden incluir seguros especializados y materiales de alta gama con resistencia a huracanes y vandalismo.",
+        "Incluye: módulos fotovoltaicos, microinversores, estructura, material eléctrico del sistema hasta 16 m al punto de interconexión, tuberías, cableado, protecciones, gabinetes y conectores, sistema de monitoreo, gestión con CFE, carpeta de proyecto, mano de obra e instalación, arreglo FV, ingeniería básica y a detalle.",
+        // "Precios sujetos a cambios sin previo aviso por posibles incrementos de aranceles (hasta 25%).",
+        // "La presente considera estructura simple de aluminio, sin refuerzos ni seguros por siniestros o eventualidades naturales (p. ej., huracanes).",
+        // "Para generar la orden se requiere el 70% del pago de la cotización.",
+        "Considerar adicionales como seguro especializado para el sistema, equipos y materiales de categoría premium y/o sujeciones extra para resistencia en temporada de huracanes.",
       ];
       const fsTiny = 7, lhTiny = 10, pad = 8;
       const maxW = contentWidth - pad * 2;
@@ -748,7 +748,7 @@ async function exportToBasePdf() {
         const tWidth = widthOf(items[i].title, titleSize, fontBold);
         page.drawText(items[i].title, { x: cardCenterX - tWidth / 2, y: cardTopY - iconH - 10 - valueSize - 8, size: titleSize, font: fontBold, color: ink });
       }
-      y -= blockH + 8;
+      y -= blockH;
     }
 
     // === NUEVA SECCIÓN INVERSIÓN: 4 cards iguales (más compactas) y línea central ===
@@ -775,7 +775,7 @@ async function exportToBasePdf() {
       const valueToTitle = 6;
 
       // Grid con 4 columnas iguales, pero limitamos el ancho de cada card
-      const gap = mm(8);
+      const gap = mm(15);
       const colW = (contentWidth - gap * 3) / 4;
       const cardW = Math.min(colW, mm(38));
       const gridW = cardW * 4 + gap * 3;
@@ -806,13 +806,13 @@ async function exportToBasePdf() {
       ];
 
       // Línea central (cae justo entre la 2ª y 3ª card)
-      page.drawRectangle({
-        x: dividerX - barW / 2,
-        y: y - cardH + 4,
-        width: barW,
-        height: cardH - 8,
-        color: primeL,
-      });
+      // page.drawRectangle({
+      //   x: dividerX - barW / 2,
+      //   y: y - cardH + 4,
+      //   width: barW,
+      //   height: cardH - 8,
+      //   color: primeL,
+      // });
 
       // Render de 4 cards
       for (let i = 0; i < 4; i++) {
@@ -820,19 +820,19 @@ async function exportToBasePdf() {
         const yTop = y;
         const cx = x + cardW / 2;
 
-        // card con borde y barra superior
-        page.drawRectangle({
-          x: x + 1, y: yTop - cardH - 1, width: cardW, height: cardH,
-          color: primeD, opacity: 0.05, borderOpacity: 0, borderRadius: 10,
-        });
-        page.drawRectangle({
-          x, y: yTop - cardH, width: cardW, height: cardH,
-          color: white, borderColor: primeD, borderWidth: 0.8, borderRadius: 10,
-        });
-        page.drawRectangle({
-          x, y: yTop - 3, width: cardW, height: 3,
-          color: primeL, borderRadius: 10,
-        });
+        // // card con borde y barra superior
+        // page.drawRectangle({
+        //   x: x + 1, y: yTop - cardH - 1, width: cardW, height: cardH,
+        //   color: primeD, opacity: 0.05, borderOpacity: 0, borderRadius: 10,
+        // });
+        // page.drawRectangle({
+        //   x, y: yTop - cardH, width: cardW, height: cardH,
+        //   color: white, borderColor: primeD, borderWidth: 0.8, borderRadius: 10,
+        // });
+        // page.drawRectangle({
+        //   x, y: yTop - 3, width: cardW, height: 3,
+        //   color: primeL, borderRadius: 10,
+        // });
 
         // icono
         try {
@@ -995,7 +995,7 @@ async function exportToBasePdf() {
     }
 
     const kpiBottomY = kpiYStart - blockBottomFromTop;
-    y = Math.min(tempY, kpiBottomY - mm(8));
+    y = Math.min(tempY, kpiBottomY - mm(13));
 
     y += mm(4);
     section("TU SISTEMA SOLAR");
