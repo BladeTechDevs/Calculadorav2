@@ -621,11 +621,7 @@ function calcularSistemaSolar() {
     }
     // Correo (formato válido)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-    if (!correo || !emailRegex.test(correo)) {
-      showToast("El correo electrónico no es válido.", "warning")
-      return false
-    }
-
+  
     return true // ✅ todos los campos son válidos
   }
 
@@ -771,13 +767,14 @@ function calcularSistemaSolar() {
   document.getElementById("numeroModulos").textContent = `${resultados.numeroModulos}`;
   document.getElementById("potenciaInstalada").textContent = `${Number(resultados.potenciaInstalada).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} kW`;
   document.getElementById("hsp").textContent = `${Number(resultados.hspPromedio).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} h`;
-  document.getElementById("ahorroCO2").textContent = `${Number(resultados.ahorroCO2).toLocaleString('es-MX', {minimumFractionDigits:3, maximumFractionDigits:3})} t`;
+  document.getElementById("ahorroCO2").textContent = `${Number(resultados.ahorroCO2.toFixed(2)).toLocaleString('es-MX', {minimumFractionDigits:3, maximumFractionDigits:3})} t`;
   document.getElementById("arboles").textContent = `${resultados.arboles.toLocaleString('es-MX', {maximumFractionDigits:0})} árboles`;
-   let porsen =(resultados.potenciaInstalada / resultados.potenciaNecesaria) * 100;
+   let porsen = Math.ceil((resultados.potenciaInstalada / resultados.potenciaNecesaria) * 100);
+
   
   document.getElementById(
       "porcentajeAhorro"
-    ).textContent = `${porsen.toFixed(1)}%`;
+    ).textContent = `${porsen.toFixed(0)}%`;
     document.getElementById(
       "generacionAnual"
     ).textContent = `${Number(resultados.generacionAnual).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} KWh`;
