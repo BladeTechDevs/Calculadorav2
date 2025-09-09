@@ -659,17 +659,19 @@
             // Evaluar Microinversor EN CADA RENDER (en vivo)
             const multiplicarInversor = isMicroinversorSelected()
             console.log('Microinversor activo:', multiplicarInversor)
-
             IDS_COSTOS.forEach(([id, nombre]) => {
               let val = toNumber($(id)?.value)
               let etiqueta = nombre
 
               const debeMultiplicarse =
-                idsSiemprePorModulo.has(id) || (id === 'inversor' && multiplicarInversor)
+              idsSiemprePorModulo.has(id) || (id === 'inversor' && multiplicarInversor)
 
-              if (debeMultiplicarse) {
-                val = val * numeroModulos
-                etiqueta = `${nombre} (x${numeroModulos})`
+              if (id === 'inversor' && multiplicarInversor) {
+              val = val * numeroModulos
+              etiqueta = `Microinversor (x${numeroModulos})`
+              } else if (debeMultiplicarse) {
+              val = val * numeroModulos
+              etiqueta = `${nombre} (x${numeroModulos})`
               }
 
               conceptos.push({ nombre: etiqueta, val })
@@ -1059,11 +1061,11 @@
             <div class="stats-value" id="tarifaPromedio">-</div>
             <div class="stats-label">Tarifa Promedio ($/kWh)</div>
           </div>
-          <!-- <div class="stats-card">
+          <div class="stats-card">
             <div class="metric-icon"><i class="fas fa-percentage"></i></div>
             <div class="stats-value" id="porcentajeAhorro">-</div>
             <div class="stats-label">% Cobertura del consumo anual</div>
-          </div> -->
+          </div>
           <!-- <div class="metric-card">
               <div class="metric-icon"><i class="fas fa-thermometer-half"></i></div>
               <div class="metric-value" id="tempMin">-</div>

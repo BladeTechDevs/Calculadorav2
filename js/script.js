@@ -773,9 +773,11 @@ function calcularSistemaSolar() {
   document.getElementById("hsp").textContent = `${Number(resultados.hspPromedio).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} h`;
   document.getElementById("ahorroCO2").textContent = `${Number(resultados.ahorroCO2).toLocaleString('es-MX', {minimumFractionDigits:3, maximumFractionDigits:3})} t`;
   document.getElementById("arboles").textContent = `${resultados.arboles.toLocaleString('es-MX', {maximumFractionDigits:0})} árboles`;
-    // document.getElementById(
-    //   "porcentajeAhorro"
-    // ).textContent = `${resultados.porcentajeAhorro.toFixed(1)}%`;
+   let porsen =(resultados.potenciaInstalada / resultados.potenciaNecesaria) * 100;
+  
+  document.getElementById(
+      "porcentajeAhorro"
+    ).textContent = `${porsen.toFixed(1)}%`;
     document.getElementById(
       "generacionAnual"
     ).textContent = `${Number(resultados.generacionAnual).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} KWh`;
