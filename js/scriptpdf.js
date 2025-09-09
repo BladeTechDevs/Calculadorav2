@@ -32,7 +32,16 @@ async function exportToBasePdf() {
         maximumFractionDigits: 2,
       }).format(toNum(n));
 
-    const datos = {
+  // Formateadores para PDF
+  const fmtNum = (n, min=0, max=2) => Number(toNum(n)).toLocaleString('es-MX', {minimumFractionDigits:min, maximumFractionDigits:max});
+  const fmtPorc = (n, min=2, max=2) => `${Number(toNum(n)).toLocaleString('es-MX', {minimumFractionDigits:min, maximumFractionDigits:max})}%`;
+  const fmtKwh = (n, min=0, max=2) => `${fmtNum(n, min, max)} kWh`;
+  const fmtKwhDia = (n, min=1, max=1) => `${fmtNum(n, min, max)} kWh`;
+  const fmtKW = (n, min=2, max=2) => `${fmtNum(n, min, max)} kW`;
+  const fmtH = (n, min=2, max=2) => `${fmtNum(n, min, max)} h`;
+  const fmtT = (n, min=3, max=3) => `${fmtNum(n, min, max)} t`;
+  const fmtArboles = (n) => `${fmtNum(n, 0, 0)} árboles`;
+  const datos = {
       // Cliente
       nombreCliente: getVal("nombreCliente"),
       direccionCliente: getVal("direccionCliente"),
@@ -48,24 +57,33 @@ async function exportToBasePdf() {
       estadoProyecto: getVal("estadoProyecto"),
       municipioProyecto: getVal("municipioProyecto"),
       regionTarifariaCFE: getVal("regionTarifariaCFE"),
-      roi: getVal("roi", "—"),
+      roi: (() => {
+        // Busca el valor numérico real del ROI en localStorage si existe
+        let roiNum = 0;
+        try {
+          const resultados = JSON.parse(localStorage.getItem("resultadosSistemaSolar") || "{}");
+          roiNum = Number(resultados?.resultados?.roi) || Number(resultados?.roi) || 0;
+        } catch {}
+        if (!roiNum) roiNum = Number(toNum(getVal("roi", "0"))) || 0;
+        return `${Math.floor(roiNum).toLocaleString('es-MX')} años`;
+      })(),
       // Métricas (cards)
-      consumoAnual: getTxt("consumoAnual", "0 kWh"),
-      consumoMensual: getTxt("consumoMensual", "0 kWh"),
-      consumoDiario: getTxt("consumoDiario", "0 kWh"),
-      importeTotal: getTxt("importeTotal", "$0"),
-      importePromedio: getTxt("importePromedio", "$0"),
-      tarifaPromedio: getTxt("tarifaPromedio", "$0"),
-      potenciaNecesaria: getTxt("potenciaNecesaria", "0 kW"),
-      numeroModulosCard: getTxt("numeroModulos"),
-      generacionAnual: getTxt("generacionAnual", "0 kWh"),
-      potenciaInstalada: getTxt("potenciaInstalada", "0 kW"),
-      hsp: getTxt("hsp", "0 h"),
-      ahorroCO2: getTxt("ahorroCO2", "0 t"),
-      porcentajeAhorro: getTxt("porcentajeAhorro", "0%"),
-      tempMin: getTxt("tempMin", "-"),
-      tempMax: getTxt("tempMax", "-"),
-      arboles: getTxt("arboles", "0"),
+  consumoAnual: fmtKwh(getTxt("consumoAnual").replace(/[^\d.,-]/g, "")),
+  consumoMensual: fmtKwh(getTxt("consumoMensual").replace(/[^\d.,-]/g, "")),
+  consumoDiario: fmtKwhDia(getTxt("consumoDiario").replace(/[^\d.,-]/g, "")),
+  importeTotal: fmtMXN(getTxt("importeTotal").replace(/[^\d.,-]/g, "")),
+  importePromedio: fmtMXN(getTxt("importePromedio").replace(/[^\d.,-]/g, "")),
+  tarifaPromedio: `$${fmtNum(getTxt("tarifaPromedio").replace(/[^\d.,-]/g, ""), 3, 3)}`,
+  potenciaNecesaria: fmtKW(getTxt("potenciaNecesaria").replace(/[^\d.,-]/g, "")),
+  numeroModulosCard: fmtNum(getTxt("numeroModulos").replace(/[^\d.,-]/g, ""), 0, 0),
+  generacionAnual: fmtKwh(getTxt("generacionAnual").replace(/[^\d.,-]/g, ""), 2, 2),
+  potenciaInstalada: fmtKW(getTxt("potenciaInstalada").replace(/[^\d.,-]/g, "")),
+  hsp: fmtH(getTxt("hsp").replace(/[^\d.,-]/g, "")),
+  ahorroCO2: fmtT(getTxt("ahorroCO2").replace(/[^\d.,-]/g, "")),
+  porcentajeAhorro: fmtPorc(getTxt("porcentajeAhorro").replace(/[^\d.,-]/g, "")),
+  tempMin: getTxt("tempMin", "-"),
+  tempMax: getTxt("tempMax", "-"),
+  arboles: fmtArboles(getTxt("arboles").replace(/[^\d.,-]/g, "")),
       potenciaPanel: getVal("potenciaPanel", "—"),
       areaAprox: getVal("areaAprox", "—"),
       notaProyecto: getVal("notaProyecto", "—"),
@@ -793,7 +811,7 @@ async function exportToBasePdf() {
       const subtotalStr = fmtMXN(_subtotal);
       const roiNum = parseFloat((window.resultadoSistemaSolar?.roi ?? resultadoSistemaSolar?.roi));
       const roiVal = Number.isFinite(roiNum)
-        ? `${roiNum.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} años`
+        ? `${Math.floor(roiNum).toLocaleString("es-MX")} años`
         : "—";
       const arbolesNum = (String(datos.arboles ?? "0").match(/[\d,.]+/) || ["0"])[0];
       const co2Num = (String(datos.ahorroCO2 ?? "0").match(/[\d,.]+/) || ["0"])[0];
@@ -935,9 +953,9 @@ async function exportToBasePdf() {
 
     // KPI “Datos del proyecto”
     const datosKPI = [
-      { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
-      { label: "Gasto Anual", value: "$" + (typeof datos.importeTotal === "string" ? datos.importeTotal.replace(/[^\d.]/g, "") : datos.importeTotal), img: "gastoAnual.png" },
-      { label: "Tarifa Promedio", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
+  { label: "Consumo Anual", value: datos.consumoAnual, img: "consumoAnual.png" },
+  { label: "Gasto Anual", value: typeof datos.importeTotal === "string" ? datos.importeTotal : fmtMXN(datos.importeTotal), img: "gastoAnual.png" },
+  { label: "Tarifa Promedio", value: datos.tarifaPromedio, img: "tarifaPromedio.png" },
     ];
 
     let kpiW = mm(22), kpiGap = mm(45);

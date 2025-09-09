@@ -375,7 +375,7 @@ recopilarDatosCotizacion() {
     let diferencia = consumoMensual - promedioProduccion;
     const porcentajeGeneracion = (1-(diferencia / consumoMensual))*100; ;
 
-    const roi = (total2 / consumoAnulaDeEnegia).toFixed(1);
+  const roi = (total2 / consumoAnulaDeEnegia).toFixed(1);
     this.data.resultados = {
       consumoAnual,
       consumoMensual,
@@ -395,7 +395,7 @@ recopilarDatosCotizacion() {
       kwintsladaConEficiancia: potenciaInstalada * 0.76,
       kwintsladaConEficiancia2 : kwintsladaConEficiancia2,
       consumoAnulaDeEnegia: consumoAnulaDeEnegia,
-      roi: roi,
+  roi: roi,
       porcentajeGeneracion: porcentajeGeneracion,
       diferencia: diferencia,
     }

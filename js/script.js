@@ -761,54 +761,30 @@ function calcularSistemaSolar() {
     document.getElementById("resultsPlaceholder").style.display = "none";
     document.getElementById("resultsContent").style.display = "block";
 
-    document.getElementById(
-      "consumoAnual"
-    ).textContent = `${resultados.consumoAnual.toFixed(0)} kWh`;
-    document.getElementById(
-      "consumoMensual"
-    ).textContent = `${resultados.consumoMensual.toFixed(0)} kWh`;
-    document.getElementById(
-      "consumoDiario"
-    ).textContent = `${resultados.consumoDiario.toFixed(1)} kWh`;
-    document.getElementById(
-      "importeTotal"
-    ).textContent = `$${resultados.importeTotalAnual.toFixed(2)}`;
-    document.getElementById(
-      "importePromedio"
-    ).textContent = `$${resultados.importePromedio.toFixed(2)}`;
-    document.getElementById(
-      "tarifaPromedio"
-    ).textContent = `$${resultados.tarifaPromedio.toFixed(3)}`;
-    document.getElementById(
-      "potenciaNecesaria"
-    ).textContent = `${resultados.potenciaNecesaria.toFixed(2)} kW`;
-    document.getElementById(
-      "numeroModulos"
-    ).textContent = `${resultados.numeroModulos}`;
-    document.getElementById(
-      "potenciaInstalada"
-    ).textContent = `${resultados.potenciaInstalada.toFixed(2)} kW`;
-    document.getElementById(
-      "hsp"
-    ).textContent = `${resultados.hspPromedio.toFixed(2)} h`;
-    document.getElementById(
-      "ahorroCO2"
-    ).textContent = `${resultados.ahorroCO2.toFixed(3)} t`;
-    document.getElementById(
-      "arboles"
-    ).textContent = `${resultados.arboles.toFixed(0)} árboles`;
+  document.getElementById("consumoAnual").textContent = `${Number(resultados.consumoAnual).toLocaleString('es-MX', {maximumFractionDigits:0})} kWh`;
+  document.getElementById("consumoMensual").textContent = `${Number(resultados.consumoMensual).toLocaleString('es-MX', {maximumFractionDigits:0})} kWh`;
+  document.getElementById("consumoDiario").textContent = `${Number(resultados.consumoDiario).toLocaleString('es-MX', {maximumFractionDigits:1})} kWh`;
+  document.getElementById("importeTotal").textContent = `$${Number(resultados.importeTotalAnual).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById("importePromedio").textContent = `$${Number(resultados.importePromedio).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById("tarifaPromedio").textContent = `$${Number(resultados.tarifaPromedio).toLocaleString('es-MX', {minimumFractionDigits:3, maximumFractionDigits:3})}`;
+  document.getElementById("potenciaNecesaria").textContent = `${Number(resultados.potenciaNecesaria).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} kW`;
+  document.getElementById("numeroModulos").textContent = `${resultados.numeroModulos}`;
+  document.getElementById("potenciaInstalada").textContent = `${Number(resultados.potenciaInstalada).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} kW`;
+  document.getElementById("hsp").textContent = `${Number(resultados.hspPromedio).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} h`;
+  document.getElementById("ahorroCO2").textContent = `${Number(resultados.ahorroCO2).toLocaleString('es-MX', {minimumFractionDigits:3, maximumFractionDigits:3})} t`;
+  document.getElementById("arboles").textContent = `${resultados.arboles.toLocaleString('es-MX', {maximumFractionDigits:0})} árboles`;
     // document.getElementById(
     //   "porcentajeAhorro"
     // ).textContent = `${resultados.porcentajeAhorro.toFixed(1)}%`;
     document.getElementById(
       "generacionAnual"
-    ).textContent = `${resultados.generacionAnual.toFixed(2)} KWh`;
+    ).textContent = `${Number(resultados.generacionAnual).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})} KWh`;
     document.getElementById(
       "porcentajeGeneracion"
     ).textContent = `${resultados.porcentajeGeneracion.toFixed(2)}%`;
-    document.getElementById(
-      "roi"
-    ).textContent = `${datos.resultados.roi} años`;
+  // Asegura que el ROI es numérico y solo se formatea visualmente
+  const roiNum = Number(datos.resultados.roi) || 0;
+  document.getElementById("roi").textContent = `${Math.floor(roiNum)} años`;
 
     // Llenar tabla detallada y crear gráficas
     window.llenarTablaDetallada(
