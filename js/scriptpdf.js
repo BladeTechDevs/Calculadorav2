@@ -1056,9 +1056,7 @@ async function exportToBasePdf() {
         },
         {
           img: "potencia.png",
-          value: datos.potenciaInstalada
-        ? Number(datos.potenciaInstalada).toLocaleString("es-MX", { maximumFractionDigits: 0 }) + " kW"
-        : "— kW",
+          value: datos.potenciaInstalada,
           title: "Potencia Total Instalada",
         },
         {

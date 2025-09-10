@@ -155,7 +155,7 @@
         <a href="https://hexasolar.com.mx" class="contact-link" target="_blank">hexasolar.com.mx</a>
       </div>
       <div class="contact-item">
-        
+
         <button id="btnAyuda" class="help-btn" type="button">
           <i class="fas fa-question-circle"></i>
         </button>
@@ -664,14 +664,14 @@
               let etiqueta = nombre
 
               const debeMultiplicarse =
-              idsSiemprePorModulo.has(id) || (id === 'inversor' && multiplicarInversor)
+                idsSiemprePorModulo.has(id) && id !== 'inversor' // 👈 evitamos multiplicar si es inversor
 
-              if (id === 'inversor' && multiplicarInversor) {
-              val = val * numeroModulos
-              etiqueta = `Microinversor (x${numeroModulos})`
-              } else if (debeMultiplicarse) {
-              val = val * numeroModulos
-              etiqueta = `${nombre} (x${numeroModulos})`
+              if (debeMultiplicarse) {
+                val = val * numeroModulos
+                etiqueta = `${nombre} (x${numeroModulos})`
+              } else if (id === 'inversor') {
+                // 👈 siempre será x1, aunque esté activo micro
+                etiqueta = `Microinversor`
               }
 
               conceptos.push({ nombre: etiqueta, val })
@@ -1030,7 +1030,7 @@
           <div class="results-subtitle">Sistema Solar Fotovoltaico Optimizado</div>
         </div>
 
-  <div class="stats-grid">
+        <div class="stats-grid">
           <div class="stats-card">
             <div class="metric-icon"><i class="fas fa-bolt"></i></div>
             <div class="stats-value" id="consumoAnual">-</div>
@@ -2007,7 +2007,7 @@
         if (numeroModulos > 0) setTxt("numeroModulos", `${numeroModulos}`);
         if (potenciaInstalada > 0) setTxt("potenciaInstalada", `${potenciaInstalada.toFixed(2)} kW`);
         if (generacionAnual > 0) setTxt("generacionAnual", `${generacionAnual.toFixed(2)} KWh`);
-  setTxt("porcentajeAhorro", `${porcentajeAhorro.toFixed(1)}%`);
+        setTxt("porcentajeAhorro", `${porcentajeAhorro.toFixed(1)}%`);
         if (Number.isFinite(ahorroCO2)) setTxt("ahorroCO2", `${ahorroCO2.toFixed(3)} t`);
         if (Number.isFinite(arboles)) setTxt("arboles", `${arboles.toFixed(0)} árboles`);
 
